@@ -46,7 +46,8 @@ Suggests:
     RColorBrewer,
     rsconnect,
     testthat (>= 3.0.0),
-    ssddata
+    ssddata,
+    shinytest2
 Encoding: UTF-8
 Language: en-US
 LazyData: true
