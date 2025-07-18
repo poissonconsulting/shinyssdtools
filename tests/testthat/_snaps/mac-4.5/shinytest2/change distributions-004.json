@@ -1,10 +1,20 @@
 {
   "input": {
     "demoData": 1,
-    "gofTable_rows_all": 1,
-    "gofTable_rows_current": 1,
+    "gofTable_rows_all": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "gofTable_rows_current": [
+      1,
+      2,
+      3,
+      4
+    ],
     "gofTable_state": [
-      "1752809406454",
+      "1752813566270",
       "0",
       "10",
       "",
@@ -321,7 +331,7 @@
     "viewUpload_rows_selected": null,
     "viewUpload_search": "",
     "viewUpload_state": [
-      "1752809375350",
+      "1752813554083",
       "0",
       "10",
       "",

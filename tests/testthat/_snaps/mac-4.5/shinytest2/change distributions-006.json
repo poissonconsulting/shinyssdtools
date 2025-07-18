@@ -1,0 +1,841 @@
+{
+  "input": {
+    "demoData": 1,
+    "gofTable_rows_all": 1,
+    "gofTable_rows_current": 1,
+    "gofTable_state": [
+      "1752813575561",
+      "0",
+      "10",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE"
+    ],
+    "hot": {
+      "data": [
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null
+        ]
+      ],
+      "changes": {
+        "event": "afterChange",
+        "changes": null
+      },
+      "params": {
+        "data": [
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ]
+        ],
+        "rClass": "data.frame",
+        "rColClasses": {
+          "Conc": "numeric",
+          "Species": "character",
+          "Group": "character"
+        },
+        "rColnames": [
+          "Conc",
+          "Species",
+          "Group"
+        ],
+        "rColHeaders": [
+          "Conc",
+          "Species",
+          "Group"
+        ],
+        "rRowHeaders": null,
+        "rDataDim": [
+          10,
+          3
+        ],
+        "selectCallback": false,
+        "colHeaders": [
+          "Conc",
+          "Species",
+          "Group"
+        ],
+        "rowHeaders": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "columns": null,
+        "width": 600,
+        "height": null,
+        "debug": 0,
+        "search": false,
+        "stretchH": "none",
+        "comments": false,
+        "contextMenu": {
+          "items": {
+            "row_above": [
+
+            ],
+            "row_below": [
+
+            ],
+            "remove_row": [
+
+            ],
+            "hsep2": {
+              "name": "---------",
+              "key": "hsep2"
+            },
+            "col_left": [
+
+            ],
+            "col_right": [
+
+            ],
+            "remove_col": [
+
+            ],
+            "hsep3": {
+              "name": "---------",
+              "key": "hsep3"
+            },
+            "undo": [
+
+            ],
+            "redo": [
+
+            ],
+            "hsep4": {
+              "name": "---------",
+              "key": "hsep4"
+            },
+            "alignment": [
+
+            ]
+          }
+        }
+      }
+    },
+    "infoCl": 0,
+    "infoDemo": 0,
+    "infoHands": 0,
+    "infoUpload": 0,
+    "language_switch": false,
+    "uploadData": null,
+    "viewUpload_cell_clicked": {
+
+    },
+    "viewUpload_cells_selected": [
+
+    ],
+    "viewUpload_columns_selected": null,
+    "viewUpload_rows_all": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28
+    ],
+    "viewUpload_rows_current": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "viewUpload_rows_selected": null,
+    "viewUpload_search": "",
+    "viewUpload_state": [
+      "1752813554083",
+      "0",
+      "10",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE",
+      "TRUE",
+      "",
+      "TRUE",
+      "FALSE",
+      "TRUE"
+    ],
+    "waiter_shown": true
+  },
+  "output": {
+    "checkfit": {
+      "message": "",
+      "call": "NULL",
+      "type": [
+        "shiny.silent.error",
+        "validation"
+      ]
+    },
+    "checkpred": true,
+    "hot": {
+      "x": {
+        "data": [
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null
+          ]
+        ],
+        "rClass": "data.frame",
+        "rColClasses": {
+          "Conc": "numeric",
+          "Species": "character",
+          "Group": "character"
+        },
+        "rColnames": [
+          "Conc",
+          "Species",
+          "Group"
+        ],
+        "rColHeaders": [
+          "Conc",
+          "Species",
+          "Group"
+        ],
+        "rRowHeaders": null,
+        "rDataDim": [
+          10,
+          3
+        ],
+        "selectCallback": false,
+        "colHeaders": [
+          "Conc",
+          "Species",
+          "Group"
+        ],
+        "rowHeaders": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ],
+        "columns": null,
+        "width": 600,
+        "height": null,
+        "debug": 0,
+        "search": false,
+        "stretchH": "none",
+        "comments": false,
+        "contextMenu": {
+          "items": {
+            "row_above": [
+
+            ],
+            "row_below": [
+
+            ],
+            "remove_row": [
+
+            ],
+            "hsep2": {
+              "name": "---------"
+            },
+            "col_left": [
+
+            ],
+            "col_right": [
+
+            ],
+            "remove_col": [
+
+            ],
+            "hsep3": {
+              "name": "---------"
+            },
+            "undo": [
+
+            ],
+            "redo": [
+
+            ],
+            "hsep4": {
+              "name": "---------"
+            },
+            "alignment": [
+
+            ]
+          }
+        }
+      },
+      "evals": [
+
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+
+      ]
+    },
+    "ui_1choose": {
+      "html": "<h4>Choose one of the following options:<\/h4>",
+      "deps": [
+
+      ]
+    },
+    "ui_1csv": {
+      "html": "<p>2. Upload a csv file<\/p>",
+      "deps": [
+
+      ]
+    },
+    "ui_1csvupload": {
+      "html": "<div class=\"form-group shiny-input-container\">\n  <label class=\"control-label\" id=\"uploadData-label\" for=\"uploadData\"><\/label>\n  <div class=\"input-group\">\n    <label class=\"input-group-btn input-group-prepend\">\n      <span class=\"btn btn-default btn-file\">\n        <span>\n          <i class=\"fas fa-upload\" role=\"presentation\" aria-label=\"upload icon\"><\/i>\n          csv\n        <\/span>\n        <input id=\"uploadData\" class=\"shiny-input-file\" name=\"uploadData\" type=\"file\" style=\"position: absolute !important; top: -99999px !important; left: -99999px !important;\" accept=\".csv\"/>\n      <\/span>\n    <\/label>\n    <input type=\"text\" class=\"form-control\" placeholder=\"Upload your data\" readonly=\"readonly\"/>\n  <\/div>\n  <div id=\"uploadData_progress\" class=\"progress active shiny-file-input-progress\">\n    <div class=\"progress-bar\"><\/div>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "font-awesome",
+          "version": "6.5.2",
+          "src": {
+            "href": "font-awesome-6.5.2"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": [
+            "css/all.min.css",
+            "css/v4-shims.min.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "ui_1data": {
+      "html": "<p>\n  1. Use\n  <a id=\"demoData\" href=\"#\" class=\"action-button\">\n    <i class=\"fas fa-table\" role=\"presentation\" aria-label=\"table icon\"><\/i>\n    boron dataset\n  <\/a>\n<\/p>",
+      "deps": [
+        {
+          "name": "font-awesome",
+          "version": "6.5.2",
+          "src": {
+            "href": "font-awesome-6.5.2"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": [
+            "css/all.min.css",
+            "css/v4-shims.min.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "ui_1note1": {
+      "html": "<span class=\"help-block\">Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value.<\/span>",
+      "deps": [
+
+      ]
+    },
+    "ui_1preview": {
+      "html": "<h4>Preview chosen dataset:<\/h4>",
+      "deps": [
+
+      ]
+    },
+    "ui_1table1": {
+      "html": "<p>3. Fill out table below:<\/p>",
+      "deps": [
+
+      ]
+    },
+    "ui_nav1": {
+      "html": "1. Data",
+      "deps": [
+
+      ]
+    },
+    "ui_nav2": {
+      "html": "2. Fit",
+      "deps": [
+
+      ]
+    },
+    "ui_nav3": {
+      "html": "3. Predict",
+      "deps": [
+
+      ]
+    },
+    "ui_nav4": {
+      "html": "R code",
+      "deps": [
+
+      ]
+    },
+    "ui_navabout": {
+      "html": "About",
+      "deps": [
+
+      ]
+    },
+    "ui_navguide": {
+      "html": "User Guide",
+      "deps": [
+
+      ]
+    },
+    "ui_navtitle": {
+      "html": "Fit and Plot Species Sensitivity Distributions",
+      "deps": [
+
+      ]
+    },
+    "ui_viewupload": {
+      "html": "<div class=\"well\" style=\"overflow-x:scroll; max-height: 600px; max-width: 640px\">\n  <div class=\"datatables html-widget html-widget-output shiny-report-size html-fill-item\" id=\"viewUpload\" style=\"width:100%;height:auto;\"><\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "htmltools-fill",
+          "version": "0.5.8.1",
+          "src": {
+            "href": "htmltools-fill-0.5.8.1"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": "fill.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "htmlwidgets",
+          "version": "1.6.4",
+          "src": {
+            "href": "htmlwidgets-1.6.4"
+          },
+          "meta": null,
+          "script": "htmlwidgets.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "datatables-css",
+          "version": "0.0.0",
+          "src": {
+            "href": "datatables-css-0.0.0"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": "datatables-crosstalk.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "datatables-binding",
+          "version": "0.33",
+          "src": {
+            "href": "datatables-binding-0.33"
+          },
+          "meta": null,
+          "script": "datatables.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "jquery",
+          "version": "3.5.1",
+          "src": {
+            "href": "jquery-3.5.1"
+          },
+          "meta": null,
+          "script": "jquery.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "crosstalk",
+          "version": "1.2.1",
+          "src": {
+            "href": "crosstalk-1.2.1"
+          },
+          "meta": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "viewUpload": {
+      "x": {
+        "filter": "none",
+        "vertical": false,
+        "container": "<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Chemical<\/th>\n      <th>Species<\/th>\n      <th>Conc<\/th>\n      <th>Group<\/th>\n      <th>Units<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
+        "options": {
+          "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.11/i18n/English.json"
+          },
+          "pageLength": 10,
+          "columnDefs": [
+            {
+              "className": "dt-right",
+              "targets": 3
+            },
+            {
+              "orderable": false,
+              "targets": 0
+            },
+            {
+              "name": " ",
+              "targets": 0
+            },
+            {
+              "name": "Chemical",
+              "targets": 1
+            },
+            {
+              "name": "Species",
+              "targets": 2
+            },
+            {
+              "name": "Conc",
+              "targets": 3
+            },
+            {
+              "name": "Group",
+              "targets": 4
+            },
+            {
+              "name": "Units",
+              "targets": 5
+            }
+          ],
+          "order": [
+
+          ],
+          "autoWidth": false,
+          "orderClasses": false,
+          "ajax": {
+            "type": "POST",
+            "data": "function(d) {\nd.search.caseInsensitive = true;\nd.search.smart = true;\nd.escape = true;\nvar encodeAmp = function(x) { x.value = x.value.replace(/&/g, \"%26\"); }\nencodeAmp(d.search);\n$.each(d.columns, function(i, v) {encodeAmp(v.search);});\n}"
+          },
+          "serverSide": true,
+          "processing": true
+        },
+        "selection": {
+          "mode": "multiple",
+          "selected": null,
+          "target": "row",
+          "selectable": null
+        }
+      },
+      "evals": [
+        "options.ajax.data"
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "jquery",
+          "version": "3.6.0",
+          "src": {
+            "href": "jquery-3.6.0"
+          },
+          "meta": null,
+          "script": "jquery-3.6.0.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "dt-core",
+          "version": "1.13.6",
+          "src": {
+            "href": "dt-core-1.13.6"
+          },
+          "meta": null,
+          "script": "js/jquery.dataTables.min.js",
+          "stylesheet": [
+            "css/jquery.dataTables.min.css",
+            "css/jquery.dataTables.extra.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "crosstalk",
+          "version": "1.2.1",
+          "src": {
+            "href": "crosstalk-1.2.1"
+          },
+          "meta": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    }
+  },
+  "export": {
+
+  }
+}
