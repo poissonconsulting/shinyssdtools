@@ -24,14 +24,15 @@ app_ui <- function() {
     ),
     
     bslib::page_sidebar(
-      title = tagList(
-        bslib::input_switch("language_switch", "Language: EN / FR", value = FALSE),
+      title =
+      tagList(
+        bslib::input_switch("language_switch", "Lang: EN / FR", value = FALSE),
         uiOutput("ui_navtitle")
       ),
       
       sidebar = bslib::sidebar(
-        width = 200,
-        bslib::navset_pill(
+        width = 170, bg = "#e5eff7", 
+        bslib::navset_underline(
           id = "main_nav",
           # widths = c(11, 1),
           bslib::nav_panel(
@@ -162,21 +163,22 @@ app_ui <- function() {
             bslib::card(
               bslib::card_header(
                 class = "bg-primary text-white",
-                "Species Sensitivity Distribution",
-                div(
-                  class = "float-end",
-                  conditionalPanel(
-                    condition = "output.distPlot1",
-                    bslib::layout_column_wrap(
-                      width = "auto",
-                      uiOutput("ui_2dlplot"),
-                      uiOutput("ui_2dlrds"),
-                      uiOutput("ui_2dltable")
-                    )
-                  )
-                )
+                "Plot Distributions"
+                # div(
+                #   class = "float-end",
+                #   
+                # )
               ),
               bslib::card_body(
+                conditionalPanel(
+                  condition = "output.distPlot1",
+                  bslib::layout_column_wrap(
+                    width = "auto",
+                    uiOutput("ui_2dlplot"),
+                    uiOutput("ui_2dlrds"),
+                    uiOutput("ui_2dltable")
+                  )
+                ),
                 conditionalPanel(
                   condition = "output.checkfit",
                   htmlOutput("hintFi")
