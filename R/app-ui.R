@@ -41,7 +41,7 @@ app_ui <- function() {
         gap = 0,
         fillable = FALSE,
         sidebar = bslib::sidebar(
-          title = "Navigation",
+          # title = "Navigation",
           width = 170,
           bg = "#e5eff7",
           bslib::navset_underline(
@@ -82,14 +82,14 @@ app_ui <- function() {
           padding = 0,
           gap = 0,
           sidebar = bslib::sidebar(
-            title = "Controls",
+            # title = "Controls",
             width = 300,
             bg = "white",
             
             # Data Controls
             conditionalPanel(
               condition = "input.main_nav == 'data'",
-              h5("Data Controls"),
+              # h5("Data Controls"),
               uiOutput("ui_1choose"),
               uiOutput("ui_1data"),
               actionLink("infoDemo", icon = icon("info-circle"), label = NULL),
@@ -117,7 +117,7 @@ app_ui <- function() {
             # Fit Controls
             conditionalPanel(
               condition = "input.main_nav == 'fit'",
-              h5("Model Configuration"),
+              # h5("Model Configuration"),
               uiOutput("ui_conc"),
               uiOutput("ui_2select"),
               uiOutput("ui_2rescale"),
@@ -218,7 +218,7 @@ app_ui <- function() {
               bslib::card(
                 bslib::card_header(
                   style = "background-color: #759dbe; color: white;",
-                  "Plot Distributions"
+                  "Plot Fitted Distributions"
                 ),
                 bslib::card_body(
                   conditionalPanel(

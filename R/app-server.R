@@ -1099,7 +1099,7 @@ app_server <- function(input, output, session) {
   })
 
   output$ui_2plot <- renderUI({
-    h4(tr("ui_2plot", trans()))
+    # h4(tr("ui_2plot", trans()))
   })
 
   output$ui_2table <- renderUI({
