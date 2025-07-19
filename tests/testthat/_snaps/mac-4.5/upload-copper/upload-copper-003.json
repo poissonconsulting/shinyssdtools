@@ -1,22 +1,26 @@
 {
   "input": {
-    "demoData": 1,
+    "demoData": 0,
     "en": 0,
     "fr": 0,
     "gofTable_rows_all": [
       1,
       2,
       3,
-      4
+      4,
+      5,
+      6
     ],
     "gofTable_rows_current": [
       1,
       2,
       3,
-      4
+      4,
+      5,
+      6
     ],
     "gofTable_state": [
-      "1752813566270",
+      "1752886809453",
       "0",
       "10",
       "",
@@ -279,7 +283,20 @@
     "infoDemo": 0,
     "infoHands": 0,
     "infoUpload": 0,
-    "uploadData": null,
+    "uploadData": {
+      "name": [
+        "data-copper.csv"
+      ],
+      "size": [
+        1332
+      ],
+      "type": [
+        "text/csv"
+      ],
+      "datapath": [
+        "0.csv"
+      ]
+    },
     "viewUpload_cell_clicked": {
 
     },
@@ -315,7 +332,30 @@
       25,
       26,
       27,
-      28
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51
     ],
     "viewUpload_rows_current": [
       1,
@@ -332,24 +372,9 @@
     "viewUpload_rows_selected": null,
     "viewUpload_search": "",
     "viewUpload_state": [
-      "1752813554083",
+      "1752886805549",
       "0",
       "10",
-      "",
-      "TRUE",
-      "FALSE",
-      "TRUE",
-      "TRUE",
-      "",
-      "TRUE",
-      "FALSE",
-      "TRUE",
-      "TRUE",
-      "",
-      "TRUE",
-      "FALSE",
-      "TRUE",
-      "TRUE",
       "",
       "TRUE",
       "FALSE",
@@ -734,7 +759,7 @@
       "x": {
         "filter": "none",
         "vertical": false,
-        "container": "<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Chemical<\/th>\n      <th>Species<\/th>\n      <th>Conc<\/th>\n      <th>Group<\/th>\n      <th>Units<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
+        "container": "<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Value<\/th>\n      <th>Species<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
         "options": {
           "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.11/i18n/English.json"
@@ -743,7 +768,7 @@
           "columnDefs": [
             {
               "className": "dt-right",
-              "targets": 3
+              "targets": 1
             },
             {
               "orderable": false,
@@ -754,24 +779,12 @@
               "targets": 0
             },
             {
-              "name": "Chemical",
+              "name": "Value",
               "targets": 1
             },
             {
               "name": "Species",
               "targets": 2
-            },
-            {
-              "name": "Conc",
-              "targets": 3
-            },
-            {
-              "name": "Group",
-              "targets": 4
-            },
-            {
-              "name": "Units",
-              "targets": 5
             }
           ],
           "order": [

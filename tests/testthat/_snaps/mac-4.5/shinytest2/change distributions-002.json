@@ -1,6 +1,8 @@
 {
   "input": {
     "demoData": 1,
+    "en": 0,
+    "fr": 0,
     "gofTable_rows_all": [
       1,
       2,
@@ -281,7 +283,6 @@
     "infoDemo": 0,
     "infoHands": 0,
     "infoUpload": 0,
-    "language_switch": false,
     "uploadData": null,
     "viewUpload_cell_clicked": {
 

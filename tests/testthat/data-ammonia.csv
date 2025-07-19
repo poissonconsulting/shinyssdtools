@@ -1,0 +1,28 @@
+Toxicity ,Group,Phylum,General taxa,Toxicity value,Common name,Species
+642,Microalga,Chlorophyta,Microalga,Chronic EC10,Green microalgae,Chlorella vulgaris
+560,Microalga,Chlorophyta,Microalga,Chronic EC10,Green microalgae,Pseudokirchneriella subcapitata
+1.2,Microinvertebrate,Platyhelminthes,Flatworm,Chronic NOEC,Flatworm,Polycelis felina
+42,Microcrustacean,Arthropoda,Cladoceran,Chronic NOEC,Water flea,Ceriodaphnia dubia
+21,Microcrustacean,Arthropoda,Cladoceran,Chronic NOEC,Water flea,Daphnia magna
+3.2,Insect,Arthropoda,Insect,Chronic NOEC,Mayfly,Deleatidium sp.
+8.9,Macroinvertebrate,Arthropoda,Amphipod,Chronic NOEC,Amphipod,Hyalella azteca
+4.4,Macroinvertebrate,Mollusca,Gastropod,Chronic NOEC,NZ mud snail,Potamopyrgus antipodarum
+0.43,Macroinvertebrate,Mollusca,Bivalve,Chronic IC10,Wavy-rayed lampmussel,Lampsilis fasciola
+0.92,Macroinvertebrate,Mollusca,Bivalve,Chronic IC10,Fatmucket clam,Lampsilis siliquoidea
+2.3,Macroinvertebrate,Mollusca,Bivalve,Chronic NOEC,Long fingernail clam,Musculium transversum
+1.1,Macroinvertebrate,Mollusca,Bivalve,Chronic NOEC,Fingernail clam,Sphaerium novaezelandiae
+1.3,Macroinvertebrate,Mollusca,Bivalve,Chronic IC10,Rainbow mussel,Villosa iris
+16,Fish,Chordata,Fish,Chronic LC50/5,Common carp,Cyprinus carpio
+14,Fish,Chordata,Fish,Chronic NOEC,Lost river sucker,Deltistes luxatus
+20,Fish,Chordata,Fish,Chronic EC20,Northern pike,Esox lucius
+1.5,Fish,Chordata,Fish,Chronic NOEC,Channel catfish,Ictalurus punctatus
+11,Fish,Chordata,Fish,Chronic NOEC,Green sunfish,Lepomis cyanellus
+13,Fish,Chordata,Fish,Chronic NOEC,Smallmouth bass,Micropterus dolomieue
+18,Fish,Chordata,Fish,Chronic NOEC,Topeka shiner,Notropis topeka
+9.6,Fish,Chordata,Fish,Chronic LC50/5,Cutthroat trout,Oncorhynchus clarkii
+11,Fish,Chordata,Fish,Chronic NOEC,Rainbow trout,Oncorhynchus mykiss
+7.2,Fish,Chordata,Fish,Chronic LC1,Fathead minnow,Pimephales promelas
+21,Fish,Chordata,Fish,Chronic LC1,Colorado pikeminnow,Ptychocheilus lucius
+14,Fish,Chordata,Fish,Chronic LC1,Razorback sucker,Xyrauchen texanus
+7.1,Amphibian,Chordata,Amphibian,Chronic NOEC,Pacific tree frog,Pseudacris regilla
+86,Amphibian,Chordata,Amphibian,Chronic NOEC,African clawed frog,Xenopus laevis
