@@ -12,7 +12,7 @@
 
 app_ui <- function() {
   tagList(
-    # Dependencies need to be outside page_sidebar
+    # Dependencies
     shinyjs::useShinyjs(),
     waiter::useWaiter(),
     
@@ -23,393 +23,375 @@ app_ui <- function() {
       ".shiny-output-error:before { visibility: hidden; }"
     ),
     
-    bslib::page_sidebar(
-      title =
-      tagList(
+    bslib::page_fillable(
+      theme = bslib::bs_theme(version = 5),
+      padding = 0,
+      
+      # Title bar
+      tags$div(
+        class = "text-white",
+        style = "background-color: #759dbe; display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; margin: 0;",
         bslib::input_switch("language_switch", "Lang: EN / FR", value = FALSE),
         uiOutput("ui_navtitle")
       ),
       
-      sidebar = bslib::sidebar(
-        width = 170, bg = "#e5eff7", 
-        bslib::navset_underline(
-          id = "main_nav",
-          # widths = c(11, 1),
-          bslib::nav_panel(
-            title = HTML(paste(icon("table"), " 1. Data")),
-            value = "data"
-          ),
-          bslib::nav_panel(
-            title = HTML(paste(icon("chart-line"), " 2. Fit")),
-            value = "fit"
-          ),
-          bslib::nav_panel(
-            title = HTML(paste(icon("calculator"), " 3. Predict")),
-            value = "predict"
-          ),
-          bslib::nav_panel(
-            title = HTML(paste(icon("file-pdf"), " 4. BCANZ Report")),
-            value = "report"
-          ),
-          bslib::nav_panel(
-            title = HTML(paste(icon("code"), " R Code")),
-            value = "rcode"
-          ),
-          bslib::nav_panel(
-            title = "About",
-            value = "about"
-          ),
-          bslib::nav_panel(
-            title = "User Guide",
-            value = "guide"
-          )
-        )
-      ),
-      
-      # Data Page Content
-      conditionalPanel(
-        condition = "input.main_nav == 'data'",
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(
-            title = "Data Controls",
-            width = 300,
-            class = "border-0 bg-transparent",
-            uiOutput("ui_1choose"),
-            uiOutput("ui_1data"),
-            actionLink("infoDemo", icon = icon("info-circle"), label = NULL),
-            shinyjs::hidden(div(
-              id = "infoDemoText",
-              uiOutput("ui_1datahelp")
-            )),
-            
-            br(),
-            uiOutput("ui_1csv"),
-            actionLink("infoUpload", icon = icon("info-circle"), label = NULL),
-            shinyjs::hidden(div(
-              id = "infoUploadText",
-              uiOutput("ui_1csvhelp")
-            )),
-            uiOutput("ui_1csvupload"),
-            
-            uiOutput("ui_1table1"),
-            actionLink("infoHands", icon = icon("info-circle"), label = NULL),
-            shinyjs::hidden(div(
-              id = "infoHandsText",
-              uiOutput("ui_1tablehelp")
-            )),
-            rhandsontable::rHandsontableOutput("hot")
-          ),
-          
-          # Data output area
-          bslib::layout_columns(
-            col_widths = 12,
-            
-            # Data Preview Card
-            bslib::card(
-              bslib::card_header(
-                class = "bg-info text-white",
-                "Data Preview"
-              ),
-              bslib::card_body(
-                uiOutput("ui_1preview"),
-                uiOutput("ui_viewupload")
-              )
+      # Main layout with navigation sidebar
+      bslib::layout_sidebar(
+        padding = 0,
+        gap = 0,
+        fillable = FALSE,
+        sidebar = bslib::sidebar(
+          title = "Navigation",
+          width = 170,
+          bg = "#e5eff7",
+          bslib::navset_underline(
+            id = "main_nav",
+            bslib::nav_panel(
+              title = HTML(paste(icon("table"), " 1. Data")),
+              value = "data"
             ),
-            
-            # Note section
-            bslib::card(
-              class = "mt-3",
-              bslib::card_body(
-                uiOutput("ui_1note1")
-              )
+            bslib::nav_panel(
+              title = HTML(paste(icon("chart-line"), " 2. Fit")),
+              value = "fit"
+            ),
+            bslib::nav_panel(
+              title = HTML(paste(icon("calculator"), " 3. Predict")),
+              value = "predict"
+            ),
+            bslib::nav_panel(
+              title = HTML(paste(icon("file-pdf"), " 4. BCANZ Report")),
+              value = "report"
+            ),
+            bslib::nav_panel(
+              title = HTML(paste(icon("code"), " R Code")),
+              value = "rcode"
+            ),
+            bslib::nav_panel(
+              title = "About",
+              value = "about"
+            ),
+            bslib::nav_panel(
+              title = "User Guide",
+              value = "guide"
             )
           )
-        )
-      ),
-      
-      # Fit Page Content
-      conditionalPanel(
-        condition = "input.main_nav == 'fit'",
+        ),
+        
+        # Nested layout for content controls and main content
         bslib::layout_sidebar(
+          padding = 0,
+          gap = 0,
           sidebar = bslib::sidebar(
-            title = "Model Configuration",
+            title = "Controls",
             width = 300,
-            class = "border-0 bg-transparent",
-            uiOutput("ui_conc"),
-            uiOutput("ui_2select"),
-            uiOutput("ui_2rescale"),
-            uiOutput("ui_2xlab"),
-            uiOutput("ui_2ylab"),
-            uiOutput("ui_unit"),
-            uiOutput("ui_2size"),
-            uiOutput("ui_2png"),
+            bg = "white",
             
-            div(
-              id = "divFormatFit",
-              bslib::layout_column_wrap(
-                width = 1/3,
-                uiOutput("ui_2width"),
-                uiOutput("ui_2height"),
-                uiOutput("ui_2dpi")
-              )
-            )
-          ),
-          
-          # Fit output area
-          bslib::layout_columns(
-            col_widths = 12,
-            
-            # Plot Card
-            bslib::card(
-              bslib::card_header(
-                class = "bg-primary text-white",
-                "Plot Distributions"
-                # div(
-                #   class = "float-end",
-                #   
-                # )
-              ),
-              bslib::card_body(
-                conditionalPanel(
-                  condition = "output.distPlot1",
-                  bslib::layout_column_wrap(
-                    width = "auto",
-                    uiOutput("ui_2dlplot"),
-                    uiOutput("ui_2dlrds"),
-                    uiOutput("ui_2dltable")
-                  )
-                ),
-                conditionalPanel(
-                  condition = "output.checkfit",
-                  htmlOutput("hintFi")
-                ),
-                conditionalPanel(
-                  condition = "output.distPlot1",
-                  uiOutput("ui_2plot")
-                ),
-                htmlOutput("fitFail"),
-                plotOutput("distPlot1")
-              )
-            ),
-            
-            # Goodness of Fit Table Card
+            # Data Controls
             conditionalPanel(
-              condition = "output.gofTable",
-              bslib::card(
-                class = "mt-3",
-                bslib::card_header(
-                  class = "bg-warning text-dark",
-                  uiOutput("ui_2table")
+              condition = "input.main_nav == 'data'",
+              h5("Data Controls"),
+              uiOutput("ui_1choose"),
+              uiOutput("ui_1data"),
+              actionLink("infoDemo", icon = icon("info-circle"), label = NULL),
+              shinyjs::hidden(div(
+                id = "infoDemoText",
+                uiOutput("ui_1datahelp")
+              )),
+              br(),
+              uiOutput("ui_1csv"),
+              actionLink("infoUpload", icon = icon("info-circle"), label = NULL),
+              shinyjs::hidden(div(
+                id = "infoUploadText",
+                uiOutput("ui_1csvhelp")
+              )),
+              uiOutput("ui_1csvupload"),
+              uiOutput("ui_1table1"),
+              actionLink("infoHands", icon = icon("info-circle"), label = NULL),
+              shinyjs::hidden(div(
+                id = "infoHandsText",
+                uiOutput("ui_1tablehelp")
+              )),
+              rhandsontable::rHandsontableOutput("hot")
+            ),
+            
+            # Fit Controls
+            conditionalPanel(
+              condition = "input.main_nav == 'fit'",
+              h5("Model Configuration"),
+              uiOutput("ui_conc"),
+              uiOutput("ui_2select"),
+              uiOutput("ui_2rescale"),
+              uiOutput("ui_2xlab"),
+              uiOutput("ui_2ylab"),
+              uiOutput("ui_unit"),
+              uiOutput("ui_2size"),
+              uiOutput("ui_2png"),
+              div(
+                id = "divFormatFit",
+                bslib::layout_column_wrap(
+                  width = 1/3,
+                  uiOutput("ui_2width"),
+                  uiOutput("ui_2height"),
+                  uiOutput("ui_2dpi")
+                )
+              )
+            ),
+            
+            # Predict Controls
+            conditionalPanel(
+              condition = "input.main_nav == 'predict'",
+              h5("Prediction Settings"),
+              style = "max-height: 70vh; overflow-y: auto;",
+              uiOutput("ui_3est"),
+              uiOutput("ui_3bshint"),
+              uiOutput("ui_thresh_type"),
+              uiOutput("ui_3thresh"),
+              uiOutput("ui_3samples"),
+              uiOutput("selectLabel"),
+              uiOutput("selectColour"),
+              uiOutput("selectShape"),
+              uiOutput("ui_3plotopts"),
+              div(
+                id = "divFormatPredict",
+                uiOutput("ui_3pal"),
+                uiOutput("ui_3xlab"),
+                uiOutput("ui_3ylab"),
+                uiOutput("ui_3title"),
+                uiOutput("uiLegendColour"),
+                uiOutput("uiLegendShape"),
+                bslib::layout_column_wrap(
+                  width = 1/2,
+                  uiOutput("ui_3size"),
+                  uiOutput("ui_3sizeLabel")
                 ),
-                bslib::card_body(
-                  DT::dataTableOutput("gofTable")
+                uiOutput("ui_checkHc"),
+                bslib::layout_column_wrap(
+                  width = 1/3,
+                  uiOutput("uiAdjustLabel"),
+                  uiOutput("uiXmin"),
+                  uiOutput("uiXmax")
+                ),
+                uiOutput("uiXlog"),
+                uiOutput("uiXbreaks")
+              ),
+              uiOutput("ui_3pngopts"),
+              div(
+                id = "divPngFormatPredict",
+                bslib::layout_column_wrap(
+                  width = 1/3,
+                  uiOutput("ui_3width"),
+                  uiOutput("ui_3height"),
+                  uiOutput("ui_3dpi")
                 )
               )
             )
-          )
-        )
-      ),
-      
-      # Predict Page Content
-      conditionalPanel(
-        condition = "input.main_nav == 'predict'",
-        bslib::layout_sidebar(
-          sidebar = bslib::sidebar(
-            title = "Prediction Settings",
-            width = 300,
-            class = "border-0 bg-transparent",
-            style = "max-height: 70vh; overflow-y: auto;",
-            uiOutput("ui_3est"),
-            uiOutput("ui_3bshint"),
-            
-            uiOutput("ui_thresh_type"),
-            uiOutput("ui_3thresh"),
-            uiOutput("ui_3samples"),
-            
-            uiOutput("selectLabel"),
-            uiOutput("selectColour"),
-            uiOutput("selectShape"),
-            uiOutput("ui_3plotopts"),
-            
-            div(
-              id = "divFormatPredict",
-              uiOutput("ui_3pal"),
-              uiOutput("ui_3xlab"),
-              uiOutput("ui_3ylab"),
-              uiOutput("ui_3title"),
-              uiOutput("uiLegendColour"),
-              uiOutput("uiLegendShape"),
-              bslib::layout_column_wrap(
-                width = 1/2,
-                uiOutput("ui_3size"),
-                uiOutput("ui_3sizeLabel")
-              ),
-              uiOutput("ui_checkHc"),
-              bslib::layout_column_wrap(
-                width = 1/3,
-                uiOutput("uiAdjustLabel"),
-                uiOutput("uiXmin"),
-                uiOutput("uiXmax")
-              ),
-              uiOutput("uiXlog"),
-              uiOutput("uiXbreaks")
-            ),
-            
-            uiOutput("ui_3pngopts"),
-            div(
-              id = "divPngFormatPredict",
-              bslib::layout_column_wrap(
-                width = 1/3,
-                uiOutput("ui_3width"),
-                uiOutput("ui_3height"),
-                uiOutput("ui_3dpi")
-              )
-            )
           ),
           
-          # Predict output area
-          bslib::layout_columns(
-            col_widths = 12,
+          # Main content area
+          tags$div(
+            style = "padding: 1rem; height: 100%; overflow: auto;",
             
-            # Model Average Plot Card
-            bslib::card(
-              bslib::card_header(
-                class = "bg-success text-white",
-                "Model Average Plot",
-                div(
-                  class = "float-end",
+            # Data Page Content
+            conditionalPanel(
+              condition = "input.main_nav == 'data'",
+              bslib::card(
+                bslib::card_header(
+                  style = "background-color: #759dbe; color: white;",
+                  "Data Preview"
+                ),
+                bslib::card_body(
+                  uiOutput("ui_1preview"),
+                  uiOutput("ui_viewupload")
+                )
+              ),
+              bslib::card(
+                class = "mt-3",
+                bslib::card_body(
+                  uiOutput("ui_1note1")
+                )
+              )
+            ),
+            
+            # Fit Page Content
+            conditionalPanel(
+              condition = "input.main_nav == 'fit'",
+              bslib::card(
+                bslib::card_header(
+                  style = "background-color: #759dbe; color: white;",
+                  "Plot Distributions"
+                ),
+                bslib::card_body(
+                  conditionalPanel(
+                    condition = "output.distPlot1",
+                    div(
+                      style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
+                      uiOutput("ui_2dlplot"), uiOutput("ui_2dlrds"), uiOutput("ui_2dltable")
+                    )
+                  ),
+                  conditionalPanel(
+                    condition = "output.checkfit",
+                    htmlOutput("hintFi")
+                  ),
+                  conditionalPanel(
+                    condition = "output.distPlot1",
+                    uiOutput("ui_2plot")
+                  ),
+                  htmlOutput("fitFail"),
+                  plotOutput("distPlot1")
+                )
+              ),
+              conditionalPanel(
+                condition = "output.gofTable",
+                bslib::card(
+                  class = "mt-3",
+                  bslib::card_header(
+                    style = "background-color: #759dbe; color: white;",
+                    uiOutput("ui_2table")
+                  ),
+                  bslib::card_body(
+                    DT::dataTableOutput("gofTable")
+                  )
+                )
+              )
+            ),
+            
+            # Predict Page Content
+            conditionalPanel(
+              condition = "input.main_nav == 'predict'",
+              bslib::card(
+                bslib::card_header(
+                  style = "background-color: #759dbe; color: white;",
+                  "Model Average Plot"
+                ),
+                bslib::card_body(
                   conditionalPanel(
                     condition = "output.modelAveragePlot",
-                    bslib::layout_column_wrap(
-                      width = "auto",
+                    div(
+                      style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
                       uiOutput("ui_3dlplot"),
                       uiOutput("ui_3dlrds")
                     )
+                  ),
+                  conditionalPanel(
+                    condition = "output.checkpred",
+                    htmlOutput("hintPr")
+                  ),
+                  conditionalPanel(
+                    condition = "output.modelAveragePlot",
+                    uiOutput("ui_3model")
+                  ),
+                  plotOutput("modelAveragePlot"),
+                  conditionalPanel(
+                    condition = "output.modelAveragePlot",
+                    htmlOutput("estHc")
                   )
                 )
               ),
-              bslib::card_body(
-                conditionalPanel(
-                  condition = "output.checkpred",
-                  htmlOutput("hintPr")
-                ),
-                conditionalPanel(
-                  condition = "output.modelAveragePlot",
-                  uiOutput("ui_3model")
-                ),
-                plotOutput("modelAveragePlot"),
-                conditionalPanel(
-                  condition = "output.modelAveragePlot",
-                  htmlOutput("estHc")
+              conditionalPanel(
+                condition = "output.modelAveragePlot",
+                bslib::card(
+                  class = "mt-3",
+                  bslib::card_header(
+                    style = "background-color: #759dbe; color: white;",
+                    "Confidence Limits"
+                  ),
+                  bslib::card_body(
+                    conditionalPanel(
+                      condition = "output.clTable",
+                      div(
+                        style = "margin-bottom: 1rem; display: inline-block;",
+                        uiOutput("ui_3dltable")
+                      )
+                    ),
+                    uiOutput("ui_3cl"),
+                    actionLink("infoCl", icon = icon("info-circle"), label = NULL),
+                    shinyjs::hidden(div(
+                      id = "clInfoText",
+                      uiOutput("ui_3help")
+                    )),
+                    htmlOutput("describeCl"),
+                    uiOutput("ui_3clbutton"),
+                    conditionalPanel(
+                      condition = "output.modelAveragePlot",
+                      DT::dataTableOutput("clTable")
+                    )
+                  )
                 )
               )
             ),
             
-            # Confidence Limits Card
+            # BCANZ Report Page Content
             conditionalPanel(
-              condition = "output.modelAveragePlot",
+              condition = "input.main_nav == 'report'",
               bslib::card(
-                class = "mt-3",
                 bslib::card_header(
-                  class = "bg-warning text-dark",
-                  "Confidence Limits",
-                  div(
-                    class = "float-end",
-                    conditionalPanel(
-                      condition = "output.clTable",
-                      uiOutput("ui_3dltable")
-                    )
-                  )
+                  style = "background-color: #759dbe; color: white;",
+                  "BCANZ Report Generation"
                 ),
                 bslib::card_body(
-                  uiOutput("ui_3cl"),
-                  actionLink("infoCl", icon = icon("info-circle"), label = NULL),
-                  shinyjs::hidden(div(
-                    id = "clInfoText",
-                    uiOutput("ui_3help")
-                  )),
-                  htmlOutput("describeCl"),
-                  uiOutput("ui_3clbutton"),
-                  conditionalPanel(
-                    condition = "output.modelAveragePlot",
-                    DT::dataTableOutput("clTable")
+                  uiOutput("ui_report_download")
+                )
+              )
+            ),
+            
+            # R Code Page Content
+            conditionalPanel(
+              condition = "input.main_nav == 'rcode'",
+              bslib::card(
+                bslib::card_header(
+                  style = "background-color: #759dbe; color: white;",
+                  uiOutput("ui_nav4")
+                ),
+                bslib::card_body(
+                  uiOutput("ui_4help"),
+                  div(
+                    id = "codes",
+                    style = "background-color: #f8f9fa; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px;",
+                    uiOutput("codeHead"),
+                    br(),
+                    uiOutput("codeData"),
+                    br(),
+                    uiOutput("codeFit"),
+                    br(),
+                    uiOutput("codeSaveFit"),
+                    br(),
+                    uiOutput("codePredPlot"),
+                    br(),
+                    uiOutput("codeSavePred"),
+                    br(),
+                    uiOutput("codePredCl")
                   )
                 )
               )
+            ),
+            
+            # About Page Content
+            conditionalPanel(
+              condition = "input.main_nav == 'about'",
+              bslib::card(
+                bslib::card_header(
+                  style = "background-color: #759dbe; color: white;",
+                  "About shinyssdtools"
+                ),
+                bslib::card_body(
+                  uiOutput("ui_about")
+                )
+              )
+            ),
+            
+            # User Guide Page Content
+            conditionalPanel(
+              condition = "input.main_nav == 'guide'",
+              bslib::card(
+                bslib::card_header(
+                  style = "background-color: #759dbe; color: white;",
+                  "User Guide"
+                ),
+                bslib::card_body(
+                  uiOutput("ui_userguide")
+                )
+              )
             )
-          )
-        )
-      ),
-      
-      # BCANZ Report Page Content
-      conditionalPanel(
-        condition = "input.main_nav == 'report'",
-        bslib::card(
-          bslib::card_header(
-            class = "bg-danger text-white",
-            "BCANZ Report Generation"
-          ),
-          bslib::card_body(
-            uiOutput("ui_report_download")
-          )
-        )
-      ),
-      
-      # R Code Page Content
-      conditionalPanel(
-        condition = "input.main_nav == 'rcode'",
-        bslib::card(
-          bslib::card_header(
-            class = "bg-secondary text-white",
-            uiOutput("ui_nav4")
-          ),
-          bslib::card_body(
-            uiOutput("ui_4help"),
-            div(
-              id = "codes",
-              style = "background-color: #f8f9fa; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px;",
-              uiOutput("codeHead"),
-              br(),
-              uiOutput("codeData"),
-              br(),
-              uiOutput("codeFit"),
-              br(),
-              uiOutput("codeSaveFit"),
-              br(),
-              uiOutput("codePredPlot"),
-              br(),
-              uiOutput("codeSavePred"),
-              br(),
-              uiOutput("codePredCl")
-            )
-          )
-        )
-      ),
-      
-      # About Page Content
-      conditionalPanel(
-        condition = "input.main_nav == 'about'",
-        bslib::card(
-          bslib::card_header(
-            class = "bg-info text-white",
-            "About shinyssdtools"
-          ),
-          bslib::card_body(
-            uiOutput("ui_about")
-          )
-        )
-      ),
-      
-      # User Guide Page Content
-      conditionalPanel(
-        condition = "input.main_nav == 'guide'",
-        bslib::card(
-          bslib::card_header(
-            class = "bg-primary text-white",
-            "User Guide"
-          ),
-          bslib::card_body(
-            uiOutput("ui_userguide")
           )
         )
       )
