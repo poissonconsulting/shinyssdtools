@@ -17,9 +17,36 @@ app_server <- function(input, output, session) {
   )
   observeEvent(input$english, {
     translation.value$lang <- "English"
+    # Send translations to client-side JavaScript
+    session$sendCustomMessage("updateTranslations", list(
+      translations = list(
+        ui_nav1 = tr("ui_nav1", trans()),
+        ui_nav2 = tr("ui_nav2", trans()),
+        ui_nav3 = tr("ui_nav3", trans()),
+        ui_nav4 = tr("ui_nav4", trans()),
+        ui_nav5 = tr("ui_nav5", trans()),
+        ui_navabout = tr("ui_navabout", trans()),
+        ui_navguide = tr("ui_navguide", trans())
+      ),
+      language = "English"
+    ))
   })
+  
   observeEvent(input$french, {
     translation.value$lang <- "French"
+    # Send translations to client-side JavaScript
+    session$sendCustomMessage("updateTranslations", list(
+      translations = list(
+        ui_nav1 = tr("ui_nav1", trans()),
+        ui_nav2 = tr("ui_nav2", trans()),
+        ui_nav3 = tr("ui_nav3", trans()),
+        ui_nav4 = tr("ui_nav4", trans()),
+        ui_nav5 = tr("ui_nav5", trans()),
+        ui_navabout = tr("ui_navabout", trans()),
+        ui_navguide = tr("ui_navguide", trans())
+      ),
+      language = "French"
+    ))
   })
   
 
@@ -972,48 +999,7 @@ app_server <- function(input, output, session) {
     HTML(tr("ui_nav1", trans()))
   })
   
-  output$nav1_title <- renderUI({
-    tagList(
-      bsicons::bs_icon("table"),
-      span(style = "margin-left: 0.5rem;", tr("ui_nav1", trans()))
-    )
-  })
-  
-  output$nav2_title <- renderUI({
-    tagList(
-      bsicons::bs_icon("graph-up"),
-      span(style = "margin-left: 0.5rem;", tr("ui_nav2", trans()))
-    )
-  })
-  
-  output$nav3_title <- renderUI({
-    tagList(
-      bsicons::bs_icon("calculator"),
-      span(style = "margin-left: 0.5rem;", tr("ui_nav3", trans()))
-    )
-  })
-  
-  output$nav4_title <- renderUI({
-    tagList(
-      bsicons::bs_icon("file-bar-graph"),
-      span(style = "margin-left: 0.5rem;", tr("ui_nav4", trans()))
-    )
-  })
-  
-  output$nav5_title <- renderUI({
-    tagList(
-      bsicons::bs_icon("code-slash"),
-      span(style = "margin-left: 0.5rem;", tr("ui_nav5", trans()))
-    )
-  })
-
-  output$ui_navabout <- renderUI({
-    tr("ui_navabout", trans())
-  })
-
-  output$ui_navguide <- renderUI({
-   tr("ui_navguide", trans())
-  })
+  # Navigation titles now handled by client-side JavaScript
 
   output$ui_1data <- renderUI({
     p(tr("ui_1data", trans()), actionLink("demoData", tr("ui_1data2", trans()), icon = icon("table")))

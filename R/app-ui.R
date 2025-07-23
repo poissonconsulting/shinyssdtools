@@ -16,6 +16,9 @@ app_ui <- function() {
     shinyjs::useShinyjs(),
     waiter::useWaiter(),
     
+    # Include custom JavaScript for translations
+    tags$script(src = "translation.js"),
+    
     # Hide shiny errors
     tags$style(
       type = "text/css",
@@ -36,23 +39,43 @@ app_ui <- function() {
             bslib::navset_underline(
               id = "main_nav",
               nav_panel(
-                title = uiOutput("nav1_title"),
+                title = span(
+                  `data-translate` = "ui_nav1",
+                  bsicons::bs_icon("table"),
+                  span(style = "margin-left: 0.5rem;", "1. Data")
+                ),
                 value = "data"
               ),
               nav_panel(
-                title = uiOutput("nav2_title"),
+                title = span(
+                  `data-translate` = "ui_nav2",
+                  bsicons::bs_icon("graph-up"),
+                  span(style = "margin-left: 0.5rem;", "2. Fit")
+                ),
                 value = "fit"
               ),
               nav_panel(
-                title = uiOutput("nav3_title"),
+                title = span(
+                  `data-translate` = "ui_nav3",
+                  bsicons::bs_icon("calculator"),
+                  span(style = "margin-left: 0.5rem;", "3. Predict")
+                ),
                 value = "predict"
               ),
               nav_panel(
-                title = uiOutput("nav4_title"),
+                title = span(
+                  `data-translate` = "ui_nav4",
+                  bsicons::bs_icon("file-bar-graph"),
+                  span(style = "margin-left: 0.5rem;", "4. BCANZ Report")
+                ),
                 value = "report"
               ),
               nav_panel(
-                title = uiOutput("nav5_title"),
+                title = span(
+                  `data-translate` = "ui_nav5",
+                  bsicons::bs_icon("code-slash"),
+                  span(style = "margin-left: 0.5rem;", "R Code")
+                ),
                 value = "rcode"
               )
             )
@@ -273,10 +296,10 @@ app_ui <- function() {
           )
         )
       )),
-      nav_panel(title = uiOutput("ui_navabout"), card(card_body(
+      nav_panel(title = span(`data-translate` = "ui_navabout", "About"), card(card_body(
         uiOutput("ui_about")
       ))),
-      nav_panel(title = uiOutput("ui_navguide"), card(
+      nav_panel(title = span(`data-translate` = "ui_navguide", "User Guide"), card(
         uiOutput("ui_userguide")
       )),
       nav_spacer(),
