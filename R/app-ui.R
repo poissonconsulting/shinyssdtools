@@ -36,6 +36,8 @@ app_ui <- function() {
         layout_sidebar(
           padding = 0,
           gap = 0,
+
+# nav ---------------------------------------------------------------------
           sidebar = sidebar(
             width = 175,
             bg = "#e5eff7",
@@ -78,12 +80,15 @@ app_ui <- function() {
               )
             )
           ),
+
+# controls ----------------------------------------------------------------
           layout_sidebar(
             padding = "1rem",
             gap = "1rem",
             sidebar = sidebar(
               width = 350,
-              # Data Controls
+
+# __data ------------------------------------------------------------------
               conditionalPanel(
                 condition = "input.main_nav == 'data'",
                 # Demo Data Section
@@ -135,8 +140,7 @@ app_ui <- function() {
                   )
                 )
               ),
-              
-              # Fit Controls
+# __ fit ------------------------------------------------------------------
               conditionalPanel(
                 condition = "input.main_nav == 'fit'",
                 uiOutput("ui_conc"),
@@ -159,7 +163,8 @@ app_ui <- function() {
                   value = 12, min = 1, max = 100
                 )
               ),
-              # Predict Controls
+
+# __ predict --------------------------------------------------------------
               conditionalPanel(
                 condition = "input.main_nav == 'predict'",
                 h5("Prediction Settings"),
@@ -205,7 +210,9 @@ app_ui <- function() {
                 )
               )
             ),
-            # Data Page Content
+
+# main content ------------------------------------------------------------
+# __ data -----------------------------------------------------------------
             conditionalPanel(
               condition = "input.main_nav == 'data'",
               card(
@@ -214,102 +221,104 @@ app_ui <- function() {
               ),
               card(class = "mt-3", card_body(span(`data-translate` = "ui_1note", "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value.")))
             ),
-            # Fit Page Content
+
+# __ fit ------------------------------------------------------------------
             conditionalPanel(
               condition = "input.main_nav == 'fit'",
               div(
                 class = "p-3",
-                card(
-                full_screen = TRUE,
-                card_header(span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")),
-                card_body(
-                  conditionalPanel(
-                    condition = "output.distPlot1",
-                    div(
-                      style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
+                conditionalPanel(
+                  condition = "output.distPlot1",
+                  card(
+                    full_screen = TRUE,
+                    card_header(span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")),
+                    card_body(
                       div(
-                        style = "display: inline-block;",
-                        bslib::popover(
-                          actionButton("fitDownloadBtn", 
-                            label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                            style = "padding:4px; font-size:80%"
-                          ),
-                          card(
-                            style = "width: 250px; margin-top: 10px;",
-                            card_body(
-                              div(
-                                style = "display: grid; gap: 8px;",
-                                downloadButton("dlFitPlot",
-                                  label = span(`data-translate` = "ui_2dlplot", "Plot .png"),
-                                  style = "width: 100%; padding: 6px; font-size: 12px;",
-                                  class = "btn-primary btn-sm"
-                                ),
-                                downloadButton("dlFitRds",
-                                  label = span(`data-translate` = "ui_2dlrds", "Plot .rds"),
-                                  style = "width: 100%; padding: 6px; font-size: 12px;",
-                                  class = "btn-outline-secondary btn-sm"
-                                )
-                              ),
-                              div(
-                                h6(span(`data-translate` = "ui_2png", "PNG Format Settings"), style = "margin-bottom: 10px;"),
+                        style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
+                        div(
+                          style = "display: inline-block;",
+                          bslib::popover(
+                            actionButton("fitDownloadBtn", 
+                              label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
+                              style = "padding:4px; font-size:80%"
+                            ),
+                            card(
+                              style = "width: 250px; margin-top: 10px;",
+                              card_body(
                                 div(
-                                  style = "display: flex; gap: 5px; justify-content: space-between;",
-                                  div(
-                                    style = "flex: 1; min-width: 0;",
-                                    numericInput("width2", 
-                                      label = span(`data-translate` = "ui_2width", "Width"), 
-                                      value = 6, min = 1, max = 50, step = 0.1
-                                    )
+                                  style = "display: grid; gap: 8px;",
+                                  downloadButton("dlFitPlot",
+                                    label = span(`data-translate` = "ui_2dlplot", "Plot .png"),
+                                    style = "width: 100%; padding: 6px; font-size: 12px;",
+                                    class = "btn-primary btn-sm"
                                   ),
+                                  downloadButton("dlFitRds",
+                                    label = span(`data-translate` = "ui_2dlrds", "Plot .rds"),
+                                    style = "width: 100%; padding: 6px; font-size: 12px;",
+                                    class = "btn-outline-secondary btn-sm"
+                                  )
+                                ),
+                                div(
+                                  h6(span(`data-translate` = "ui_2png", "PNG Format Settings"), style = "margin-bottom: 10px;"),
                                   div(
-                                    style = "flex: 1; min-width: 0;",
-                                    numericInput("height2", 
-                                      label = span(`data-translate` = "ui_2height", "Height"),
-                                      value = 4, min = 1, max = 50, step = 0.1
-                                    )
-                                  ),
-                                  div(
-                                    style = "flex: 1; min-width: 0;",
-                                    numericInput("dpi2", 
-                                      label = span(`data-translate` = "ui_2dpi", "DPI"),
-                                      value = 300, min = 50, max = 2000, step = 50
+                                    style = "display: flex; gap: 5px; justify-content: space-between;",
+                                    div(
+                                      style = "flex: 1; min-width: 0;",
+                                      numericInput("width2", 
+                                        label = span(`data-translate` = "ui_2width", "Width"), 
+                                        value = 6, min = 1, max = 50, step = 0.1
+                                      )
+                                    ),
+                                    div(
+                                      style = "flex: 1; min-width: 0;",
+                                      numericInput("height2", 
+                                        label = span(`data-translate` = "ui_2height", "Height"),
+                                        value = 4, min = 1, max = 50, step = 0.1
+                                      )
+                                    ),
+                                    div(
+                                      style = "flex: 1; min-width: 0;",
+                                      numericInput("dpi2", 
+                                        label = span(`data-translate` = "ui_2dpi", "DPI"),
+                                        value = 300, min = 50, max = 2000, step = 50
+                                      )
                                     )
                                   )
                                 )
                               )
-                            )
-                          ),
-                          placement = "bottom"
+                            ),
+                            placement = "bottom"
+                          )
                         )
-                      )
+                      ),
+                      conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),
+                      conditionalPanel(condition = "output.distPlot1", uiOutput("ui_2plot")),
+                      htmlOutput("fitFail"),
+                      plotOutput("distPlot1")
                     )
-                  ),
-                  conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),
-                  conditionalPanel(condition = "output.distPlot1", uiOutput("ui_2plot")),
-                  htmlOutput("fitFail"),
-                  plotOutput("distPlot1")
-                )
-              ),
-              card(
-                card_header(span(`data-translate` = "ui_2table", "Goodness of Fit")),
+                  )
+                ),
                 conditionalPanel(
                   condition = "output.distPlot1",
-                  card_body(
-                    div(
-                      style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
-                      downloadButton("dlFitTable",
-                                     label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                                     style = "padding:4px; font-size:80%",
-                                     icon = NULL
+                  card(
+                    card_header(span(`data-translate` = "ui_2table", "Goodness of Fit")),
+                    card_body(
+                      div(
+                        style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
+                        downloadButton("dlFitTable",
+                                       label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
+                                       style = "padding:4px; font-size:80%",
+                                       icon = NULL
+                        )
                       ),
                       DT::dataTableOutput("gofTable")
                     )
                   )
                 )
               )
-              )
             ),
-            # Predict Page Content
+
+# __ predict --------------------------------------------------------------
             conditionalPanel(
               condition = "input.main_nav == 'predict'",
               card(
@@ -343,7 +352,8 @@ app_ui <- function() {
                 )
               )
             ),
-            # BCANZ Report Page Content
+
+# __ report ---------------------------------------------------------------
             conditionalPanel(
               condition = "input.main_nav == 'report'",
               card(
@@ -351,7 +361,8 @@ app_ui <- function() {
                 card_body(uiOutput("ui_report_download"))
               )
             ),
-            # R Code Page Content
+
+# __ r code ---------------------------------------------------------------
             conditionalPanel(
               condition = "input.main_nav == 'rcode'",
               card(
