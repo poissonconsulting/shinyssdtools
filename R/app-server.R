@@ -506,9 +506,10 @@ app_server <- function(input, output, session) {
     
     DT::datatable(
       data,
-      options = dt_options(),
+      options = dt_options(translation.value$lang),
       class = 'table-striped table-hover table-bordered',
-      selection = 'none'
+      selection = 'none',
+      extensions = 'Buttons'
     ) %>%
     DT::formatStyle(
       columns = colnames(data),
