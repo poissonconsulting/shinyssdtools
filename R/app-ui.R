@@ -31,32 +31,27 @@ app_ui <- function() {
           padding = 0,
           gap = 0,
           sidebar = sidebar(
-            width = 160,
+            width = 175,
             bg = "#e5eff7",
             bslib::navset_underline(
               nav_panel(
-                title = HTML(paste(bsicons::bs_icon("table"), uiOutput("ui_nav1"))),
-                icon = ,
+                title = uiOutput("nav1_title"),
                 value = "data"
               ),
               nav_panel(
-                title = "2. Fit",
-                icon = bsicons::bs_icon("graph-up"),
+                title = uiOutput("nav2_title"),
                 value = "fit"
               ),
               nav_panel(
-                title = "3. Predict",
-                icon = bsicons::bs_icon("calculator"),
+                title = uiOutput("nav3_title"),
                 value = "predict"
               ),
               nav_panel(
-                title = "4. BCANZ Report",
-                icon = bsicons::bs_icon("file-bar-graph"),
+                title = uiOutput("nav4_title"),
                 value = "report"
               ),
               nav_panel(
-                title = "R Code",
-                icon = bsicons::bs_icon("code-slash"),
+                title = uiOutput("nav5_title"),
                 value = "rcode"
               )
             )
@@ -277,10 +272,10 @@ app_ui <- function() {
           )
         )
       )),
-      nav_panel(title = "About", card(card_body(
+      nav_panel(title = uiOutput("ui_navabout"), card(card_body(
         uiOutput("ui_about")
       ))),
-      nav_panel(title = "User Guide", card(
+      nav_panel(title = uiOutput("ui_navguide"), card(
         uiOutput("ui_userguide")
       )),
       nav_spacer(),

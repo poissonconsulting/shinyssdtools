@@ -971,25 +971,48 @@ app_server <- function(input, output, session) {
   output$ui_nav1 <- renderUI({
     HTML(tr("ui_nav1", trans()))
   })
-
-  output$ui_nav2 <- renderUI({
-    HTML(tr("ui_nav2", trans()))
+  
+  output$nav1_title <- renderUI({
+    tagList(
+      bsicons::bs_icon("table"),
+      span(style = "margin-left: 0.5rem;", tr("ui_nav1", trans()))
+    )
   })
-
-  output$ui_nav3 <- renderUI({
-    HTML(tr("ui_nav3", trans()))
+  
+  output$nav2_title <- renderUI({
+    tagList(
+      bsicons::bs_icon("graph-up"),
+      span(style = "margin-left: 0.5rem;", tr("ui_nav2", trans()))
+    )
   })
-
-  output$ui_nav4 <- renderUI({
-    HTML(tr("ui_nav4", trans()))
+  
+  output$nav3_title <- renderUI({
+    tagList(
+      bsicons::bs_icon("calculator"),
+      span(style = "margin-left: 0.5rem;", tr("ui_nav3", trans()))
+    )
+  })
+  
+  output$nav4_title <- renderUI({
+    tagList(
+      bsicons::bs_icon("file-bar-graph"),
+      span(style = "margin-left: 0.5rem;", tr("ui_nav4", trans()))
+    )
+  })
+  
+  output$nav5_title <- renderUI({
+    tagList(
+      bsicons::bs_icon("code-slash"),
+      span(style = "margin-left: 0.5rem;", tr("ui_nav5", trans()))
+    )
   })
 
   output$ui_navabout <- renderUI({
-    HTML(tr("ui_navabout", trans()))
+    tr("ui_navabout", trans())
   })
 
   output$ui_navguide <- renderUI({
-    HTML(tr("ui_navguide", trans()))
+   tr("ui_navguide", trans())
   })
 
   output$ui_1data <- renderUI({
