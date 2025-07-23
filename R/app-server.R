@@ -18,7 +18,7 @@ app_server <- function(input, output, session) {
   
   client_translations <- reactive({
     list(
-      ui_nav1 = "1. Data",
+      ui_nav1 = tr("ui_nav1", trans()),
       ui_nav2 = tr("ui_nav2", trans()),
       ui_nav3 = tr("ui_nav3", trans()),
       ui_nav4 = tr("ui_nav4", trans()),
@@ -34,7 +34,9 @@ app_server <- function(input, output, session) {
       ui_1csvhelp = tr("ui_1csvhelp", trans()),
       ui_1csvlabel = tr("ui_1csvlabel", trans()),
       ui_1table = tr("ui_1table", trans()),
-      ui_1tablehelp = tr("ui_1tablehelp", trans())
+      ui_1tablehelp = tr("ui_1tablehelp", trans()),
+      ui_1preview = tr("ui_1preview", trans()),
+      ui_1note = tr("ui_1note", trans())
     )
   })
   
@@ -1002,13 +1004,6 @@ app_server <- function(input, output, session) {
   
   # Navigation titles and data controls now handled by client-side JavaScript
 
-  output$ui_1preview <- renderUI({
-    tr("ui_1preview", trans())
-  })
-
-  output$ui_1note1 <- renderUI({
-    helpText(tr("ui_1note", trans()))
-  })
 
   output$ui_2select <- renderUI({
     selectizeInput("selectDist",

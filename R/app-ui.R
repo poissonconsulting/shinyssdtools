@@ -207,10 +207,10 @@ app_ui <- function() {
             conditionalPanel(
               condition = "input.main_nav == 'data'",
               card(
-                card_header(uiOutput("ui_1preview")),
+                card_header(span(`data-translate` = "ui_1preview", "Preview chosen dataset")),
                 card_body(DT::DTOutput("viewUpload"), min_height = "550px")
               ),
-              card(class = "mt-3", card_body(uiOutput("ui_1note1")))
+              card(class = "mt-3", card_body(span(`data-translate` = "ui_1note", "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value.")))
             ),
             # Fit Page Content
             conditionalPanel(
