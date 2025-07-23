@@ -23,7 +23,10 @@ app_ui <- function() {
     tags$style(
       type = "text/css",
       ".shiny-output-error { visibility: hidden; }",
-      ".shiny-output-error:before { visibility: hidden; }"
+      ".shiny-output-error:before { visibility: hidden; }",
+      "/* Remove focus outline from help icons */",
+      ".bi-question-circle:focus { outline: none !important; border: none !important; box-shadow: none !important; }",
+      ".bi-question-circle { cursor: pointer; }"
     ),
     
     page_navbar(
@@ -36,7 +39,7 @@ app_ui <- function() {
           sidebar = sidebar(
             width = 175,
             bg = "#e5eff7",
-            bslib::navset_underline(
+            navset_underline(
               id = "main_nav",
               nav_panel(
                 title = span(
@@ -80,39 +83,18 @@ app_ui <- function() {
               )
             )
           ),
-          bslib::layout_sidebar(
-            padding = 0,
-            gap = 0,
-            sidebar = bslib::sidebar(
-              width = 300,
+          layout_sidebar(
+            padding = "1rem",
+            gap = "1rem",
+            sidebar = sidebar(
+              width = 350,
               # Data Controls
               conditionalPanel(
                 condition = "input.main_nav == 'data'",
-                # uiOutput("ui_1choose"),
+                uiOutput("ui_1choose"),
                 uiOutput("ui_1data"),
-                actionLink(
-                  "infoDemo",
-                  icon = icon("info-circle"),
-                  label = NULL
-                ),
-                shinyjs::hidden(div(id = "infoDemoText", uiOutput("ui_1datahelp"))),
-                br(),
                 uiOutput("ui_1csv"),
-                actionLink(
-                  "infoUpload",
-                  icon = icon("info-circle"),
-                  label = NULL
-                ),
-                shinyjs::hidden(div(id = "infoUploadText", uiOutput("ui_1csvhelp"))),
-                uiOutput("ui_1csvupload"),
-                uiOutput("ui_1table1"),
-                actionLink(
-                  "infoHands",
-                  icon = icon("info-circle"),
-                  label = NULL
-                ),
-                shinyjs::hidden(div(id = "infoHandsText", uiOutput("ui_1tablehelp"))),
-                rhandsontable::rHandsontableOutput("hot")
+                uiOutput("ui_1table1")
               ),
               
               # Fit Controls
@@ -128,7 +110,7 @@ app_ui <- function() {
                 uiOutput("ui_2png"),
                 div(
                   id = "divFormatFit",
-                  bslib::layout_column_wrap(
+                  layout_column_wrap(
                     width = 1 / 3,
                     uiOutput("ui_2width"),
                     uiOutput("ui_2height"),
@@ -136,7 +118,6 @@ app_ui <- function() {
                   )
                 )
               ),
-              
               # Predict Controls
               conditionalPanel(
                 condition = "input.main_nav == 'predict'",
@@ -159,10 +140,10 @@ app_ui <- function() {
                   uiOutput("ui_3title"),
                   uiOutput("uiLegendColour"),
                   uiOutput("uiLegendShape"),
-                  bslib::layout_column_wrap(width = 1 /
+                  layout_column_wrap(width = 1 /
                                               2, uiOutput("ui_3size"), uiOutput("ui_3sizeLabel")),
                   uiOutput("ui_checkHc"),
-                  bslib::layout_column_wrap(
+                  layout_column_wrap(
                     width = 1 / 3,
                     uiOutput("uiAdjustLabel"),
                     uiOutput("uiXmin"),
@@ -174,7 +155,7 @@ app_ui <- function() {
                 uiOutput("ui_3pngopts"),
                 div(
                   id = "divPngFormatPredict",
-                  bslib::layout_column_wrap(
+                  layout_column_wrap(
                     width = 1 / 3,
                     uiOutput("ui_3width"),
                     uiOutput("ui_3height"),
@@ -186,18 +167,21 @@ app_ui <- function() {
             # Data Page Content
             conditionalPanel(
               condition = "input.main_nav == 'data'",
-              bslib::card(
-                bslib::card_header(style = "background-color: #759dbe; color: white;", ),
-                bslib::card_body(uiOutput("ui_1preview"), uiOutput("ui_viewupload"))
+              card(
+                card_header(uiOutput("ui_1preview")),
+                card_body(uiOutput("ui_viewupload"))
               ),
-              bslib::card(class = "mt-3", bslib::card_body(uiOutput("ui_1note1")))
+              card(class = "mt-3", card_body(uiOutput("ui_1note1")))
             ),
             # Fit Page Content
             conditionalPanel(
               condition = "input.main_nav == 'fit'",
-              bslib::card(
-                bslib::card_header(style = "background-color: #759dbe; color: white;", "Plot Fitted Distributions"),
-                bslib::card_body(
+              div(
+                class = "p-3",
+                card(
+                full_screen = TRUE,
+                card_header("Plot Fitted Distributions"),
+                card_body(
                   conditionalPanel(
                     condition = "output.distPlot1",
                     div(
@@ -215,19 +199,20 @@ app_ui <- function() {
               ),
               conditionalPanel(
                 condition = "output.gofTable",
-                bslib::card(
+                card(
                   class = "mt-3",
-                  bslib::card_header(style = "background-color: #759dbe; color: white;", uiOutput("ui_2table")),
-                  bslib::card_body(DT::dataTableOutput("gofTable"))
+                  card_header(style = "background-color: #759dbe; color: white;", uiOutput("ui_2table")),
+                  card_body(DT::dataTableOutput("gofTable"))
                 )
+              )
               )
             ),
             # Predict Page Content
             conditionalPanel(
               condition = "input.main_nav == 'predict'",
-              bslib::card(
-                bslib::card_header(style = "background-color: #759dbe; color: white;", "Model Average Plot"),
-                bslib::card_body(
+              card(
+                card_header(style = "background-color: #759dbe; color: white;", "Model Average Plot"),
+                card_body(
                   conditionalPanel(
                     condition = "output.modelAveragePlot",
                     div(style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;", uiOutput("ui_3dlplot"), uiOutput("ui_3dlrds"))
@@ -240,17 +225,15 @@ app_ui <- function() {
               ),
               conditionalPanel(
                 condition = "output.modelAveragePlot",
-                bslib::card(
+                card(
                   class = "mt-3",
-                  bslib::card_header(style = "background-color: #759dbe; color: white;", "Confidence Limits"),
-                  bslib::card_body(
+                  card_header(style = "background-color: #759dbe; color: white;", "Confidence Limits"),
+                  card_body(
                     conditionalPanel(
                       condition = "output.clTable",
                       div(style = "margin-bottom: 1rem; display: inline-block;", uiOutput("ui_3dltable"))
                     ),
                     uiOutput("ui_3cl"),
-                    actionLink("infoCl", icon = icon("info-circle"), label = NULL),
-                    shinyjs::hidden(div(id = "clInfoText", uiOutput("ui_3help"))),
                     htmlOutput("describeCl"),
                     uiOutput("ui_3clbutton"),
                     conditionalPanel(condition = "output.modelAveragePlot", DT::dataTableOutput("clTable"))
@@ -261,17 +244,17 @@ app_ui <- function() {
             # BCANZ Report Page Content
             conditionalPanel(
               condition = "input.main_nav == 'report'",
-              bslib::card(
-                bslib::card_header(style = "background-color: #759dbe; color: white;", "BCANZ Report Generation"),
-                bslib::card_body(uiOutput("ui_report_download"))
+              card(
+                card_header(style = "background-color: #759dbe; color: white;", "BCANZ Report Generation"),
+                card_body(uiOutput("ui_report_download"))
               )
             ),
             # R Code Page Content
             conditionalPanel(
               condition = "input.main_nav == 'rcode'",
-              bslib::card(
-                bslib::card_header(style = "background-color: #759dbe; color: white;", uiOutput("ui_nav4")),
-                bslib::card_body(
+              card(
+                card_header(style = "background-color: #759dbe; color: white;", uiOutput("ui_nav4")),
+                card_body(
                   uiOutput("ui_4help"),
                   div(
                     id = "codes",

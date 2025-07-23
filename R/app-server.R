@@ -855,22 +855,9 @@ app_server <- function(input, output, session) {
   })
 
   ########### Observers --------------------
-  # --- info
-  observeEvent(input$infoCl, {
-    shinyjs::toggle("clInfoText", anim = FALSE, animType = "slide", time = 0.2)
-  })
+  # --- info section help now handled by inline tooltips
 
-  observeEvent(input$infoUpload, {
-    shinyjs::toggle("infoUploadText", anim = TRUE, animType = "slide", time = 0.2)
-  })
-
-  observeEvent(input$infoDemo, {
-    shinyjs::toggle("infoDemoText", anim = TRUE, animType = "slide", time = 0.2)
-  })
-
-  observeEvent(input$infoHands, {
-    shinyjs::toggle("infoHandsText", anim = TRUE, animType = "slide", time = 0.2)
-  })
+  # Help tooltips now handled by bslib::tooltip() in UI
 
   # --- user data
   observeEvent(input$uploadData, {
@@ -988,7 +975,7 @@ app_server <- function(input, output, session) {
 
   ########### Render UI Translations -------------------
   output$ui_1choose <- renderUI({
-    h4(tr("ui_1choose", trans()))
+    tr("ui_1choose", trans())
   })
 
   output$ui_navtitle <- renderUI({
@@ -1000,45 +987,50 @@ app_server <- function(input, output, session) {
   })
   
   # Navigation titles now handled by client-side JavaScript
-
   output$ui_1data <- renderUI({
-    p(tr("ui_1data", trans()), actionLink("demoData", tr("ui_1data2", trans()), icon = icon("table")))
-  })
-
-  output$ui_1datahelp <- renderUI({
-    tagList(
-      helpText(tr("ui_1datahelp", trans())),
-      helpText("Citation:"),
-      tags$a("Canadian Council of Ministers of the Environment. 2009. Canadian water quality guidelines for the protection of aquatic life: Boron. In: Canadian  environmental  quality guidelines, 2009, Canadian Council of  Ministers of the Environment, Winnipeg.", href = "http://ceqg-rcqe.ccme.ca/download/en/324/")
+    p(
+      popover(
+        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+        tagList(
+          tr("ui_1datahelp", trans()),
+          br(), br(),
+          "Citation:",
+          tags$a("Canadian Council of Ministers of the Environment. 2009. Canadian water quality guidelines for the protection of aquatic life: Boron. In: Canadian  environmental  quality guidelines, 2009, Canadian Council of  Ministers of the Environment, Winnipeg.", href = "http://ceqg-rcqe.ccme.ca/download/en/324/")
+        ),
+        placement = "right"
+      ),
+      tr("ui_1data", trans()),
+      actionLink("demoData", tr("ui_1data2", trans()), icon = icon("table"))
     )
   })
 
   output$ui_1csv <- renderUI({
-    p(tr("ui_1csv", trans()))
-  })
-
-  output$ui_1csvhelp <- renderUI({
-    helpText(tr("ui_1csvhelp", trans()))
-  })
-
-  output$ui_1csvupload <- renderUI({
+    label <- span(popover(
+        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+        tr("ui_1csvhelp", trans()),
+        placement = "right"
+      ), tr("ui_1csv", trans()))
+      
     fileInput("uploadData",
-      buttonLabel = span(tagList(icon("upload"), "csv")),
-      label = "", placeholder = tr("ui_1csvlabel", trans()),
-      accept = c(".csv")
-    )
+                buttonLabel = span(tagList(icon("upload"), "csv")),
+                label = label, placeholder = tr("ui_1csvlabel", trans()),
+                accept = c(".csv")
+      )
   })
 
   output$ui_1table1 <- renderUI({
-    p(tr("ui_1table", trans()))
-  })
-
-  output$ui_1tablehelp <- renderUI({
-    helpText(tr("ui_1tablehelp", trans()))
+    accordion(
+      open = FALSE,
+      accordion_panel(tr("ui_1table", trans()), icon = popover(
+        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+        tr("ui_1tablehelp", trans()),
+        placement = "right"
+      ), rhandsontable::rHandsontableOutput("hot"))
+    )
   })
 
   output$ui_1preview <- renderUI({
-    h4(tr("ui_1preview", trans()))
+    tr("ui_1preview", trans())
   })
 
   output$ui_1note1 <- renderUI({
@@ -1290,11 +1282,18 @@ app_server <- function(input, output, session) {
   })
 
   output$ui_3cl <- renderUI({
-    h4(tr("ui_3cl", trans()))
+    h4(
+      tr("ui_3cl", trans()),
+      bslib::tooltip(
+        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+        uiOutput("ui_3help"),
+        placement = "right"
+      )
+    )
   })
 
   output$ui_3help <- renderUI({
-    helpText(tr("ui_3help", trans()))
+    tr("ui_3help", trans())
   })
 
   output$ui_3clbutton <- renderUI({
@@ -1302,7 +1301,7 @@ app_server <- function(input, output, session) {
   })
 
   output$ui_4help <- renderUI({
-    helpText(tr("ui_4help", trans()))
+    tr("ui_4help", trans())
   })
 
   output$ui_5format <- renderUI({
