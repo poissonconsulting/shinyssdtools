@@ -15,54 +15,45 @@ app_server <- function(input, output, session) {
   translation.value <- reactiveValues(
     lang = "English"
   )
+  
+  # Reactive list of client-side translations
+  client_translations <- reactive({
+    list(
+      ui_nav1 = tr("ui_nav1", trans()),
+      ui_nav2 = tr("ui_nav2", trans()),
+      ui_nav3 = tr("ui_nav3", trans()),
+      ui_nav4 = tr("ui_nav4", trans()),
+      ui_nav5 = tr("ui_nav5", trans()),
+      ui_navabout = tr("ui_navabout", trans()),
+      ui_navanalyse = tr("ui_navanalyse", trans()),
+      ui_navguide = tr("ui_navguide", trans()),
+      ui_1choose = tr("ui_1choose", trans()),
+      ui_1data = tr("ui_1data", trans()),
+      ui_1data2 = tr("ui_1data2", trans()),
+      ui_1datahelp = tr("ui_1datahelp", trans()),
+      ui_1csv = tr("ui_1csv", trans()),
+      ui_1csvhelp = tr("ui_1csvhelp", trans()),
+      ui_1csvlabel = tr("ui_1csvlabel", trans()),
+      ui_1table = tr("ui_1table", trans()),
+      ui_1tablehelp = tr("ui_1tablehelp", trans())
+    )
+  })
+  
+  # Observe language changes and send translations
+  observeEvent(translation.value$lang, {
+    session$sendCustomMessage("updateTranslations", list(
+      translations = client_translations(),
+      language = translation.value$lang
+    ))
+  })
+  
+  # Simple language switching
   observeEvent(input$english, {
     translation.value$lang <- "English"
-    # Send translations to client-side JavaScript
-    session$sendCustomMessage("updateTranslations", list(
-      translations = list(
-        ui_nav1 = tr("ui_nav1", trans()),
-        ui_nav2 = tr("ui_nav2", trans()),
-        ui_nav3 = tr("ui_nav3", trans()),
-        ui_nav4 = tr("ui_nav4", trans()),
-        ui_nav5 = tr("ui_nav5", trans()),
-        ui_navabout = tr("ui_navabout", trans()),
-        ui_navguide = tr("ui_navguide", trans()),
-        ui_1data = tr("ui_1data", trans()),
-        ui_1data2 = tr("ui_1data2", trans()),
-        ui_1datahelp = tr("ui_1datahelp", trans()),
-        ui_1csv = tr("ui_1csv", trans()),
-        ui_1csvhelp = tr("ui_1csvhelp", trans()),
-        ui_1csvlabel = tr("ui_1csvlabel", trans()),
-        ui_1table = tr("ui_1table", trans()),
-        ui_1tablehelp = tr("ui_1tablehelp", trans())
-      ),
-      language = "English"
-    ))
   })
   
   observeEvent(input$french, {
     translation.value$lang <- "French"
-    # Send translations to client-side JavaScript
-    session$sendCustomMessage("updateTranslations", list(
-      translations = list(
-        ui_nav1 = tr("ui_nav1", trans()),
-        ui_nav2 = tr("ui_nav2", trans()),
-        ui_nav3 = tr("ui_nav3", trans()),
-        ui_nav4 = tr("ui_nav4", trans()),
-        ui_nav5 = tr("ui_nav5", trans()),
-        ui_navabout = tr("ui_navabout", trans()),
-        ui_navguide = tr("ui_navguide", trans()),
-        ui_1data = tr("ui_1data", trans()),
-        ui_1data2 = tr("ui_1data2", trans()),
-        ui_1datahelp = tr("ui_1datahelp", trans()),
-        ui_1csv = tr("ui_1csv", trans()),
-        ui_1csvhelp = tr("ui_1csvhelp", trans()),
-        ui_1csvlabel = tr("ui_1csvlabel", trans()),
-        ui_1table = tr("ui_1table", trans()),
-        ui_1tablehelp = tr("ui_1tablehelp", trans())
-      ),
-      language = "French"
-    ))
   })
   
 
@@ -1001,7 +992,7 @@ app_server <- function(input, output, session) {
 
   ########### Render UI Translations -------------------
   output$ui_1choose <- renderUI({
-    tr("ui_1choose", trans())
+    
   })
 
   output$ui_navtitle <- renderUI({

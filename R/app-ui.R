@@ -32,7 +32,7 @@ app_ui <- function() {
     page_navbar(
       title = "shinyssdtools",
       navbar_options = navbar_options(bg = "#759dbe", underline = TRUE),
-      nav_panel(title = "Analyse", page_fillable(
+      nav_panel(title = span(`data-translate` = "ui_navanalyse", "About"), page_fillable(
         layout_sidebar(
           padding = 0,
           gap = 0,
@@ -92,6 +92,7 @@ app_ui <- function() {
               conditionalPanel(
                 condition = "input.main_nav == 'data'",
                 # Demo Data Section
+                span(`data-translate` = "ui_1choose"),
                 p(
                   bslib::popover(
                     bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
