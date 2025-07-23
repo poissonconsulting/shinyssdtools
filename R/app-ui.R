@@ -145,17 +145,7 @@ app_ui <- function() {
                 uiOutput("ui_2xlab"),
                 uiOutput("ui_2ylab"),
                 uiOutput("ui_unit"),
-                uiOutput("ui_2size"),
-                uiOutput("ui_2png"),
-                div(
-                  id = "divFormatFit",
-                  layout_column_wrap(
-                    width = 1 / 3,
-                    uiOutput("ui_2width"),
-                    uiOutput("ui_2height"),
-                    uiOutput("ui_2dpi")
-                  )
-                )
+                uiOutput("ui_2size")
               ),
               # Predict Controls
               conditionalPanel(
@@ -225,9 +215,7 @@ app_ui <- function() {
                     condition = "output.distPlot1",
                     div(
                       style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
-                      uiOutput("ui_2dlplot"),
-                      uiOutput("ui_2dlrds"),
-                      uiOutput("ui_2dltable")
+                      uiOutput("ui_2download")
                     )
                   ),
                   conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),

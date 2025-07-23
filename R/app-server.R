@@ -260,7 +260,7 @@ app_server <- function(input, output, session) {
   })
 
   get_width2 <- reactive({
-    ifelse(input$selectWidth2 == 0, 1, input$selectWidth2)
+    ifelse(is.null(input$width2) || input$width2 == 0, 6, input$width2)
   })
 
   get_height <- reactive({
@@ -268,7 +268,7 @@ app_server <- function(input, output, session) {
   })
 
   get_height2 <- reactive({
-    ifelse(input$selectHeight2 == 0, 1, input$selectHeight2)
+    ifelse(is.null(input$height2) || input$height2 == 0, 4, input$height2)
   })
 
   get_dpi <- reactive({
@@ -282,13 +282,14 @@ app_server <- function(input, output, session) {
   })
 
   get_dpi2 <- reactive({
-    if (input$selectDpi2 > 3000) {
-      return(3000)
+    dpi_val <- if(is.null(input$dpi2)) 300 else input$dpi2
+    if (dpi_val > 2000) {
+      return(2000)
     }
-    if (input$selectDpi2 == 0) {
-      return(1)
+    if (dpi_val < 50) {
+      return(50)
     }
-    input$selectDpi2
+    dpi_val
   })
 
   # --- fit distributions
@@ -567,8 +568,14 @@ app_server <- function(input, output, session) {
 
   # --- render fit results ----
   output$distPlot1 <- renderPlot({
-    waiter::waiter_show(id = "distPlot1", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
-    plot_dist()
+    tryCatch({
+      # waiter::waiter_show(id = "distPlot1", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
+      plot_dist()
+    }, error = function(e) {
+      # Close any open devices on error to prevent leaks
+      tryCatch(while(dev.cur() > 1) dev.off(), error = function(e2) {})
+      stop(e)
+    })
   })
 
   output$gofTable <- DT::renderDataTable({
@@ -581,8 +588,14 @@ app_server <- function(input, output, session) {
   })
   # --- render predict results ----
   output$modelAveragePlot <- renderPlot({
-    waiter::waiter_show(id = "modelAveragePlot", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
-    plot_model_average()
+    tryCatch({
+      waiter::waiter_show(id = "modelAveragePlot", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
+      plot_model_average()
+    }, error = function(e) {
+      # Close any open devices on error to prevent leaks
+      tryCatch(while(dev.cur() > 1) dev.off(), error = function(e2) {})
+      stop(e)
+    })
   })
 
   output$estHc <- renderUI({
@@ -626,7 +639,6 @@ app_server <- function(input, output, session) {
   # --- render UI ----
   shinyjs::onclick("linkFormatPredict", shinyjs::toggle("divFormatPredict", anim = TRUE, animType = "slide", time = 0.2))
   shinyjs::onclick("linkPngFormatPredict", shinyjs::toggle("divPngFormatPredict", anim = TRUE, animType = "slide", time = 0.2))
-  shinyjs::onclick("linkFormatFit", shinyjs::toggle("divFormatFit", anim = TRUE, animType = "slide", time = 0.2))
 
   output$uiAdjustLabel <- renderUI({
     numericInput("adjustLabel",
@@ -1019,21 +1031,6 @@ app_server <- function(input, output, session) {
     )
   })
 
-  output$ui_2png <- renderUI({
-    actionLink("linkFormatFit", label = tr("ui_2png", trans()))
-  })
-
-  output$ui_2width <- renderUI({
-    numericInput("selectWidth2", label = tr("ui_2width", trans()), min = 1, max = 20, step = 1, value = 8)
-  })
-
-  output$ui_2height <- renderUI({
-    numericInput("selectHeight2", label = tr("ui_2height", trans()), min = 1, max = 20, step = 1, value = 6)
-  })
-
-  output$ui_2dpi <- renderUI({
-    numericInput("selectDpi2", label = tr("ui_2dpi", trans()), min = 50, max = 3000, step = 50, value = 300)
-  })
 
   output$ui_conc <- renderUI({
     selectInput("selectConc",
@@ -1074,24 +1071,60 @@ app_server <- function(input, output, session) {
     h4(tr("ui_2table", trans()))
   })
 
-  output$ui_2dlplot <- renderUI({
-    downloadButton("dlFitPlot",
-      label = tr("ui_2dlplot", trans()),
-      style = "padding:4px; font-size:80%"
-    )
-  })
-
-  output$ui_2dlrds <- renderUI({
-    downloadButton("dlFitRds",
-      label = tr("ui_2dlrds", trans()),
-      style = "padding:4px; font-size:80%"
-    )
-  })
-
-  output$ui_2dltable <- renderUI({
-    downloadButton("dlFitTable",
-      label = tr("ui_2dltable", trans()),
-      style = "padding:4px; font-size:80%"
+  output$ui_2download <- renderUI({
+    div(
+      style = "display: inline-block;",
+      bslib::popover(
+        actionButton("fitDownloadBtn", 
+          label = tagList(bsicons::bs_icon("download"), "Download"),
+          style = "padding:4px; font-size:80%"
+        ),
+        card(
+          style = "width: 250px;", # Fixed width to contain inputs
+          card_body(
+            # Download Options
+            # h6("Download Options", style = "margin-bottom: 10px;"),
+            div(
+              style = "display: grid; gap: 8px;",
+              downloadButton("dlFitPlot",
+                label = tr("ui_2dlplot", trans()),
+                style = "width: 100%; padding: 6px; font-size: 12px;",
+                class = "btn-primary btn-sm"
+              ),
+              downloadButton("dlFitRds",
+                label = tr("ui_2dlrds", trans()),
+                style = "width: 100%; padding: 6px; font-size: 12px;",
+                class = "btn-outline-secondary btn-sm"
+              ),
+              downloadButton("dlFitTable",
+                label = tr("ui_2dltable", trans()),
+                style = "width: 100%; padding: 6px; font-size: 12px;",
+                class = "btn-outline-secondary btn-sm"
+              )
+            ),
+            div(
+              style = "display: grid; gap: 8px;",
+              h6("PNG Format Settings", style = "margin-bottom: 10px;"),
+                numericInput("width2", 
+                             width = "200px",
+                             label = tr("ui_2width", trans()), 
+                             value = 6, min = 1, max = 50, step = 0.1
+                ),
+                numericInput("height2", 
+                             width = "200px",
+                             label = tr("ui_2height", trans()),
+                             value = 4, min = 1, max = 50, step = 0.1
+                ),
+                numericInput("dpi2", 
+                             width = "200px",
+                             label = tr("ui_2dpi", trans()),
+                             value = 300, min = 50, max = 2000, step = 50
+                )
+            ),
+          )
+        ),
+        placement = "bottom"
+      )
     )
   })
 
