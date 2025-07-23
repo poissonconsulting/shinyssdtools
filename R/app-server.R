@@ -1076,7 +1076,7 @@ app_server <- function(input, output, session) {
       style = "display: inline-block;",
       bslib::popover(
         actionButton("fitDownloadBtn", 
-          label = tagList(bsicons::bs_icon("download"), "Download"),
+          label = tagList(bsicons::bs_icon("download"), tr("ui_2download", trans())),
           style = "padding:4px; font-size:80%"
         ),
         card(
@@ -1103,27 +1103,27 @@ app_server <- function(input, output, session) {
               )
             ),
             div(
-              h6("PNG Format Settings", style = "margin-bottom: 10px;"),
+              h6(tr("ui_2png", trans()), style = "margin-bottom: 10px;"),
               div(
                 style = "display: flex; gap: 5px; justify-content: space-between;",
                 div(
                   style = "flex: 1; min-width: 0;",
                   numericInput("width2", 
-                               label = "Width", 
+                               label = tr("ui_2width", trans()), 
                                value = 6, min = 1, max = 50, step = 0.1
                   )
                 ),
                 div(
                   style = "flex: 1; min-width: 0;",
                   numericInput("height2", 
-                               label = "Height",
+                               label = tr("ui_2height", trans()),
                                value = 4, min = 1, max = 50, step = 0.1
                   )
                 ),
                 div(
                   style = "flex: 1; min-width: 0;",
                   numericInput("dpi2", 
-                               label = "DPI",
+                               label = tr("ui_2dpi", trans()),
                                value = 300, min = 50, max = 2000, step = 50
                   )
                 )
