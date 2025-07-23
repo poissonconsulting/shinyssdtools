@@ -34,6 +34,7 @@ app_ui <- function() {
             width = 175,
             bg = "#e5eff7",
             bslib::navset_underline(
+              id = "main_nav",
               nav_panel(
                 title = uiOutput("nav1_title"),
                 value = "data"
@@ -64,7 +65,7 @@ app_ui <- function() {
               # Data Controls
               conditionalPanel(
                 condition = "input.main_nav == 'data'",
-                uiOutput("ui_1choose"),
+                # uiOutput("ui_1choose"),
                 uiOutput("ui_1data"),
                 actionLink(
                   "infoDemo",
