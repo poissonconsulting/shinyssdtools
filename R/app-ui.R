@@ -91,10 +91,53 @@ app_ui <- function() {
               # Data Controls
               conditionalPanel(
                 condition = "input.main_nav == 'data'",
-                uiOutput("ui_1choose"),
-                uiOutput("ui_1data"),
-                uiOutput("ui_1csv"),
-                uiOutput("ui_1table1")
+                # Demo Data Section
+                p(
+                  bslib::popover(
+                    bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                    div(
+                      span(`data-translate` = "ui_1datahelp", "This can be used to demo the app or view a dataset that 'works'."),
+                      br(), br(),
+                      "Citation:",
+                      tags$a("Canadian Council of Ministers of the Environment. 2009. Canadian water quality guidelines for the protection of aquatic life: Boron. In: Canadian environmental quality guidelines, 2009, Canadian Council of Ministers of the Environment, Winnipeg.", href = "http://ceqg-rcqe.ccme.ca/download/en/324/")
+                    ),
+                    placement = "right"
+                  ),
+                  span(
+                    span(`data-translate` = "ui_1data", "1. Use "),
+                    actionLink("demoData", span(`data-translate` = "ui_1data2", "boron dataset"), icon = icon("table"))
+                  )
+                ),
+                # CSV Upload Section  
+                fileInput("uploadData",
+                  buttonLabel = span(tagList(icon("upload"), "csv")),
+                  label = span(
+                    bslib::popover(
+                      bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                      span(`data-translate` = "ui_1csvhelp", "Upload your own CSV file with concentration and species data."),
+                      placement = "right"
+                    ),
+                    span(`data-translate` = "ui_1csv", "2. Upload CSV file")
+                  ),
+                  placeholder = "...",
+                  accept = c(".csv")
+                ),
+                # Data Table Section
+                bslib::accordion(
+                  open = FALSE,
+                  bslib::accordion_panel(
+                    title = span(
+                      bslib::popover(
+                        bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                        span(`data-translate` = "ui_1tablehelp", "Manually enter concentration and species data in the table."),
+                        placement = "right"
+                      ),
+                      span(`data-translate` = "ui_1table", "3. Fill out table below:")
+                    ),
+                    value = "data_table",
+                    rhandsontable::rHandsontableOutput("hot")
+                  )
+                )
               ),
               
               # Fit Controls
@@ -169,7 +212,7 @@ app_ui <- function() {
               condition = "input.main_nav == 'data'",
               card(
                 card_header(uiOutput("ui_1preview")),
-                card_body(uiOutput("ui_viewupload"))
+                card_body(DT::DTOutput("viewUpload"), min_height = "550px")
               ),
               card(class = "mt-3", card_body(uiOutput("ui_1note1")))
             ),

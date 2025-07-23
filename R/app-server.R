@@ -26,7 +26,15 @@ app_server <- function(input, output, session) {
         ui_nav4 = tr("ui_nav4", trans()),
         ui_nav5 = tr("ui_nav5", trans()),
         ui_navabout = tr("ui_navabout", trans()),
-        ui_navguide = tr("ui_navguide", trans())
+        ui_navguide = tr("ui_navguide", trans()),
+        ui_1data = tr("ui_1data", trans()),
+        ui_1data2 = tr("ui_1data2", trans()),
+        ui_1datahelp = tr("ui_1datahelp", trans()),
+        ui_1csv = tr("ui_1csv", trans()),
+        ui_1csvhelp = tr("ui_1csvhelp", trans()),
+        ui_1csvlabel = tr("ui_1csvlabel", trans()),
+        ui_1table = tr("ui_1table", trans()),
+        ui_1tablehelp = tr("ui_1tablehelp", trans())
       ),
       language = "English"
     ))
@@ -43,7 +51,15 @@ app_server <- function(input, output, session) {
         ui_nav4 = tr("ui_nav4", trans()),
         ui_nav5 = tr("ui_nav5", trans()),
         ui_navabout = tr("ui_navabout", trans()),
-        ui_navguide = tr("ui_navguide", trans())
+        ui_navguide = tr("ui_navguide", trans()),
+        ui_1data = tr("ui_1data", trans()),
+        ui_1data2 = tr("ui_1data2", trans()),
+        ui_1datahelp = tr("ui_1datahelp", trans()),
+        ui_1csv = tr("ui_1csv", trans()),
+        ui_1csvhelp = tr("ui_1csvhelp", trans()),
+        ui_1csvlabel = tr("ui_1csvlabel", trans()),
+        ui_1table = tr("ui_1table", trans()),
+        ui_1tablehelp = tr("ui_1tablehelp", trans())
       ),
       language = "French"
     ))
@@ -482,23 +498,32 @@ app_server <- function(input, output, session) {
     }
   })
 
-  output$ui_viewupload <- renderUI({
-    wellPanel(DT::DTOutput("viewUpload"),
-      style = "overflow-x:scroll; max-height: 600px; max-width: 640px"
-    )
-  })
-
   output$viewUpload <- DT::renderDataTable({
-    DT::datatable(read_data(), options = dtopt())
-  })
-
-  dtopt <- reactive({
-    url <- paste0("//cdn.datatables.net/plug-ins/1.10.11/i18n/", translation.value$lang, ".json")
-    list(
-      language = list(url = url),
-      pageLength = 10
+    data <- read_data()
+    if (is.null(data) || nrow(data) == 0) {
+      return(NULL)
+    }
+    
+    DT::datatable(
+      data,
+      options = dt_options(),
+      class = 'table-striped table-hover table-bordered',
+      selection = 'none'
+    ) %>%
+    DT::formatStyle(
+      columns = colnames(data),
+      backgroundColor = 'white',
+      border = '1px solid #ddd'
     )
   })
+
+  # dtopt <- reactive({
+  #   url <- paste0("//cdn.datatables.net/plug-ins/1.10.11/i18n/", translation.value$lang, ".json")
+  #   list(
+  #     language = list(url = url),
+  #     pageLength = 10
+  #   )
+  # })
 
   # --- render UI with choices based on file upload
   output$selectLabel <- renderUI({
@@ -986,48 +1011,7 @@ app_server <- function(input, output, session) {
     HTML(tr("ui_nav1", trans()))
   })
   
-  # Navigation titles now handled by client-side JavaScript
-  output$ui_1data <- renderUI({
-    p(
-      popover(
-        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-        tagList(
-          tr("ui_1datahelp", trans()),
-          br(), br(),
-          "Citation:",
-          tags$a("Canadian Council of Ministers of the Environment. 2009. Canadian water quality guidelines for the protection of aquatic life: Boron. In: Canadian  environmental  quality guidelines, 2009, Canadian Council of  Ministers of the Environment, Winnipeg.", href = "http://ceqg-rcqe.ccme.ca/download/en/324/")
-        ),
-        placement = "right"
-      ),
-      tr("ui_1data", trans()),
-      actionLink("demoData", tr("ui_1data2", trans()), icon = icon("table"))
-    )
-  })
-
-  output$ui_1csv <- renderUI({
-    label <- span(popover(
-        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-        tr("ui_1csvhelp", trans()),
-        placement = "right"
-      ), tr("ui_1csv", trans()))
-      
-    fileInput("uploadData",
-                buttonLabel = span(tagList(icon("upload"), "csv")),
-                label = label, placeholder = tr("ui_1csvlabel", trans()),
-                accept = c(".csv")
-      )
-  })
-
-  output$ui_1table1 <- renderUI({
-    accordion(
-      open = FALSE,
-      accordion_panel(tr("ui_1table", trans()), icon = popover(
-        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-        tr("ui_1tablehelp", trans()),
-        placement = "right"
-      ), rhandsontable::rHandsontableOutput("hot"))
-    )
-  })
+  # Navigation titles and data controls now handled by client-side JavaScript
 
   output$ui_1preview <- renderUI({
     tr("ui_1preview", trans())
