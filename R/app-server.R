@@ -15,12 +15,11 @@ app_server <- function(input, output, session) {
   translation.value <- reactiveValues(
     lang = "English"
   )
-  observeEvent(input$language_switch, {
-    if (input$language_switch) {
-      translation.value$lang <- "French"
-    } else {
-      translation.value$lang <- "English"
-    }
+  observeEvent(input$english, {
+    translation.value$lang <- "English"
+  })
+  observeEvent(input$french, {
+    translation.value$lang <- "French"
   })
   
 

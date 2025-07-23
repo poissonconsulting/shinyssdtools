@@ -34,12 +34,31 @@ app_ui <- function() {
             width = 160,
             bg = "#e5eff7",
             bslib::navset_underline(
-              nav_panel(title = "1. Data", icon = bsicons::bs_icon("table"), value = "data"),
-              nav_panel(title = "2. Fit",  icon = bsicons::bs_icon("graph-up"), value = "fit"),
-              nav_panel(title = "3. Predict", icon = bsicons::bs_icon("calculator"), value = "predict"),
-              nav_panel(title = "4. BCANZ Report", icon = bsicons::bs_icon("file-bar-graph"), value = "report"),
-              nav_panel(title = "R Code", icon = bsicons::bs_icon("code-slash"), value = "rcode"),
-         
+              nav_panel(
+                title = HTML(paste(bsicons::bs_icon("table"), uiOutput("ui_nav1"))),
+                icon = ,
+                value = "data"
+              ),
+              nav_panel(
+                title = "2. Fit",
+                icon = bsicons::bs_icon("graph-up"),
+                value = "fit"
+              ),
+              nav_panel(
+                title = "3. Predict",
+                icon = bsicons::bs_icon("calculator"),
+                value = "predict"
+              ),
+              nav_panel(
+                title = "4. BCANZ Report",
+                icon = bsicons::bs_icon("file-bar-graph"),
+                value = "report"
+              ),
+              nav_panel(
+                title = "R Code",
+                icon = bsicons::bs_icon("code-slash"),
+                value = "rcode"
+              )
             )
           ),
           bslib::layout_sidebar(
@@ -47,8 +66,6 @@ app_ui <- function() {
             gap = 0,
             sidebar = bslib::sidebar(
               width = 300,
-              bg = "white",
-              
               # Data Controls
               conditionalPanel(
                 condition = "input.main_nav == 'data'",
@@ -145,7 +162,8 @@ app_ui <- function() {
                     uiOutput("ui_3dpi")
                   )
                 )
-              )),
+              )
+            ),
             # Data Page Content
             conditionalPanel(
               condition = "input.main_nav == 'data'",
@@ -258,18 +276,19 @@ app_ui <- function() {
             )
           )
         )
+      )),
+      nav_panel(title = "About", card(card_body(
+        uiOutput("ui_about")
+      ))),
+      nav_panel(title = "User Guide", card(
+        uiOutput("ui_userguide")
+      )),
+      nav_spacer(),
+      nav_menu(
+        title = "Language",
+        nav_item(actionLink(inputId = "english", label = "English")),
+        nav_item(actionLink(inputId = "french", label = "Français"))
       )
-  ), nav_panel(title = "About", card(
-    card_body(uiOutput("ui_about"))
-  )), nav_panel(title = "User Guide", card(
-    card_header(style = "background-color: #759dbe; color: white;", "User Guide"),
-    card_body(uiOutput("ui_userguide"))
-  )), nav_spacer(), nav_menu(title = "Language",
-                             align = "right",
-                             
-                             nav_item("English"),
-                             nav_item("French"))
-  
+    )
   )
-)
 }
