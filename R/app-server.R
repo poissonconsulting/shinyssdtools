@@ -26,6 +26,7 @@ app_server <- function(input, output, session) {
       ui_navabout = tr("ui_navabout", trans()),
       ui_navanalyse = tr("ui_navanalyse", trans()),
       ui_navguide = tr("ui_navguide", trans()),
+      ui_2plot = tr("ui_2plot", trans()),
       ui_1choose = tr("ui_1choose", trans()),
       ui_1data = tr("ui_1data", trans()),
       ui_1data2 = tr("ui_1data2", trans()),
@@ -1015,8 +1016,6 @@ app_server <- function(input, output, session) {
   })
   
   # Navigation titles and data controls now handled by client-side JavaScript
-
-
   output$ui_2select <- renderUI({
     selectizeInput("selectDist",
       label = tr("ui_2dist", trans()),
@@ -1030,7 +1029,6 @@ app_server <- function(input, output, session) {
       )
     )
   })
-
 
   output$ui_conc <- renderUI({
     selectInput("selectConc",
@@ -1063,10 +1061,6 @@ app_server <- function(input, output, session) {
     textInput("yaxis2", value = tr("ui_2ploty", trans()), label = tr("ui_3ylab", trans()))
   })
 
-  output$ui_2plot <- renderUI({
-    # h4(tr("ui_2plot", trans()))
-  })
-
   output$ui_2table <- renderUI({
     h4(tr("ui_2table", trans()))
   })
@@ -1080,10 +1074,8 @@ app_server <- function(input, output, session) {
           style = "padding:4px; font-size:80%"
         ),
         card(
-          style = "width: 250px; margin-top: 10px;", # Fixed width to contain inputs
+          style = "width: 250px; margin-top: 10px;", 
           card_body(
-            # Download Options
-            # h6("Download Options", style = "margin-bottom: 10px;"),
             div(
               style = "display: grid; gap: 8px;",
               downloadButton("dlFitPlot",

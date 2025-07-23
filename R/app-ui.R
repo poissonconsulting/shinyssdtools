@@ -209,7 +209,7 @@ app_ui <- function() {
                 class = "p-3",
                 card(
                 full_screen = TRUE,
-                card_header("Plot Fitted Distributions"),
+                card_header(span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")),
                 card_body(
                   conditionalPanel(
                     condition = "output.distPlot1",
