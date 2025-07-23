@@ -27,6 +27,22 @@ app_server <- function(input, output, session) {
       ui_navanalyse = tr("ui_navanalyse", trans()),
       ui_navguide = tr("ui_navguide", trans()),
       ui_2plot = tr("ui_2plot", trans()),
+      ui_2conc = tr("ui_2conc", trans()),
+      ui_2dist = tr("ui_2dist", trans()),
+      ui_2rescale = tr("ui_2rescale", trans()),
+      ui_3xlab = tr("ui_3xlab", trans()),
+      ui_3ylab = tr("ui_3ylab", trans()),
+      ui_unit = tr("ui_unit", trans()),
+      ui_size = tr("ui_size", trans()),
+      ui_2table = tr("ui_2table", trans()),
+      ui_2download = tr("ui_2download", trans()),
+      ui_2dlplot = tr("ui_2dlplot", trans()),
+      ui_2dlrds = tr("ui_2dlrds", trans()),
+      ui_2png = tr("ui_2png", trans()),
+      ui_2width = tr("ui_2width", trans()),
+      ui_2height = tr("ui_2height", trans()),
+      ui_2dpi = tr("ui_2dpi", trans()),
+      ui_2dltable = tr("ui_2dltable", trans()),
       ui_1choose = tr("ui_1choose", trans()),
       ui_1data = tr("ui_1data", trans()),
       ui_1data2 = tr("ui_1data2", trans()),
@@ -325,6 +341,7 @@ app_server <- function(input, output, session) {
   table_gof <- reactive({
     req(fit_dist())
     dist <- fit_dist()
+    print(dist)
     gof <-
       ssdtools::ssd_gof(dist) %>%
       dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
@@ -567,6 +584,44 @@ app_server <- function(input, output, session) {
     checkboxInput("checkHc", label = tr("ui_checkHc", trans()), value = TRUE)
   })
 
+  # Fit control renderUI functions (need server-side for dynamic choices)
+  output$ui_conc <- renderUI({
+    selectInput("selectConc",
+      label = span(`data-translate` = "ui_2conc", "Concentration"),
+      choices = column_names(),
+      selected = guess_conc()
+    )
+  })
+
+  output$ui_2select <- renderUI({
+    selectizeInput("selectDist",
+      label = span(`data-translate` = "ui_2dist", "Distributions"),
+      multiple = TRUE,
+      choices = c(default.dists, extra.dists),
+      selected = default.dists,
+      options = list(
+        "plugins" = list("remove_button"),
+        "create" = TRUE,
+        "persist" = FALSE
+      )
+    )
+  })
+
+  output$ui_unit <- renderUI({
+    conc_name <- input$selectConc
+    if (is.null(conc_name)) {
+      conc_name <- guess_conc()
+    }
+    conc_name_simple <- simplify_string(conc_name)
+    choices <- ssdtools::ssd_units(conc_name_simple)
+    choices <- choices[order(choices)]
+    selectInput("selectUnit",
+      label = span(`data-translate` = "ui_unit", "Units"),
+      choices = choices,
+      selected = choices[1]
+    )
+  })
+
   # --- render fit results ----
   output$distPlot1 <- renderPlot({
     tryCatch({
@@ -580,6 +635,7 @@ app_server <- function(input, output, session) {
   })
 
   output$gofTable <- DT::renderDataTable({
+    print(table_gof())
     DT::datatable(table_gof(), options = list(dom = "t"))
   })
 
@@ -1061,72 +1117,7 @@ app_server <- function(input, output, session) {
     textInput("yaxis2", value = tr("ui_2ploty", trans()), label = tr("ui_3ylab", trans()))
   })
 
-  output$ui_2table <- renderUI({
-    h4(tr("ui_2table", trans()))
-  })
 
-  output$ui_2download <- renderUI({
-    div(
-      style = "display: inline-block;",
-      bslib::popover(
-        actionButton("fitDownloadBtn", 
-          label = tagList(bsicons::bs_icon("download"), tr("ui_2download", trans())),
-          style = "padding:4px; font-size:80%"
-        ),
-        card(
-          style = "width: 250px; margin-top: 10px;", 
-          card_body(
-            div(
-              style = "display: grid; gap: 8px;",
-              downloadButton("dlFitPlot",
-                label = tr("ui_2dlplot", trans()),
-                style = "width: 100%; padding: 6px; font-size: 12px;",
-                class = "btn-primary btn-sm"
-              ),
-              downloadButton("dlFitRds",
-                label = tr("ui_2dlrds", trans()),
-                style = "width: 100%; padding: 6px; font-size: 12px;",
-                class = "btn-outline-secondary btn-sm"
-              ),
-              downloadButton("dlFitTable",
-                label = tr("ui_2dltable", trans()),
-                style = "width: 100%; padding: 6px; font-size: 12px;",
-                class = "btn-outline-secondary btn-sm"
-              )
-            ),
-            div(
-              h6(tr("ui_2png", trans()), style = "margin-bottom: 10px;"),
-              div(
-                style = "display: flex; gap: 5px; justify-content: space-between;",
-                div(
-                  style = "flex: 1; min-width: 0;",
-                  numericInput("width2", 
-                               label = tr("ui_2width", trans()), 
-                               value = 6, min = 1, max = 50, step = 0.1
-                  )
-                ),
-                div(
-                  style = "flex: 1; min-width: 0;",
-                  numericInput("height2", 
-                               label = tr("ui_2height", trans()),
-                               value = 4, min = 1, max = 50, step = 0.1
-                  )
-                ),
-                div(
-                  style = "flex: 1; min-width: 0;",
-                  numericInput("dpi2", 
-                               label = tr("ui_2dpi", trans()),
-                               value = 300, min = 50, max = 2000, step = 50
-                  )
-                )
-              )
-            ),
-          )
-        ),
-        placement = "bottom"
-      )
-    )
-  })
 
   output$ui_3est <- renderUI({
     h4(tr("ui_3est", trans()))
