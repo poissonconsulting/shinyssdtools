@@ -32,7 +32,7 @@ app_ui <- function() {
     page_navbar(
       title = "shinyssdtools",
       navbar_options = navbar_options(bg = "#759dbe", underline = TRUE),
-      nav_panel(title = span(`data-translate` = "ui_navanalyse", "About"), page_fillable(
+      nav_panel(title = span(`data-translate` = "ui_navanalyse", "Analyse"), page_fillable(
         layout_sidebar(
           padding = 0,
           gap = 0,
@@ -43,41 +43,36 @@ app_ui <- function() {
               id = "main_nav",
               nav_panel(
                 title = span(
-                  `data-translate` = "ui_nav1",
                   bsicons::bs_icon("table"),
-                  span(style = "margin-left: 0.5rem;", "1. Data")
+                  span(`data-translate` = "ui_nav1", style = "margin-left: 0.5rem;", "1. Data")
                 ),
                 value = "data"
               ),
               nav_panel(
                 title = span(
-                  `data-translate` = "ui_nav2",
                   bsicons::bs_icon("graph-up"),
-                  span(style = "margin-left: 0.5rem;", "2. Fit")
+                  span(`data-translate` = "ui_nav2", style = "margin-left: 0.5rem;", "2. Fit")
                 ),
                 value = "fit"
               ),
               nav_panel(
                 title = span(
-                  `data-translate` = "ui_nav3",
                   bsicons::bs_icon("calculator"),
-                  span(style = "margin-left: 0.5rem;", "3. Predict")
+                  span(`data-translate` = "ui_nav3", style = "margin-left: 0.5rem;", "3. Predict")
                 ),
                 value = "predict"
               ),
               nav_panel(
                 title = span(
-                  `data-translate` = "ui_nav4",
                   bsicons::bs_icon("file-bar-graph"),
-                  span(style = "margin-left: 0.5rem;", "4. BCANZ Report")
+                  span(`data-translate` = "ui_nav4", style = "margin-left: 0.5rem;", "4. Report")
                 ),
                 value = "report"
               ),
               nav_panel(
                 title = span(
-                  `data-translate` = "ui_nav5",
                   bsicons::bs_icon("code-slash"),
-                  span(style = "margin-left: 0.5rem;", "R Code")
+                  span(`data-translate` = "ui_nav5", style = "margin-left: 0.5rem;", "R Code")
                 ),
                 value = "rcode"
               )
@@ -92,7 +87,7 @@ app_ui <- function() {
               conditionalPanel(
                 condition = "input.main_nav == 'data'",
                 # Demo Data Section
-                span(`data-translate` = "ui_1choose"),
+                span(`data-translate` = "ui_1choose", "Choose one of the following options:"),
                 p(
                   bslib::popover(
                     bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),

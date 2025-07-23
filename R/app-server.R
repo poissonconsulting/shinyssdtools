@@ -11,15 +11,14 @@
 # See the License for the specific language governing permissions and limitations under the License.
 app_server <- function(input, output, session) {
   ########### Reactives --------------------
-  # --- upload data
+  # --- Translations
   translation.value <- reactiveValues(
     lang = "English"
   )
   
-  # Reactive list of client-side translations
   client_translations <- reactive({
     list(
-      ui_nav1 = tr("ui_nav1", trans()),
+      ui_nav1 = "1. Data",
       ui_nav2 = tr("ui_nav2", trans()),
       ui_nav3 = tr("ui_nav3", trans()),
       ui_nav4 = tr("ui_nav4", trans()),
@@ -39,7 +38,6 @@ app_server <- function(input, output, session) {
     )
   })
   
-  # Observe language changes and send translations
   observeEvent(translation.value$lang, {
     session$sendCustomMessage("updateTranslations", list(
       translations = client_translations(),
@@ -47,7 +45,6 @@ app_server <- function(input, output, session) {
     ))
   })
   
-  # Simple language switching
   observeEvent(input$english, {
     translation.value$lang <- "English"
   })
@@ -1015,7 +1012,7 @@ app_server <- function(input, output, session) {
 
   output$ui_2select <- renderUI({
     selectizeInput("selectDist",
-      label = label_mandatory(tr("ui_2dist", trans())),
+      label = tr("ui_2dist", trans()),
       multiple = TRUE,
       choices = c(default.dists, extra.dists),
       selected = default.dists,
@@ -1045,7 +1042,7 @@ app_server <- function(input, output, session) {
 
   output$ui_conc <- renderUI({
     selectInput("selectConc",
-      label = label_mandatory(tr("ui_2conc", trans())),
+      label = tr("ui_2conc", trans()),
       choices = column_names(),
       selected = guess_conc()
     )
