@@ -624,14 +624,8 @@ app_server <- function(input, output, session) {
 
   # --- render fit results ----
   output$distPlot1 <- renderPlot({
-    tryCatch({
-      # waiter::waiter_show(id = "distPlot1", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
-      plot_dist()
-    }, error = function(e) {
-      # Close any open devices on error to prevent leaks
-      tryCatch(while(dev.cur() > 1) dev.off(), error = function(e2) {})
-      stop(e)
-    })
+    waiter::waiter_show(id = "distPlot1", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
+    plot_dist()
   })
 
   output$gofTable <- DT::renderDataTable({

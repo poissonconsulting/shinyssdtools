@@ -237,58 +237,7 @@ app_ui <- function() {
                         style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
                         div(
                           style = "display: inline-block;",
-                          bslib::popover(
-                            actionButton("fitDownloadBtn", 
-                              label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                              style = "padding:4px; font-size:80%"
-                            ),
-                            card(
-                              style = "width: 250px; margin-top: 10px;",
-                              card_body(
-                                div(
-                                  style = "display: grid; gap: 8px;",
-                                  downloadButton("dlFitPlot",
-                                    label = span(`data-translate` = "ui_2dlplot", "Plot .png"),
-                                    style = "width: 100%; padding: 6px; font-size: 12px;",
-                                    class = "btn-primary btn-sm"
-                                  ),
-                                  downloadButton("dlFitRds",
-                                    label = span(`data-translate` = "ui_2dlrds", "Plot .rds"),
-                                    style = "width: 100%; padding: 6px; font-size: 12px;",
-                                    class = "btn-outline-secondary btn-sm"
-                                  )
-                                ),
-                                div(
-                                  h6(span(`data-translate` = "ui_2png", "PNG Format Settings"), style = "margin-bottom: 10px;"),
-                                  div(
-                                    style = "display: flex; gap: 5px; justify-content: space-between;",
-                                    div(
-                                      style = "flex: 1; min-width: 0;",
-                                      numericInput("width2", 
-                                        label = span(`data-translate` = "ui_2width", "Width"), 
-                                        value = 6, min = 1, max = 50, step = 0.1
-                                      )
-                                    ),
-                                    div(
-                                      style = "flex: 1; min-width: 0;",
-                                      numericInput("height2", 
-                                        label = span(`data-translate` = "ui_2height", "Height"),
-                                        value = 4, min = 1, max = 50, step = 0.1
-                                      )
-                                    ),
-                                    div(
-                                      style = "flex: 1; min-width: 0;",
-                                      numericInput("dpi2", 
-                                        label = span(`data-translate` = "ui_2dpi", "DPI"),
-                                        value = 300, min = 50, max = 2000, step = 50
-                                      )
-                                    )
-                                  )
-                                )
-                              )
-                            ),
-                            placement = "bottom"
-                          )
+                          ui_download_popover()
                         )
                       ),
                       conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),
