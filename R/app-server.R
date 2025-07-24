@@ -350,6 +350,7 @@ app_server <- function(input, output, session) {
   })
 
   fit_fail <- reactive({
+    print(fit_dist())
     req(input$selectDist)
     dist <- fit_dist()
     x <- paste0(setdiff(input$selectDist, names(dist)), collapse = ", ")

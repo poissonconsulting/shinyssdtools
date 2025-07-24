@@ -227,6 +227,8 @@ app_ui <- function() {
               condition = "input.main_nav == 'fit'",
               div(
                 class = "p-3",
+                conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),
+                conditionalPanel(condition = "output.showFitResults", uiOutput("ui_2plot")),
                 conditionalPanel(
                   condition = "output.showFitResults",
                   card(
@@ -240,8 +242,6 @@ app_ui <- function() {
                           ui_download_popover()
                         )
                       ),
-                      conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),
-                      conditionalPanel(condition = "output.showFitResults", uiOutput("ui_2plot")),
                       htmlOutput("fitFail"),
                       plotOutput("distPlot1")
                     )
