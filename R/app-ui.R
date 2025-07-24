@@ -144,7 +144,17 @@ app_ui <- function() {
               conditionalPanel(
                 condition = "input.main_nav == 'fit'",
                 uiOutput("ui_conc"),
-                uiOutput("ui_2select"),
+                selectizeInput("selectDist",
+                               label = span(`data-translate` = "ui_2dist", "Distributions"),
+                               multiple = TRUE,
+                               choices = c(default.dists, extra.dists),
+                               selected = default.dists,
+                               options = list(
+                                 "plugins" = list("remove_button"),
+                                 "create" = TRUE,
+                                 "persist" = FALSE
+                               )
+                ),
                 uiOutput("ui_unit"),
                 checkboxInput("rescale",
                   label = span(`data-translate` = "ui_2rescale", "Rescale"),

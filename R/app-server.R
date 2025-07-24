@@ -620,20 +620,6 @@ app_server <- function(input, output, session) {
     )
   })
 
-  output$ui_2select <- renderUI({
-    selectizeInput("selectDist",
-      label = span(`data-translate` = "ui_2dist", "Distributions"),
-      multiple = TRUE,
-      choices = c(default.dists, extra.dists),
-      selected = default.dists,
-      options = list(
-        "plugins" = list("remove_button"),
-        "create" = TRUE,
-        "persist" = FALSE
-      )
-    )
-  })
-
   output$ui_unit <- renderUI({
     conc_name <- input$selectConc
     if (is.null(conc_name)) {
