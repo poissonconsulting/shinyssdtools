@@ -233,15 +233,12 @@ app_ui <- function() {
                   condition = "output.showFitResults",
                   card(
                     full_screen = TRUE,
-                    card_header(span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")),
+                    card_header(
+                      class = "d-flex justify-content-between align-items-center",
+                      span(`data-translate` = "ui_2plot", "Plot Fitted Distributions"),
+                      ui_download_popover()
+                    ),
                     card_body(
-                      div(
-                        style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
-                        div(
-                          style = "display: inline-block;",
-                          ui_download_popover()
-                        )
-                      ),
                       htmlOutput("fitFail"),
                       plotOutput("distPlot1")
                     )
@@ -251,16 +248,16 @@ app_ui <- function() {
                   condition = "output.showFitResults",
                   card(
                     full_screen = TRUE,
-                    card_header(span(`data-translate` = "ui_2table", "Goodness of Fit")),
+                    card_header(
+                      class = "d-flex justify-content-between align-items-center",
+                      span(`data-translate` = "ui_2table", "Goodness of Fit"),
+                      downloadButton("dlFitTable",
+                                     label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
+                                     icon = NULL,
+                                     style = "padding:4px; font-size:80%"
+                      )
+                    ),
                     card_body(
-                      div(
-                        style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;",
-                        downloadButton("dlFitTable",
-                                       label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                                       style = "padding:4px; font-size:80%",
-                                       icon = NULL
-                        )
-                      ),
                       DT::dataTableOutput("gofTable")
                     )
                   )
