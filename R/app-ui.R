@@ -228,7 +228,7 @@ app_ui <- function() {
               div(
                 class = "p-3",
                 conditionalPanel(
-                  condition = "output.distPlot1",
+                  condition = "output.showFitResults",
                   card(
                     full_screen = TRUE,
                     card_header(span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")),
@@ -241,15 +241,16 @@ app_ui <- function() {
                         )
                       ),
                       conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),
-                      conditionalPanel(condition = "output.distPlot1", uiOutput("ui_2plot")),
+                      conditionalPanel(condition = "output.showFitResults", uiOutput("ui_2plot")),
                       htmlOutput("fitFail"),
                       plotOutput("distPlot1")
                     )
                   )
                 ),
                 conditionalPanel(
-                  condition = "output.distPlot1",
+                  condition = "output.showFitResults",
                   card(
+                    full_screen = TRUE,
                     card_header(span(`data-translate` = "ui_2table", "Goodness of Fit")),
                     card_body(
                       div(

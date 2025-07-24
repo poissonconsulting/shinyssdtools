@@ -341,7 +341,6 @@ app_server <- function(input, output, session) {
   table_gof <- reactive({
     req(fit_dist())
     dist <- fit_dist()
-    print(dist)
     gof <-
       ssdtools::ssd_gof(dist) %>%
       dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
@@ -622,6 +621,12 @@ app_server <- function(input, output, session) {
     )
   })
 
+  # Reactive indicator for fit results
+  output$showFitResults <- reactive({
+    return(!is.null(fit_dist()) && !inherits(fit_dist(), "try-error"))
+  })
+  outputOptions(output, "showFitResults", suspendWhenHidden = FALSE)
+
   # --- render fit results ----
   output$distPlot1 <- renderPlot({
     waiter::waiter_show(id = "distPlot1", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
@@ -629,7 +634,6 @@ app_server <- function(input, output, session) {
   })
 
   output$gofTable <- DT::renderDataTable({
-    print(table_gof())
     DT::datatable(table_gof(), options = list(dom = "t"))
   })
 
@@ -637,6 +641,7 @@ app_server <- function(input, output, session) {
     req(fit_fail() != "")
     HTML(paste0("<font color='grey'>", paste(fit_fail(), tr("ui_hintfail", trans())), "</font>"))
   })
+  
   # --- render predict results ----
   output$modelAveragePlot <- renderPlot({
     tryCatch({

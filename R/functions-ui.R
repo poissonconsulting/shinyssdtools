@@ -76,7 +76,7 @@ ui_download_popover <- function(){
           downloadButton("dlFitRds",
                          label = span(`data-translate` = "ui_2dlrds", "Plot .rds"),
                          style = "width: 100%; padding: 6px; font-size: 12px;",
-                         class = "btn-outline-secondary btn-sm"
+                         class = "btn-primary btn-sm"
           )
         ),
         div(
