@@ -43,6 +43,15 @@ app_server <- function(input, output, session) {
       ui_2height = tr("ui_2height", trans()),
       ui_2dpi = tr("ui_2dpi", trans()),
       ui_2dltable = tr("ui_2dltable", trans()),
+      ui_3model = tr("ui_3model", trans()),
+      ui_3cl = tr("ui_3cl", trans()),
+      ui_3dlplot = tr("ui_2dlplot", trans()),
+      ui_3dlrds = tr("ui_2dlrds", trans()),
+      ui_3dltable = tr("ui_2dltable", trans()),
+      ui_3width = tr("ui_3width", trans()),
+      ui_3height = tr("ui_3height", trans()),
+      ui_3dpi = tr("ui_3dpi", trans()),
+      ui_3png = tr("ui_3png", trans()),
       ui_1choose = tr("ui_1choose", trans()),
       ui_1data = tr("ui_1data", trans()),
       ui_1data2 = tr("ui_1data2", trans()),
@@ -53,7 +62,32 @@ app_server <- function(input, output, session) {
       ui_1table = tr("ui_1table", trans()),
       ui_1tablehelp = tr("ui_1tablehelp", trans()),
       ui_1preview = tr("ui_1preview", trans()),
-      ui_1note = tr("ui_1note", trans())
+      ui_1note = tr("ui_1note", trans()),
+      ui_3est = tr("ui_3est", trans()),
+      ui_3bshint = tr("ui_3bshint", trans()),
+      ui_3threshlabel = tr("ui_3threshlabel", trans()),
+      ui_3thresh = tr("ui_3thresh", trans()),
+      ui_3byconc = tr("ui_3byconc", trans()),
+      ui_3affecting = tr("ui_3affecting", trans()),
+      ui_3protecting = tr("ui_3protecting", trans()),
+      ui_3samples = tr("ui_3samples", trans()),
+      ui_3label = tr("ui_3label", trans()),
+      ui_3colour = tr("ui_3colour", trans()),
+      ui_3symbol = tr("ui_3symbol", trans()),
+      ui_3legend = tr("ui_3legend", trans()),
+      ui_3shape = tr("ui_3shape", trans()),
+      ui_sizeLabel = tr("ui_sizeLabel", trans()),
+      ui_checkHc = tr("ui_checkHc", trans()),
+      ui_adjustLabel = tr("ui_adjustLabel", trans()),
+      ui_xmax = tr("ui_xmax", trans()),
+      ui_xmin = tr("ui_xmin", trans()),
+      ui_xlog = tr("ui_xlog", trans()),
+      ui_xbreaks = tr("ui_xbreaks", trans()),
+      ui_3plotopts = tr("ui_3plotopts", trans()),
+      ui_3pal = tr("ui_3pal", trans()),
+      ui_3title = tr("ui_3title", trans()),
+      ui_3help = tr("ui_3help", trans()),
+      ui_3clbutton = tr("ui_3clbutton", trans())
     )
   })
   
@@ -350,7 +384,6 @@ app_server <- function(input, output, session) {
   })
 
   fit_fail <- reactive({
-    print(fit_dist())
     req(input$selectDist)
     dist <- fit_dist()
     x <- paste0(setdiff(input$selectDist, names(dist)), collapse = ", ")
@@ -538,7 +571,7 @@ app_server <- function(input, output, session) {
   # --- render UI with choices based on file upload
   output$selectLabel <- renderUI({
     selectInput("selectLabel",
-      label = tr("ui_3label", trans()),
+      label = span(`data-translate` = "ui_3label", "Label"),
       choices = c("-none-", column_names()),
       selected = guess_spp()
     )
@@ -546,7 +579,7 @@ app_server <- function(input, output, session) {
 
   output$selectColour <- renderUI({
     selectInput("selectColour",
-      label = tr("ui_3colour", trans()),
+      label = span(`data-translate` = "ui_3colour", "Colour"),
       choices = c("-none-", column_names()),
       selected = "-none-"
     )
@@ -554,35 +587,29 @@ app_server <- function(input, output, session) {
 
   output$selectShape <- renderUI({
     selectInput("selectShape",
-      label = tr("ui_3symbol", trans()),
+      label = span(`data-translate` = "ui_3symbol", "Symbol"),
       choices = c("-none-", column_names()),
       selected = "-none-"
     )
   })
 
   output$uiLegendColour <- renderUI({
-    textInput("legendColour", label = tr("ui_3legend", trans()), value = input$selectColour)
+    textInput("legendColour", 
+              label = span(`data-translate` = "ui_3legend", "Legend colour"), 
+              value = input$selectColour)
   })
 
   output$uiLegendShape <- renderUI({
-    textInput("legendShape", label = tr("ui_3shape", trans()), value = input$selectShape)
+    textInput("legendShape", 
+              label = span(`data-translate` = "ui_3shape", "Legend shape"), 
+              value = input$selectShape)
   })
 
-  output$ui_3size <- renderUI({
-    numericInput("size3", label = tr("ui_size", trans()), value = 12, min = 1, max = 100)
-  })
-
-  output$ui_3sizeLabel <- renderUI({
-    numericInput("sizeLabel3", label = tr("ui_sizeLabel", trans()), value = 3, min = 1, max = 10)
-  })
 
   output$ui_2size <- renderUI({
     numericInput("size2", label = tr("ui_size", trans()), value = 12, min = 1, max = 100)
   })
 
-  output$ui_checkHc <- renderUI({
-    checkboxInput("checkHc", label = tr("ui_checkHc", trans()), value = TRUE)
-  })
 
   # Fit control renderUI functions (need server-side for dynamic choices)
   output$ui_conc <- renderUI({
@@ -627,6 +654,12 @@ app_server <- function(input, output, session) {
     return(!is.null(fit_dist()) && !inherits(fit_dist(), "try-error"))
   })
   outputOptions(output, "showFitResults", suspendWhenHidden = FALSE)
+
+  # Reactive indicator for predict results
+  output$showPredictResults <- reactive({
+    return(!is.null(predict_hc()) && !inherits(predict_hc(), "try-error"))
+  })
+  outputOptions(output, "showPredictResults", suspendWhenHidden = FALSE)
 
   # --- render fit results ----
   output$distPlot1 <- renderPlot({
@@ -697,32 +730,15 @@ app_server <- function(input, output, session) {
   shinyjs::onclick("linkFormatPredict", shinyjs::toggle("divFormatPredict", anim = TRUE, animType = "slide", time = 0.2))
   shinyjs::onclick("linkPngFormatPredict", shinyjs::toggle("divPngFormatPredict", anim = TRUE, animType = "slide", time = 0.2))
 
-  output$uiAdjustLabel <- renderUI({
-    numericInput("adjustLabel",
-      value = 1.05, label = tr("ui_adjustLabel", trans()),
-      min = 0, max = 10, step = 0.1
-    )
-  })
-
-  output$uiXmax <- renderUI({
-    numericInput("xMax", label = tr("ui_xmax", trans()), min = 1, value = NULL)
-  })
-
-  output$uiXmin <- renderUI({
-    numericInput("xMin", label = tr("ui_xmin", trans()), min = 1, value = NULL)
-  })
-
-  output$uiXlog <- renderUI({
-    checkboxInput("xlog", tr("ui_xlog", trans()), value = TRUE)
-  })
 
   output$uiXbreaks <- renderUI({
     xbreaks <- plot_model_average_xbreaks()
-    selectizeInput("xbreaks", tr("ui_xbreaks", trans()),
-      options = list(create = TRUE, plugins = list("remove_button")),
-      choices = xbreaks,
-      selected = xbreaks,
-      multiple = TRUE
+    selectizeInput("xbreaks", 
+                   label = span(`data-translate` = "ui_xbreaks", "X breaks"),
+                   options = list(create = TRUE, plugins = list("remove_button")),
+                   choices = xbreaks,
+                   selected = xbreaks,
+                   multiple = TRUE
     )
   })
 
@@ -1119,20 +1135,14 @@ app_server <- function(input, output, session) {
 
 
 
-  output$ui_3est <- renderUI({
-    h4(tr("ui_3est", trans()))
-  })
-
-  output$ui_3bshint <- renderUI({
-    hint(tr("ui_3bshint", trans()))
-  })
 
   output$ui_thresh_type <- renderUI({
     thresh_label <- tr("ui_3threshlabel", trans())
     thresh <- tr("ui_3thresh", trans())
-    radioButtons("thresh_type", thresh_label,
-      choices = c("Concentration", thresh),
-      selected = "Concentration", inline = TRUE
+    radioButtons("thresh_type", 
+                 label = span(`data-translate` = "ui_3threshlabel", "Threshold type"),
+                 choices = c("Concentration", thresh),
+                 selected = "Concentration", inline = TRUE
     )
   })
 
@@ -1140,20 +1150,20 @@ app_server <- function(input, output, session) {
     req(input$thresh_type)
     if (input$thresh_type != "Concentration") {
       return(numericInput("conc",
-        label = tr("ui_3byconc", trans()),
+        label = span(`data-translate` = "ui_3byconc", "By concentration"),
         value = 1, min = 0,
         max = 100, step = 0.1, width = "100px"
       ))
     }
     div(
       inline(selectizeInput("thresh",
-        label = tr("ui_3affecting", trans()),
+        label = span(`data-translate` = "ui_3affecting", "% affecting"),
         choices = c(1, 5, 10, 20),
         options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
         selected = 5, width = "100px"
       )),
       inline(selectizeInput("thresh_pc",
-        label = tr("ui_3protecting", trans()),
+        label = span(`data-translate` = "ui_3protecting", "% protecting"),
         choices = c(99, 95, 90, 80),
         options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
         selected = 95, width = "100px"
@@ -1179,7 +1189,7 @@ app_server <- function(input, output, session) {
       choices <- c("500", "1,000", "5,000", "10,000")
     }
     selectInput("bootSamp",
-      label = tr("ui_3samples", trans()),
+      label = span(`data-translate` = "ui_3samples", "Bootstrap samples"),
       choices = choices,
       selected = choices[2],
       width = "150px"
@@ -1212,65 +1222,20 @@ app_server <- function(input, output, session) {
     }
   })
 
-  output$ui_3plotopts <- renderUI({
-    actionLink("linkFormatPredict", label = tr("ui_3plotopts", trans()))
-  })
 
   output$ui_3pal <- renderUI({
-    selectInput("selectPalette", label = tr("ui_3pal", trans()), choices = pals, selected = pals[2])
+    selectInput("selectPalette", 
+                label = span(`data-translate` = "ui_3pal", "Palette"), 
+                choices = pals, selected = pals[2])
   })
 
-  output$ui_3xlab <- renderUI({
-    textInput("xaxis", value = "Concentration", label = tr("ui_3xlab", trans()))
-  })
-
-  output$ui_3ylab <- renderUI({
-    textInput("yaxis", value = tr("ui_2ploty", trans()), label = tr("ui_3ylab", trans()))
-  })
-
-  output$ui_3title <- renderUI({
-    textInput("title", value = "", label = tr("ui_3title", trans()))
-  })
 
   output$ui_3pngopts <- renderUI({
     actionLink("linkPngFormatPredict", label = tr("ui_3pngopts", trans()))
   })
 
-  output$ui_3width <- renderUI({
-    inline(numericInput("selectWidth", label = tr("ui_3width", trans()), min = 1, max = 20, step = 1, value = 8))
-  })
-
-  output$ui_3height <- renderUI({
-    inline(numericInput("selectHeight", label = tr("ui_3height", trans()), min = 1, max = 20, step = 1, value = 6))
-  })
-
-  output$ui_3dpi <- renderUI({
-    inline(numericInput("selectDpi", label = tr("ui_3dpi", trans()), min = 50, max = 3000, step = 50, value = 600))
-  })
-
   output$ui_3model <- renderUI({
     h4(tr("ui_3model", trans()))
-  })
-
-  output$ui_3dlplot <- renderUI({
-    downloadButton("dlPredPlot",
-      label = tr("ui_2dlplot", trans()),
-      style = "padding:4px; font-size:80%"
-    )
-  })
-
-  output$ui_3dlrds <- renderUI({
-    downloadButton("dlPredRds",
-      label = tr("ui_2dlrds", trans()),
-      style = "padding:4px; font-size:80%"
-    )
-  })
-
-  output$ui_3dltable <- renderUI({
-    downloadButton("dlPredTable",
-      label = tr("ui_2dltable", trans()),
-      style = "padding:4px; font-size:80%"
-    )
   })
 
   output$ui_3cl <- renderUI({
@@ -1289,7 +1254,10 @@ app_server <- function(input, output, session) {
   })
 
   output$ui_3clbutton <- renderUI({
-    actionButton("getCl", label = tr("ui_3clbutton", trans()))
+    actionButton("getCl", 
+                 label = tr("ui_3clbutton", trans()),
+                 class = "btn-primary",
+                 style = "white-space: nowrap;")
   })
 
   output$ui_4help <- renderUI({

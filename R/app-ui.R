@@ -167,49 +167,60 @@ app_ui <- function() {
 # __ predict --------------------------------------------------------------
               conditionalPanel(
                 condition = "input.main_nav == 'predict'",
-                h5("Prediction Settings"),
                 style = "max-height: 70vh; overflow-y: auto;",
-                uiOutput("ui_3est"),
-                uiOutput("ui_3bshint"),
+                span(`data-translate` = "ui_3est", "Estimate hazard concentration"),
+                p(class = "text-muted small", span(`data-translate` = "ui_3bshint", "10,000 bootstrap samples recommended")),
                 uiOutput("ui_thresh_type"),
                 uiOutput("ui_3thresh"),
                 uiOutput("ui_3samples"),
                 uiOutput("selectLabel"),
                 uiOutput("selectColour"),
                 uiOutput("selectShape"),
-                uiOutput("ui_3plotopts"),
-                div(
-                  id = "divFormatPredict",
-                  uiOutput("ui_3pal"),
-                  uiOutput("ui_3xlab"),
-                  uiOutput("ui_3ylab"),
-                  uiOutput("ui_3title"),
-                  uiOutput("uiLegendColour"),
-                  uiOutput("uiLegendShape"),
-                  layout_column_wrap(width = 1 /
-                                              2, uiOutput("ui_3size"), uiOutput("ui_3sizeLabel")),
-                  uiOutput("ui_checkHc"),
-                  layout_column_wrap(
-                    width = 1 / 3,
-                    uiOutput("uiAdjustLabel"),
-                    uiOutput("uiXmin"),
-                    uiOutput("uiXmax")
-                  ),
-                  uiOutput("uiXlog"),
-                  uiOutput("uiXbreaks")
-                ),
-                uiOutput("ui_3pngopts"),
-                div(
-                  id = "divPngFormatPredict",
-                  layout_column_wrap(
-                    width = 1 / 3,
-                    uiOutput("ui_3width"),
-                    uiOutput("ui_3height"),
-                    uiOutput("ui_3dpi")
+                accordion(open = FALSE,
+                  accordion_panel(title = span(`data-translate` = "ui_3plotopts", "Plot formatting options"),
+                                  value = "plot-formatting",
+                                  uiOutput("ui_3pal"),
+                                  textInput("xaxis", 
+                                            value = "Concentration", 
+                                            label = span(`data-translate` = "ui_3xlab", "X-axis label")),
+                                  textInput("yaxis", 
+                                            value = "Percent", 
+                                            label = span(`data-translate` = "ui_3ylab", "Y-axis label")),
+                                  textInput("title", 
+                                            value = "", 
+                                            label = span(`data-translate` = "ui_3title", "Title")),
+                                  uiOutput("uiLegendColour"),
+                                  uiOutput("uiLegendShape"),
+                                  layout_column_wrap(width = 1 / 2, 
+                                                     numericInput("size3", 
+                                                                  label = span(`data-translate` = "ui_size", "Text size"), 
+                                                                  value = 12, min = 1, max = 100),
+                                                     numericInput("sizeLabel3", 
+                                                                  label = span(`data-translate` = "ui_sizeLabel", "Label size"), 
+                                                                  value = 3, min = 1, max = 10)
+                                  ),
+                                  checkboxInput("checkHc", 
+                                                label = span(`data-translate` = "ui_checkHc", "Show hazard concentration"), 
+                                                value = TRUE),
+                                  layout_column_wrap(
+                                    width = 1 / 3,
+                                    numericInput("adjustLabel",
+                                                 value = 1.05, 
+                                                 label = span(`data-translate` = "ui_adjustLabel", "Adjust label"), 
+                                                 min = 0, max = 10, step = 0.1),
+                                    numericInput("xMin", 
+                                                 label = span(`data-translate` = "ui_xmin", "X min"), 
+                                                 min = 1, value = NULL),
+                                    numericInput("xMax", 
+                                                 label = span(`data-translate` = "ui_xmax", "X max"), 
+                                                 min = 1, value = NULL)
+                                  ),
+                                  checkboxInput("xlog", 
+                                                label = span(`data-translate` = "ui_xlog", "Log scale"), 
+                                                value = TRUE),
+                                  uiOutput("uiXbreaks")
                   )
-                )
-              )
-            ),
+                ))),
 
 # main content ------------------------------------------------------------
 # __ data -----------------------------------------------------------------
@@ -268,33 +279,56 @@ app_ui <- function() {
 # __ predict --------------------------------------------------------------
             conditionalPanel(
               condition = "input.main_nav == 'predict'",
-              card(
-                card_header(style = "background-color: #759dbe; color: white;", "Model Average Plot"),
-                card_body(
-                  conditionalPanel(
-                    condition = "output.modelAveragePlot",
-                    div(style = "margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;", uiOutput("ui_3dlplot"), uiOutput("ui_3dlrds"))
-                  ),
-                  conditionalPanel(condition = "output.checkpred", htmlOutput("hintPr")),
-                  conditionalPanel(condition = "output.modelAveragePlot", uiOutput("ui_3model")),
-                  plotOutput("modelAveragePlot"),
-                  conditionalPanel(condition = "output.modelAveragePlot", htmlOutput("estHc"))
-                )
-              ),
-              conditionalPanel(
-                condition = "output.modelAveragePlot",
-                card(
-                  class = "mt-3",
-                  card_header(style = "background-color: #759dbe; color: white;", "Confidence Limits"),
-                  card_body(
-                    conditionalPanel(
-                      condition = "output.clTable",
-                      div(style = "margin-bottom: 1rem; display: inline-block;", uiOutput("ui_3dltable"))
+              div(
+                class = "p-3",
+                conditionalPanel(condition = "output.checkpred", htmlOutput("hintPr")),
+                conditionalPanel(
+                  condition = "output.showPredictResults",
+                  card(
+                    full_screen = TRUE,
+                    card_header(
+                      class = "d-flex justify-content-between align-items-center",
+                      span(`data-translate` = "ui_3model", "Model Average Plot"),
+                      ui_predict_download_popover()
                     ),
-                    uiOutput("ui_3cl"),
-                    htmlOutput("describeCl"),
-                    uiOutput("ui_3clbutton"),
-                    conditionalPanel(condition = "output.modelAveragePlot", DT::dataTableOutput("clTable"))
+                    card_body(
+                      plotOutput("modelAveragePlot"),
+                      conditionalPanel(condition = "output.showPredictResults", htmlOutput("estHc"))
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "output.showPredictResults",
+                  card(
+                    full_screen = TRUE,
+                    card_header(
+                      class = "d-flex justify-content-between align-items-center",
+                      div(
+                        span(`data-translate` = "ui_3cl", "Confidence Limits"),
+                        bslib::tooltip(
+                          bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                          uiOutput("ui_3help"),
+                          placement = "right"
+                        )
+                      ),
+                      downloadButton("dlPredTable",
+                                     label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
+                                     icon = NULL
+                      )
+                    ),
+                    card_body(
+                      div(
+                        class = "d-flex justify-content-between align-items-start mb-3",
+                        div(
+                          class = "flex-grow-1 me-3",
+                          htmlOutput("describeCl")
+                        ),
+                        div(
+                          uiOutput("ui_3clbutton")
+                        )
+                      ),
+                      conditionalPanel(condition = "output.showPredictResults", DT::dataTableOutput("clTable"))
+                    )
                   )
                 )
               )
@@ -304,7 +338,7 @@ app_ui <- function() {
             conditionalPanel(
               condition = "input.main_nav == 'report'",
               card(
-                card_header(style = "background-color: #759dbe; color: white;", "BCANZ Report Generation"),
+                card_header("BCANZ Report Generation"),
                 card_body(uiOutput("ui_report_download"))
               )
             ),
@@ -313,7 +347,7 @@ app_ui <- function() {
             conditionalPanel(
               condition = "input.main_nav == 'rcode'",
               card(
-                card_header(style = "background-color: #759dbe; color: white;", uiOutput("ui_nav4")),
+                card_header(uiOutput("ui_nav4")),
                 card_body(
                   uiOutput("ui_4help"),
                   div(
