@@ -57,7 +57,7 @@ dt_options <- function(lang = "English"){
   )
 }
 
-ui_download_popover <- function(tab){
+ui_download_popover <- function(tab = "fit"){
   bslib::popover(
     actionButton(paste0(tab, "DownloadBtn"), 
                  label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),

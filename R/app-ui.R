@@ -145,7 +145,7 @@ app_ui <- function() {
                 condition = "input.main_nav == 'fit'",
                 uiOutput("ui_conc"),
                 selectizeInput("selectDist",
-                               label = span(`data-translate` = "ui_2dist", "Distributions"),
+                               label = span(`data-translate` = "ui_2dist", "Select distributions to fit"),
                                multiple = TRUE,
                                choices = c(default.dists, extra.dists),
                                selected = default.dists,
@@ -155,7 +155,11 @@ app_ui <- function() {
                                  "persist" = FALSE
                                )
                 ),
-                uiOutput("ui_unit"),
+                selectInput("selectUnit",
+                            label = span(`data-translate` = "ui_2unit", "Select units"),
+                            choices = units(),
+                            selected = units()[1]
+                ),
                 checkboxInput("rescale",
                   label = span(`data-translate` = "ui_2rescale", "Rescale"),
                   value = FALSE
@@ -251,7 +255,7 @@ app_ui <- function() {
                 conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),
                 conditionalPanel(condition = "output.showFitResults", uiOutput("ui_2plot")),
                 conditionalPanel(
-                  condition = "output.showFitResults",
+                  condition = "output.showFitResults", 
                   card(
                     full_screen = TRUE,
                     card_header(
@@ -263,10 +267,7 @@ app_ui <- function() {
                       htmlOutput("fitFail"),
                       plotOutput("distPlot1")
                     )
-                  )
-                ),
-                conditionalPanel(
-                  condition = "output.showFitResults",
+                  ),
                   card(
                     full_screen = TRUE,
                     card_header(
@@ -279,10 +280,12 @@ app_ui <- function() {
                       )
                     ),
                     card_body(
-                      DT::dataTableOutput("gofTable")
+                      div(id = "gofDiv",
+                          DT::dataTableOutput("gofTable")
+                      )
                     )
                   )
-                )
+                ),
               )
             ),
 

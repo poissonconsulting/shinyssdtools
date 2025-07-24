@@ -10,6 +10,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 app_server <- function(input, output, session) {
+
+# waiters -----------------------------------------------------------------
+
+  waiter_gof <- waiter::Waiter$new(id = "gofDiv", html = waiter::spin_2(), color = "white")
+  waiter_distplot <- waiter::Waiter$new(id = "distPlot1", html = waiter::spin_2(), color = "white")
+  
   ########### Reactives --------------------
   # --- Translations
   translation.value <- reactiveValues(
@@ -32,7 +38,7 @@ app_server <- function(input, output, session) {
       ui_2rescale = tr("ui_2rescale", trans()),
       ui_3xlab = tr("ui_3xlab", trans()),
       ui_3ylab = tr("ui_3ylab", trans()),
-      ui_unit = tr("ui_unit", trans()),
+      ui_2unit = tr("ui_2unit", trans()),
       ui_size = tr("ui_size", trans()),
       ui_2table = tr("ui_2table", trans()),
       ui_2download = tr("ui_2download", trans()),
@@ -348,6 +354,9 @@ app_server <- function(input, output, session) {
     req(input$selectConc)
     req(input$selectDist)
     req(check_fit() == "")
+    waiter_gof$show()
+    waiter_distplot$show()
+    
     data <- names_data()
     conc <- input$selectConc %>% make.names()
     dist <- input$selectDist
@@ -365,21 +374,25 @@ app_server <- function(input, output, session) {
 
   plot_dist <- reactive({
     dist <- fit_dist()
-    plot_distributions(dist,
+    gp <- plot_distributions(dist,
       ylab = input$yaxis2,
       xlab = append_unit(input$xaxis2, input$selectUnit),
       text_size = input$size2
     )
+    waiter_distplot$hide()
+    gp
   })
 
   table_gof <- reactive({
     req(fit_dist())
+    
     dist <- fit_dist()
     gof <-
       ssdtools::ssd_gof(dist) %>%
       dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
       dplyr::arrange(dplyr::desc(.data$weight))
     names(gof) <- gsub("weight", tr("ui_2weight", trans()), names(gof))
+    waiter_gof$hide()
     gof
   })
 
@@ -649,7 +662,6 @@ app_server <- function(input, output, session) {
 
   # --- render fit results ----
   output$distPlot1 <- renderPlot({
-    waiter::waiter_show(id = "distPlot1", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
     plot_dist()
   })
 
@@ -729,7 +741,7 @@ app_server <- function(input, output, session) {
   })
 
   # --- download handlers ----
-  output$dlFitPlot <- downloadHandler(
+  output$fitDlPlot <- downloadHandler(
     filename = function() {
       "ssdtools_distFitPlot.png"
     },
@@ -741,7 +753,7 @@ app_server <- function(input, output, session) {
     }
   )
 
-  output$dlPredPlot <- downloadHandler(
+  output$predDlPlot <- downloadHandler(
     filename = function() {
       "ssdtools_modelAveragePlot.png"
     },
@@ -753,7 +765,7 @@ app_server <- function(input, output, session) {
     }
   )
 
-  output$dlFitRds <- downloadHandler(
+  output$fitDlRds <- downloadHandler(
     filename = function() {
       "ssdtools_distFitPlot.rds"
     },
@@ -762,7 +774,7 @@ app_server <- function(input, output, session) {
     }
   )
 
-  output$dlPredRds <- downloadHandler(
+  output$predDlRds <- downloadHandler(
     filename = function() {
       "ssdtools_modelAveragePlot.rds"
     },
@@ -771,7 +783,7 @@ app_server <- function(input, output, session) {
     }
   )
 
-  output$dlFitTable <- downloadHandler(
+  output$fitDlTable <- downloadHandler(
     filename = function() {
       "ssdtools_distGofTable.csv"
     },
@@ -780,7 +792,7 @@ app_server <- function(input, output, session) {
     }
   )
 
-  output$dlPredTable <- downloadHandler(
+  output$predDlTable <- downloadHandler(
     filename = function() {
       "ssdtools_predictTable.csv"
     },
