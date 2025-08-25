@@ -110,7 +110,7 @@ app_ui <- function() {
             conditionalPanel(
               condition = "input.main_nav == 'data'",
               conditionalPanel(
-                condition = "output.showDataResults",
+                condition = "input.main_nav == 'data' && output.showDataResults",
                 card(
                   card_header(span(`data-translate` = "ui_1preview", "Preview chosen dataset")),
                   card_body(DT::DTOutput("viewUpload"), min_height = "550px")
