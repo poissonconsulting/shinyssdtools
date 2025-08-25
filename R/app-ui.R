@@ -91,163 +91,32 @@ app_ui <- function() {
 # __data ------------------------------------------------------------------
               conditionalPanel(
                 condition = "input.main_nav == 'data'",
-                # Demo Data Section
-                span(`data-translate` = "ui_1choose", "Choose one of the following options:"),
-                p(
-                  bslib::popover(
-                    bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                    div(
-                      span(`data-translate` = "ui_1datahelp", "This can be used to demo the app or view a dataset that 'works'."),
-                      br(), br(),
-                      "Citation:",
-                      tags$a("Canadian Council of Ministers of the Environment. 2009. Canadian water quality guidelines for the protection of aquatic life: Boron. In: Canadian environmental quality guidelines, 2009, Canadian Council of Ministers of the Environment, Winnipeg.", href = "http://ceqg-rcqe.ccme.ca/download/en/324/")
-                    ),
-                    placement = "right"
-                  ),
-                  span(
-                    span(`data-translate` = "ui_1data", "1. Use "),
-                    actionLink("demoData", span(`data-translate` = "ui_1data2", "boron dataset"), icon = icon("table"))
-                  )
-                ),
-                # CSV Upload Section  
-                fileInput("uploadData",
-                  buttonLabel = span(tagList(icon("upload"), "csv")),
-                  label = span(
-                    bslib::popover(
-                      bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                      span(`data-translate` = "ui_1csvhelp", "Upload your own CSV file with concentration and species data."),
-                      placement = "right"
-                    ),
-                    span(`data-translate` = "ui_1csv", "2. Upload CSV file")
-                  ),
-                  placeholder = "...",
-                  accept = c(".csv")
-                ),
-                # Data Table Section
-                bslib::accordion(
-                  open = FALSE,
-                  bslib::accordion_panel(
-                    title = span(
-                      bslib::popover(
-                        bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                        span(`data-translate` = "ui_1tablehelp", "Manually enter concentration and species data in the table."),
-                        placement = "right"
-                      ),
-                      span(`data-translate` = "ui_1table", "3. Fill out table below:")
-                    ),
-                    value = "data_table",
-                    rhandsontable::rHandsontableOutput("hot")
-                  )
-                )
+                mod_data_ui("data_module")
               ),
 # __ fit ------------------------------------------------------------------
               conditionalPanel(
                 condition = "input.main_nav == 'fit'",
-                tags$label(
-                  `for` = "selectConc",
-                  class = "control-label",
-                  span(`data-translate` = "ui_2conc", "Concentration")
-                ),
-                selectInput("selectConc",
-                           label = NULL,
-                           choices = NULL,
-                           selected = NULL
-                ),
-                selectizeInput("selectDist",
-                               label = span(`data-translate` = "ui_2dist", "Select distributions to fit"),
-                               multiple = TRUE,
-                               choices = c(default.dists, extra.dists),
-                               selected = default.dists,
-                               options = list(
-                                 "plugins" = list("remove_button"),
-                                 "create" = TRUE,
-                                 "persist" = FALSE
-                               )
-                ),
-                selectInput("selectUnit",
-                            label = span(`data-translate` = "ui_2unit", "Select units"),
-                            choices = units(),
-                            selected = units()[1]
-                ),
-                checkboxInput("rescale",
-                  label = span(`data-translate` = "ui_2rescale", "Rescale"),
-                  value = FALSE
-                ),
-                textInput("xaxis2",
-                  label = span(`data-translate` = "ui_3xlab", "X-axis label"),
-                  value = "Concentration"
-                ),
-                textInput("yaxis2",
-                  label = span(`data-translate` = "ui_3ylab", "Y-axis label"),
-                  value = "Percent"
-                ),
-                numericInput("size2",
-                  label = span(`data-translate` = "ui_size", "Text size"),
-                  value = 12, min = 1, max = 100
-                )
+                mod_fit_ui("fit_module")
               ),
 
 # __ predict --------------------------------------------------------------
               conditionalPanel(
                 condition = "input.main_nav == 'predict'",
-                style = "max-height: 70vh; overflow-y: auto;",
-                span(`data-translate` = "ui_3est", "Estimate hazard concentration"),
-                uiOutput("ui_thresh_type"),
-                uiOutput("ui_3thresh"),
-                uiOutput("selectLabel"),
-                uiOutput("selectColour"),
-                uiOutput("selectShape"),
-                uiOutput("ui_3pal"),
-                textInput("xaxis", 
-                          value = "Concentration", 
-                          label = span(`data-translate` = "ui_3xlab", "X-axis label")),
-                textInput("yaxis", 
-                          value = "Percent", 
-                          label = span(`data-translate` = "ui_3ylab", "Y-axis label")),
-                textInput("title", 
-                          value = "", 
-                          label = span(`data-translate` = "ui_3title", "Title")),
-                uiOutput("uiLegendColour"),
-                uiOutput("uiLegendShape"),
-                layout_column_wrap(width = 1 / 2, 
-                                   numericInput("size3", 
-                                                label = span(`data-translate` = "ui_size", "Text size"), 
-                                                value = 12, min = 1, max = 100),
-                                   numericInput("sizeLabel3", 
-                                                label = span(`data-translate` = "ui_sizeLabel", "Label size"), 
-                                                value = 3, min = 1, max = 10)
-                ),
-                checkboxInput("checkHc", 
-                              label = span(`data-translate` = "ui_checkHc", "Show hazard concentration"), 
-                              value = TRUE),
-                layout_column_wrap(
-                  width = 1 / 3,
-                  numericInput("adjustLabel",
-                               value = 1.05, 
-                               label = span(`data-translate` = "ui_adjustLabel", "Adjust label"), 
-                               min = 0, max = 10, step = 0.1),
-                  numericInput("xMin", 
-                               label = span(`data-translate` = "ui_xmin", "X min"), 
-                               min = 1, value = NULL),
-                  numericInput("xMax", 
-                               label = span(`data-translate` = "ui_xmax", "X max"), 
-                               min = 1, value = NULL)
-                ),
-                checkboxInput("xlog", 
-                              label = span(`data-translate` = "ui_xlog", "Log scale"), 
-                              value = TRUE),
-                uiOutput("uiXbreaks")
+                mod_predict_ui("predict_module")
               )
             ),
 # main content ------------------------------------------------------------
 # __ data -----------------------------------------------------------------
             conditionalPanel(
               condition = "input.main_nav == 'data'",
-              card(
-                card_header(span(`data-translate` = "ui_1preview", "Preview chosen dataset")),
-                card_body(DT::DTOutput("viewUpload"), min_height = "550px")
-              ),
-              card(class = "mt-3", card_body(span(`data-translate` = "ui_1note", "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value.")))
+              conditionalPanel(
+                condition = "output.showDataResults",
+                card(
+                  card_header(span(`data-translate` = "ui_1preview", "Preview chosen dataset")),
+                  card_body(DT::DTOutput("viewUpload"), min_height = "550px")
+                ),
+                card(class = "mt-3", card_body(span(`data-translate` = "ui_1note", "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value.")))
+              )
             ),
 
 # __ fit ------------------------------------------------------------------
@@ -388,7 +257,7 @@ app_ui <- function() {
               condition = "input.main_nav == 'report'",
               card(
                 card_header("BCANZ Report Generation"),
-                card_body(uiOutput("ui_report_download"))
+                card_body(mod_report_ui("report_module"))
               )
             ),
 
@@ -397,26 +266,7 @@ app_ui <- function() {
               condition = "input.main_nav == 'rcode'",
               card(
                 card_header(uiOutput("ui_nav4")),
-                card_body(
-                  uiOutput("ui_4help"),
-                  div(
-                    id = "codes",
-                    style = "background-color: #f8f9fa; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px;",
-                    uiOutput("codeHead"),
-                    br(),
-                    uiOutput("codeData"),
-                    br(),
-                    uiOutput("codeFit"),
-                    br(),
-                    uiOutput("codeSaveFit"),
-                    br(),
-                    uiOutput("codePredPlot"),
-                    br(),
-                    uiOutput("codeSavePred"),
-                    br(),
-                    uiOutput("codePredCl")
-                  )
-                )
+                card_body(mod_rcode_ui("rcode_module"))
               )
             )
           )

@@ -11,12 +11,61 @@
 # See the License for the specific language governing permissions and limitations under the License.
 app_server <- function(input, output, session) {
 
-# waiters -----------------------------------------------------------------
+# Shared reactive values for inter-module communication
+  shared_values <- reactiveValues(
+    # From data module
+    data = NULL,
+    data_source = NULL,
+    column_names = NULL,
+    upload_filename = NULL,
+    
+    # From fit module  
+    fitted_dist = NULL,
+    selected_conc = NULL,
+    selected_dists = NULL,
+    selected_unit = NULL,
+    fit_plot = NULL,
+    gof_table = NULL,
+    rescale = FALSE,
+    fit_xaxis = NULL,
+    fit_yaxis = NULL,
+    fit_text_size = NULL,
+    fit_plot_width = NULL,
+    fit_plot_height = NULL,
+    fit_plot_dpi = NULL,
+    
+    # From predict module
+    predictions = NULL,
+    threshold_values = NULL,
+    model_average_plot = NULL,
+    bootstrap_samples = NULL,
+    predict_label = NULL,
+    predict_colour = NULL,
+    predict_shape = NULL,
+    predict_xaxis = NULL,
+    predict_yaxis = NULL,
+    predict_title = NULL,
+    predict_text_size = NULL,
+    predict_label_size = NULL,
+    predict_shift_x = NULL,
+    predict_palette = NULL,
+    predict_xmax = NULL,
+    predict_xmin = NULL,
+    transformation = NULL,
+    xbreaks = NULL,
+    show_hc = NULL,
+    legend_colour = NULL,
+    legend_shape = NULL,
+    thresh_type = NULL,
+    plot_width = NULL,
+    plot_height = NULL,
+    plot_dpi = NULL,
+    
+    # Global state
+    translations = NULL,
+    current_language = "English"
+  )
 
-  waiter_gof <- waiter::Waiter$new(id = "gofDiv", html = waiter::spin_2(), color = "white")
-  waiter_distplot <- waiter::Waiter$new(id = "distPlot1", html = waiter::spin_2(), color = "white")
-  
-  ########### Reactives --------------------
   # --- Translations
   translation.value <- reactiveValues(
     lang = "English"
@@ -125,6 +174,34 @@ app_server <- function(input, output, session) {
   tr <- function(id, trans) {
     trans$trans[trans$id == id]
   }
+
+  # Update shared values with current translations and language
+  observe({
+    shared_values$translations <- trans()
+    shared_values$current_language <- translation.value$lang
+  })
+
+# Module Server Calls -----------------------------------------------------
+  
+  # Call module servers with shared values
+  data_module <- mod_data_server("data_module", shared_values, trans)
+  fit_module <- mod_fit_server("fit_module", shared_values, trans)
+  predict_module <- mod_predict_server("predict_module", shared_values, trans)
+  report_module <- mod_report_server("report_module", shared_values, trans)
+  rcode_module <- mod_rcode_server("rcode_module", shared_values, trans)
+
+  # Reactive indicator for data availability
+  output$showDataResults <- reactive({
+    # Add a small delay and more defensive checks
+    tryCatch({
+      has_data <- data_module$has_data()
+      # Only return TRUE if we explicitly have data
+      return(isTRUE(has_data))
+    }, error = function(e) {
+      return(FALSE)
+    })
+  })
+  outputOptions(output, "showDataResults", suspendWhenHidden = FALSE)
 
   # --- upload data
   upload.values <- reactiveValues(
@@ -242,7 +319,7 @@ app_server <- function(input, output, session) {
   })
 
   output$checkfit <- reactive({
-    check_fit() != ""
+    fit_module$check_fit() != ""
   })
   outputOptions(output, "checkfit", suspendWhenHidden = FALSE)
 
@@ -261,12 +338,12 @@ app_server <- function(input, output, session) {
   })
 
   output$checkpred <- reactive({
-    check_pred() != ""
+    predict_module$check_pred() != ""
   })
   outputOptions(output, "checkpred", suspendWhenHidden = FALSE)
 
-  output$hintFi <- renderText(hint(check_fit()))
-  output$hintPr <- renderText(hint(check_pred()))
+  output$hintFi <- renderText(hint(fit_module$check_fit()))
+  output$hintPr <- renderText(hint(predict_module$check_pred()))
 
   # --- render column choices
   column_names <- reactive({
@@ -554,7 +631,7 @@ app_server <- function(input, output, session) {
   })
 
   output$viewUpload <- DT::renderDataTable({
-    data <- read_data()
+    data <- shared_values$data
     if (is.null(data) || nrow(data) == 0) {
       return(NULL)
     }
@@ -651,35 +728,38 @@ app_server <- function(input, output, session) {
 
   # Reactive indicator for fit results
   output$showFitResults <- reactive({
-    return(!is.null(fit_dist()) && !inherits(fit_dist(), "try-error"))
+    return(fit_module$show_fit_results())
   })
   outputOptions(output, "showFitResults", suspendWhenHidden = FALSE)
 
   # Reactive indicator for predict results
   output$showPredictResults <- reactive({
-    return(!is.null(predict_hc()) && !inherits(predict_hc(), "try-error"))
+    return(predict_module$show_predict_results())
   })
   outputOptions(output, "showPredictResults", suspendWhenHidden = FALSE)
 
   # --- render fit results ----
   output$distPlot1 <- renderPlot({
-    plot_dist()
+    shared_values$fit_plot
   })
 
   output$gofTable <- DT::renderDataTable({
-    DT::datatable(table_gof(), options = list(dom = "t"))
+    if (!is.null(shared_values$gof_table)) {
+      DT::datatable(shared_values$gof_table, options = list(dom = "t"))
+    }
   })
 
   output$fitFail <- renderText({
-    req(fit_fail() != "")
-    HTML(paste0("<font color='grey'>", paste(fit_fail(), tr("ui_hintfail", trans())), "</font>"))
+    failed_fits <- fit_module$fit_fail()
+    req(failed_fits != "")
+    HTML(paste0("<font color='grey'>", paste(failed_fits, tr("ui_hintfail", trans())), "</font>"))
   })
   
   # --- render predict results ----
   output$modelAveragePlot <- renderPlot({
     tryCatch({
       waiter::waiter_show(id = "modelAveragePlot", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
-      plot_model_average()
+      shared_values$model_average_plot
     }, error = function(e) {
       # Close any open devices on error to prevent leaks
       tryCatch(while(dev.cur() > 1) dev.off(), error = function(e2) {})
