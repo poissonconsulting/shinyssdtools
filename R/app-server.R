@@ -625,12 +625,13 @@ app_server <- function(input, output, session) {
 
 
   # Fit control renderUI functions (need server-side for dynamic choices)
-  output$ui_conc <- renderUI({
-    selectInput("selectConc",
-      label = span(`data-translate` = "ui_2conc", "Concentration"),
-      choices = column_names(),
-      selected = guess_conc()
-    )
+  # Update concentration selectInput when data changes
+  observe({
+    choices <- column_names()
+    selected <- guess_conc()
+    updateSelectInput(session, "selectConc",
+                      choices = choices,
+                      selected = selected)
   })
 
   output$ui_unit <- renderUI({
@@ -783,7 +784,7 @@ app_server <- function(input, output, session) {
     }
   )
 
-  output$fitDlTable <- downloadHandler(
+  output$fitDlTableHidden <- downloadHandler(
     filename = function() {
       "ssdtools_distGofTable.csv"
     },
@@ -791,6 +792,12 @@ app_server <- function(input, output, session) {
       readr::write_csv(table_gof() %>% dplyr::as_tibble(), file)
     }
   )
+  
+  # Handle actionButton click for fit table download
+  observeEvent(input$dlFitTable, {
+    # Trigger the hidden download button
+    shinyjs::click("fitDlTableHidden")
+  })
 
   output$predDlTable <- downloadHandler(
     filename = function() {
@@ -1100,13 +1107,6 @@ app_server <- function(input, output, session) {
     )
   })
 
-  output$ui_conc <- renderUI({
-    selectInput("selectConc",
-      label = tr("ui_2conc", trans()),
-      choices = column_names(),
-      selected = guess_conc()
-    )
-  })
 
   output$ui_unit <- renderUI({
     selectInput("selectUnit",
@@ -1181,18 +1181,6 @@ app_server <- function(input, output, session) {
     updateSelectizeInput(session, "thresh", choices = choices, selected = isolate(thresh))
   })
 
-  output$ui_3samples <- renderUI({
-    choices <- c("500", "1 000", "5 000", "10 000")
-    if (translation.value$lang == "English") {
-      choices <- c("500", "1,000", "5,000", "10,000")
-    }
-    selectInput("bootSamp",
-      label = span(`data-translate` = "ui_3samples", "Bootstrap samples"),
-      choices = choices,
-      selected = choices[2],
-      width = "150px"
-    )
-  })
 
   thresh_rv <- reactiveValues(
     percent = NULL,
@@ -1251,12 +1239,6 @@ app_server <- function(input, output, session) {
     tr("ui_3help", trans())
   })
 
-  output$ui_3clbutton <- renderUI({
-    actionButton("getCl", 
-                 label = tr("ui_3clbutton", trans()),
-                 class = "btn-primary",
-                 style = "white-space: nowrap;")
-  })
 
   output$ui_4help <- renderUI({
     tr("ui_4help", trans())

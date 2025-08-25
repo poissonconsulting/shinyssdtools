@@ -69,12 +69,12 @@ ui_download_popover <- function(tab = "fit"){
         div(
           style = "display: grid; gap: 8px;",
           downloadButton(paste0(tab, "DlPlot"),
-                         label = span(`data-translate` = "ui_2dlplot", "Plot .png"),
+                         label = span(`data-translate` = "ui_2dlplot", "PNG file"),
                          style = "width: 100%; padding: 6px; font-size: 12px;",
                          class = "btn-primary btn-sm"
           ),
           downloadButton(paste0(tab, "DlRds"),
-                         label = span(`data-translate` = "ui_2dlrds", "Plot .rds"),
+                         label = span(`data-translate` = "ui_2dlrds", "RDS File"),
                          style = "width: 100%; padding: 6px; font-size: 12px;",
                          class = "btn-primary btn-sm"
           )
@@ -87,14 +87,14 @@ ui_download_popover <- function(tab = "fit"){
               style = "flex: 1; min-width: 0;",
               numericInput("width2", 
                            label = span(`data-translate` = "ui_2width", "Width"), 
-                           value = 6, min = 1, max = 50, step = 0.1
+                           value = 6, min = 1, max = 50, step = 1
               )
             ),
             div(
               style = "flex: 1; min-width: 0;",
               numericInput("height2", 
                            label = span(`data-translate` = "ui_2height", "Height"),
-                           value = 4, min = 1, max = 50, step = 0.1
+                           value = 4, min = 1, max = 50, step = 1
               )
             ),
             div(
@@ -102,61 +102,6 @@ ui_download_popover <- function(tab = "fit"){
               numericInput("dpi2", 
                            label = span(`data-translate` = "ui_2dpi", "DPI"),
                            value = 300, min = 50, max = 2000, step = 50
-              )
-            )
-          )
-        )
-      )
-    ),
-    placement = "bottom"
-  )
-}
-
-ui_predict_download_popover <- function(){
-  bslib::popover(
-    actionButton("predictDownloadBtn", 
-                 label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                 style = "padding:4px; font-size:80%"
-    ),
-    card(
-      style = "width: 250px; margin-top: 10px;",
-      card_body(
-        div(
-          style = "display: grid; gap: 8px;",
-          downloadButton("dlPredPlot",
-                         label = span(`data-translate` = "ui_3dlplot", "Plot .png"),
-                         style = "width: 100%; padding: 6px; font-size: 12px;",
-                         class = "btn-primary btn-sm"
-          ),
-          downloadButton("dlPredRds",
-                         label = span(`data-translate` = "ui_3dlrds", "Plot .rds"),
-                         style = "width: 100%; padding: 6px; font-size: 12px;",
-                         class = "btn-primary btn-sm"
-          )
-        ),
-        div(
-          h6(span(`data-translate` = "ui_3png", "PNG Format Settings"), style = "margin-bottom: 10px;"),
-          div(
-            style = "display: flex; gap: 5px; justify-content: space-between;",
-            div(
-              style = "flex: 1; min-width: 0;",
-              numericInput("selectWidth", 
-                           label = span(`data-translate` = "ui_3width", "Width"), 
-                           value = 8, min = 1, max = 50, step = 0.1
-              )
-            ),
-            div(
-              style = "flex: 1; min-width: 0;",
-              numericInput("selectHeight", 
-                           label = span(`data-translate` = "ui_3height", "Height"),
-                           value = 6, min = 1, max = 50, step = 0.1
-              )
-            ),
-            div(
-              style = "flex: 1; min-width: 0;",
-              numericInput("selectDpi", 
-                           label = span(`data-translate` = "ui_3dpi", "DPI"),
-                           value = 600, min = 50, max = 2000, step = 50
               )
             )
           )
