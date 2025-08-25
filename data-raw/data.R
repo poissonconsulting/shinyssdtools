@@ -18,11 +18,6 @@ translations <- dplyr::bind_rows(
     french = "Obtenir l’estimation par"
   ),
   dplyr::tibble(
-    id = "ui_2dlrds",
-    english = "Plot .rds",
-    french = "Graphique .rds"
-  ),
-  dplyr::tibble(
     id = "ui_checkHc",
     english = "Plot Threshold/Concentration",
     french = "Graphique seuil/concentration"
