@@ -2,27 +2,30 @@
 mod_rcode_ui <- function(id) {
   ns <- NS(id)
   
-  card(
-    card_header(uiOutput("ui_nav4")), 
-    card_body(
-      tagList(
-        uiOutput(ns("ui_4help")),
-        div(
-          id = "codes",
-          style = "background-color: #f8f9fa; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px;",
-          uiOutput(ns("codeHead")),
-          br(),
-          uiOutput(ns("codeData")),
-          br(),
-          uiOutput(ns("codeFit")),
-          br(),
-          uiOutput(ns("codeSaveFit")),
-          br(),
-          uiOutput(ns("codePredPlot")),
-          br(),
-          uiOutput(ns("codeSavePred")),
-          br(),
-          uiOutput(ns("codePredCl"))
+  div(
+    style = "padding: 1rem;",
+    card(
+      card_header(uiOutput("ui_nav4")), 
+      card_body(
+        tagList(
+          uiOutput(ns("ui_4help")),
+          div(
+            id = "codes",
+            style = "background-color: #f8f9fa; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px;",
+            uiOutput(ns("codeHead")),
+            br(),
+            uiOutput(ns("codeData")),
+            br(),
+            uiOutput(ns("codeFit")),
+            br(),
+            uiOutput(ns("codeSaveFit")),
+            br(),
+            uiOutput(ns("codePredPlot")),
+            br(),
+            uiOutput(ns("codeSavePred")),
+            br(),
+            uiOutput(ns("codePredCl"))
+          )
         )
       )
     )
