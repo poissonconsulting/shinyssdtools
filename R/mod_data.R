@@ -2,57 +2,68 @@
 mod_data_ui <- function(id) {
   ns <- NS(id)
   
-  tagList(
-    # Demo Data Section
-    span(`data-translate` = "ui_1choose", "Choose one of the following options:"),
-    p(
-      bslib::popover(
-        bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
-        div(
-          span(`data-translate` = "ui_1datahelp", "This can be used to demo the app or view a dataset that 'works'."),
-          br(), br(),
-          "Citation:",
-          tags$a("Canadian Council of Ministers of the Environment. 2009. Canadian water quality guidelines for the protection of aquatic life: Boron. In: Canadian environmental quality guidelines, 2009, Canadian Council of Ministers of the Environment, Winnipeg.", href = "http://ceqg-rcqe.ccme.ca/download/en/324/")
-        ),
-        placement = "right"
-      ),
-      span(
-        span(`data-translate` = "ui_1data", "1. Use "),
-        actionLink(ns("demoData"), span(`data-translate` = "ui_1data2", "boron dataset"), icon = icon("table"))
-      )
-    ),
-    
-    # CSV Upload Section  
-    fileInput(ns("uploadData"),
-      buttonLabel = span(tagList(icon("upload"), "csv")),
-      label = span(
-        bslib::popover(
-          bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
-          span(`data-translate` = "ui_1csvhelp", "Upload your own CSV file with concentration and species data."),
-          placement = "right"
-        ),
-        span(`data-translate` = "ui_1csv", "2. Upload CSV file")
-      ),
-      placeholder = "...",
-      accept = c(".csv")
-    ),
-    
-    # Data Table Section
-    bslib::accordion(
-      open = FALSE,
-      bslib::accordion_panel(
-        title = span(
+    layout_sidebar(
+      padding = "1rem",
+      gap = "1rem",
+      sidebar = sidebar(
+        width = 350,
+        span(`data-translate` = "ui_1choose", "Choose one of the following options:"),
+        p(
           bslib::popover(
             bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
-            span(`data-translate` = "ui_1tablehelp", "Manually enter concentration and species data in the table."),
+            div(
+              span(`data-translate` = "ui_1datahelp", "This can be used to demo the app or view a dataset that 'works'."),
+              br(), br(),
+              "Citation:",
+              tags$a("Canadian Council of Ministers of the Environment. 2009. Canadian water quality guidelines for the protection of aquatic life: Boron. In: Canadian environmental quality guidelines, 2009, Canadian Council of Ministers of the Environment, Winnipeg.", href = "http://ceqg-rcqe.ccme.ca/download/en/324/")
+            ),
             placement = "right"
           ),
-          span(`data-translate` = "ui_1table", "3. Fill out table below:")
+          span(
+            span(`data-translate` = "ui_1data", "1. Use "),
+            actionLink(ns("demoData"), span(`data-translate` = "ui_1data2", "boron dataset"), icon = icon("table"))
+          )
         ),
-        value = "data_table",
-        rhandsontable::rHandsontableOutput(ns("hot"))
+        
+        # CSV Upload Section  
+        fileInput(ns("uploadData"),
+                  buttonLabel = span(tagList(icon("upload"), "csv")),
+                  label = span(
+                    bslib::popover(
+                      bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                      span(`data-translate` = "ui_1csvhelp", "Upload your own CSV file with concentration and species data."),
+                      placement = "right"
+                    ),
+                    span(`data-translate` = "ui_1csv", "2. Upload CSV file")
+                  ),
+                  placeholder = "...",
+                  accept = c(".csv")
+        ),
+        
+        # Data Table Section
+        bslib::accordion(
+          open = FALSE,
+          bslib::accordion_panel(
+            title = span(
+              bslib::popover(
+                bsicons::bs_icon("question-circle", style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                span(`data-translate` = "ui_1tablehelp", "Manually enter concentration and species data in the table."),
+                placement = "right"
+              ),
+              span(`data-translate` = "ui_1table", "3. Fill out table below:")
+            ),
+            value = "data_table",
+            rhandsontable::rHandsontableOutput(ns("hot"))
+          )
+        )),
+      conditionalPanel(
+        condition = "input.main_nav == 'data' && output.showDataResults",
+        card(
+          card_header(span(`data-translate` = "ui_1preview", "Preview chosen dataset")),
+          card_body(DT::DTOutput("viewUpload"), min_height = "550px")
+        ),
+        card(class = "mt-3", card_body(span(`data-translate` = "ui_1note", "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value.")))
       )
-    )
   )
 }
 

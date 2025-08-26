@@ -2,18 +2,23 @@
 mod_report_ui <- function(id) {
   ns <- NS(id)
   
-  tagList(
-    textInput(ns("toxicant"), 
-              label = span(`data-translate` = "ui_4toxname", "Toxicant name"),
-              value = ""),
-    shinyWidgets::dropdownButton(
-      status = "primary",
-      label = span(`data-translate` = "ui_4download", "Download Report"),
-      inline = TRUE,
-      circle = FALSE,
-      icon = icon("download"),
-      dl_button(ns("dl_pdf"), span(`data-translate` = "ui_4pdf", "PDF")),
-      dl_button(ns("dl_html"), span(`data-translate` = "ui_4html", "HTML"))
+  card(
+    card_header("BCANZ Report Generation"),
+    card_body(
+      tagList(
+        textInput(ns("toxicant"), 
+                  label = span(`data-translate` = "ui_4toxname", "Toxicant name"),
+                  value = ""),
+        shinyWidgets::dropdownButton(
+          status = "primary",
+          label = span(`data-translate` = "ui_4download", "Download Report"),
+          inline = TRUE,
+          circle = FALSE,
+          icon = icon("download"),
+          dl_button(ns("dl_pdf"), span(`data-translate` = "ui_4pdf", "PDF")),
+          dl_button(ns("dl_html"), span(`data-translate` = "ui_4html", "HTML"))
+        )
+      )
     )
   )
 }

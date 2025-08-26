@@ -2,55 +2,142 @@
 mod_predict_ui <- function(id) {
   ns <- NS(id)
   
-  tagList(
-    style = "max-height: 70vh; overflow-y: auto;",
-    span(`data-translate` = "ui_3est", "Estimate hazard concentration"),
-    uiOutput(ns("ui_thresh_type")),
-    uiOutput(ns("ui_3thresh")),
-    uiOutput(ns("selectLabel")),
-    uiOutput(ns("selectColour")),
-    uiOutput(ns("selectShape")),
-    uiOutput(ns("ui_3pal")),
-    textInput(ns("xaxis"), 
-              value = "Concentration", 
-              label = span(`data-translate` = "ui_3xlab", "X-axis label")),
-    textInput(ns("yaxis"), 
-              value = "Percent", 
-              label = span(`data-translate` = "ui_3ylab", "Y-axis label")),
-    textInput(ns("title"), 
-              value = "", 
-              label = span(`data-translate` = "ui_3title", "Title")),
-    uiOutput(ns("uiLegendColour")),
-    uiOutput(ns("uiLegendShape")),
-    layout_column_wrap(width = 1 / 2, 
-                       numericInput(ns("size3"), 
-                                    label = span(`data-translate` = "ui_size", "Text size"), 
-                                    value = 12, min = 1, max = 100),
-                       numericInput(ns("sizeLabel3"), 
-                                    label = span(`data-translate` = "ui_sizeLabel", "Label size"), 
-                                    value = 3, min = 1, max = 10)
+  layout_sidebar(
+    padding = "1rem",
+    gap = "1rem",
+    sidebar = sidebar(
+      width = 350,
+      tagList(
+        style = "max-height: 70vh; overflow-y: auto;",
+        span(`data-translate` = "ui_3est", "Estimate hazard concentration"),
+        uiOutput(ns("ui_thresh_type")),
+        uiOutput(ns("ui_3thresh")),
+        uiOutput(ns("selectLabel")),
+        uiOutput(ns("selectColour")),
+        uiOutput(ns("selectShape")),
+        uiOutput(ns("ui_3pal")),
+        textInput(ns("xaxis"), 
+                  value = "Concentration", 
+                  label = span(`data-translate` = "ui_3xlab", "X-axis label")),
+        textInput(ns("yaxis"), 
+                  value = "Percent", 
+                  label = span(`data-translate` = "ui_3ylab", "Y-axis label")),
+        textInput(ns("title"), 
+                  value = "", 
+                  label = span(`data-translate` = "ui_3title", "Title")),
+        uiOutput(ns("uiLegendColour")),
+        uiOutput(ns("uiLegendShape")),
+        layout_column_wrap(width = 1 / 2, 
+                           numericInput(ns("size3"), 
+                                        label = span(`data-translate` = "ui_size", "Text size"), 
+                                        value = 12, min = 1, max = 100),
+                           numericInput(ns("sizeLabel3"), 
+                                        label = span(`data-translate` = "ui_sizeLabel", "Label size"), 
+                                        value = 3, min = 1, max = 10)
+        ),
+        checkboxInput(ns("checkHc"), 
+                      label = span(`data-translate` = "ui_checkHc", "Show hazard concentration"), 
+                      value = TRUE),
+        layout_column_wrap(
+          width = 1 / 3,
+          numericInput(ns("adjustLabel"),
+                       value = 1.05, 
+                       label = span(`data-translate` = "ui_adjustLabel", "Adjust label"), 
+                       min = 0, max = 10, step = 0.1),
+          numericInput(ns("xMin"), 
+                       label = span(`data-translate` = "ui_xmin", "X min"), 
+                       min = 1, value = NULL),
+          numericInput(ns("xMax"), 
+                       label = span(`data-translate` = "ui_xmax", "X max"), 
+                       min = 1, value = NULL)
+        ),
+        checkboxInput(ns("xlog"), 
+                      label = span(`data-translate` = "ui_xlog", "Log scale"), 
+                      value = TRUE),
+        uiOutput(ns("uiXbreaks"))
+      )
     ),
-    checkboxInput(ns("checkHc"), 
-                  label = span(`data-translate` = "ui_checkHc", "Show hazard concentration"), 
-                  value = TRUE),
-    layout_column_wrap(
-      width = 1 / 3,
-      numericInput(ns("adjustLabel"),
-                   value = 1.05, 
-                   label = span(`data-translate` = "ui_adjustLabel", "Adjust label"), 
-                   min = 0, max = 10, step = 0.1),
-      numericInput(ns("xMin"), 
-                   label = span(`data-translate` = "ui_xmin", "X min"), 
-                   min = 1, value = NULL),
-      numericInput(ns("xMax"), 
-                   label = span(`data-translate` = "ui_xmax", "X max"), 
-                   min = 1, value = NULL)
-    ),
-    checkboxInput(ns("xlog"), 
-                  label = span(`data-translate` = "ui_xlog", "Log scale"), 
-                  value = TRUE),
-    uiOutput(ns("uiXbreaks"))
-  )
+    conditionalPanel(
+      condition = "input.main_nav == 'predict'",
+      div(
+        class = "p-3",
+        conditionalPanel(condition = "output.checkpred", htmlOutput("hintPr")),
+        conditionalPanel(
+          condition = "output.showPredictResults",
+          card(
+            full_screen = TRUE,
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              span(`data-translate` = "ui_3model", "Model Average Plot"),
+              ui_download_popover(tab = "pred")
+            ),
+            card_body(
+              plotOutput("modelAveragePlot"),
+              conditionalPanel(condition = "output.showPredictResults", htmlOutput("estHc"))
+            )
+          )
+        ),
+        conditionalPanel(
+          condition = "output.showPredictResults",
+          card(
+            full_screen = TRUE,
+            card_header(
+              class = "d-flex justify-content-between align-items-center",
+              div(
+                span(`data-translate` = "ui_3cl", "Confidence Limits"),
+                bslib::tooltip(
+                  bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                  uiOutput("ui_3help"),
+                  placement = "right"
+                )
+              ),
+              downloadButton(
+                "dlPredTable",
+                label = tagList(
+                  bsicons::bs_icon("download"),
+                  span(`data-translate` = "ui_2download", "Download")
+                ),
+                icon = NULL,
+                style = "padding:4px; font-size:80%"
+              )
+            ),
+            card_body(
+              div(class = "d-flex gap-4 align-items-start mb-3", div(
+                selectInput(
+                  "bootSamp",
+                  label = div(
+                    span(`data-translate` = "ui_3samples", "Bootstrap samples"),
+                    bslib::tooltip(
+                      bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                      span(`data-translate` = "ui_3bshint", "10,000 bootstrap samples recommended"),
+                      placement = "right"
+                    )
+                  ),
+                  choices = c(
+                    "500" = "500",
+                    "1,000" = "1000",
+                    "5,000" = "5000",
+                    "10,000" = "10000"
+                  ),
+                  selected = "1000",
+                  width = "190px"
+                )
+              ), div(
+                actionButton(
+                  "getCl",
+                  label = span(`data-translate` = "ui_3clbutton", "Get CL"),
+                  class = "btn-primary",
+                  style = "white-space: nowrap;"
+                )
+              )),
+              div(class = "mb-3", htmlOutput("describeCl")),
+              # Results table
+              conditionalPanel(condition = "output.showPredictResults", DT::dataTableOutput("clTable"))
+            )
+          )
+        )
+      )
+    ))
 }
 
 # Predict Module Server

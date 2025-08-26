@@ -2,6 +2,12 @@
 mod_fit_ui <- function(id) {
   ns <- NS(id)
   
+  layout_sidebar(
+    padding = "1rem",
+    gap = "1rem",
+    sidebar = sidebar(
+      width = 350,
+  
   tagList(
     tags$label(
       `for` = ns("selectConc"),
@@ -45,7 +51,46 @@ mod_fit_ui <- function(id) {
       label = span(`data-translate` = "ui_size", "Text size"),
       value = 12, min = 1, max = 100
     )
-  )
+  )),
+conditionalPanel(
+  condition = "input.main_nav == 'fit'",
+  div(
+    class = "p-3",
+    conditionalPanel(condition = "output.checkfit", htmlOutput("hintFi")),
+    conditionalPanel(condition = "output.showFitResults", uiOutput("ui_2plot")),
+    conditionalPanel(
+      condition = "output.showFitResults", 
+      card(
+        full_screen = TRUE,
+        card_header(
+          class = "d-flex justify-content-between align-items-center",
+          span(`data-translate` = "ui_2plot", "Plot Fitted Distributions"),
+          ui_download_popover()
+        ),
+        card_body(
+          htmlOutput("fitFail"),
+          plotOutput("distPlot1")
+        )
+      ),
+      card(
+        full_screen = TRUE,
+        card_header(
+          class = "d-flex justify-content-between align-items-center",
+          span(`data-translate` = "ui_2table", "Goodness of Fit"),
+          actionButton("dlFitTable",
+                       label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
+                       style = "padding:4px; font-size:80%"
+          )
+        ),
+        card_body(
+          div(id = "gofDiv",
+              DT::dataTableOutput("gofTable")
+          ),
+          # Hidden download button for programmatic triggering
+          downloadButton("fitDlTableHidden", "", style = "display: none;")
+        )
+      )
+    ))))
 }
 
 # Fit Module Server
