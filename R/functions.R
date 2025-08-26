@@ -12,6 +12,14 @@
 
 utils::globalVariables(c("."))
 
+paste_js <- function(x, ns){
+  paste0("output['", ns(x), "']")
+}
+
+guess_sp <- function(name){
+  name[grepl("sp", name %>% tolower())][1]
+}
+
 # functions
 label_mandatory <- function(label) {
   tagList(label, span("*", class = "mandatory_star"))

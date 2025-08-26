@@ -57,7 +57,7 @@ mod_data_ui <- function(id) {
           )
         )),
       conditionalPanel(
-        condition = "input.main_nav == 'data' && output.showDataResults",
+        condition = glue::glue("input.main_nav == 'data' && {paste_js('showDataResults', ns)} == true"),
         card(
           card_header(span(`data-translate` = "ui_1preview", "Preview chosen dataset")),
           card_body(DT::DTOutput("viewUpload"), min_height = "550px")
@@ -172,6 +172,26 @@ mod_data_server <- function(id, shared_values, translations) {
       }
     })
     
+    output$viewUpload <- DT::renderDataTable({
+      data <- shared_values$data
+      if (is.null(data) || nrow(data) == 0) {
+        return(NULL)
+      }
+      
+      DT::datatable(
+        data,
+        options = dt_options(translation.value$lang),
+        class = 'table-striped table-hover table-bordered',
+        selection = 'none',
+        extensions = 'Buttons'
+      ) %>%
+        DT::formatStyle(
+          columns = colnames(data),
+          backgroundColor = 'white',
+          border = '1px solid #ddd'
+        )
+    })
+    
     # Event observers
     observeEvent(input$uploadData, {
       upload_values$upload_state <- "upload"
@@ -192,6 +212,21 @@ mod_data_server <- function(id, shared_values, translations) {
       }
     })
     
+    # Reactive indicator for data availability
+    has_data <- reactive({
+      if (!upload_values$data_ready) return(FALSE)
+      data <- tryCatch({
+        names_data()
+      }, error = function(e) NULL)
+      if (is.null(data) || nrow(data) == 0) return(FALSE)
+      
+      TRUE
+    })
+    output$showDataResults <- reactive({
+      has_data()
+    })
+    outputOptions(output, "showDataResults", suspendWhenHidden = FALSE)
+    
     # Return reactive data for use by other modules
     return(
       list(
@@ -199,20 +234,7 @@ mod_data_server <- function(id, shared_values, translations) {
         clean_data = reactive({ clean_data() }),
         column_names = reactive({ names(clean_data()) }),
         data_source = reactive({ upload_values$upload_state }),
-        has_data = reactive({ 
-          # Only show if explicitly marked as ready
-          if (!upload_values$data_ready) return(FALSE)
-          if (is.null(upload_values$upload_state)) return(FALSE)
-          
-          # Double-check data exists
-          data <- tryCatch({
-            names_data()
-          }, error = function(e) NULL)
-          
-          if (is.null(data) || nrow(data) == 0) return(FALSE)
-          
-          TRUE
-        })
+        has_data = reactive({ has_data()})
       )
     )
   })
