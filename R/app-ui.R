@@ -26,8 +26,16 @@ app_ui <- function() {
       ".shiny-output-error:before { visibility: hidden; }",
       "/* Remove focus outline from help icons */",
       ".bi-question-circle:focus { outline: none !important; border: none !important; box-shadow: none !important; }",
-      ".bi-question-circle { cursor: pointer; }"
+      ".bi-question-circle { cursor: pointer; }",
+      ".initially-hidden {
+        display: none;
+      }"
     ),
+    tags$script(HTML("
+      $(document).on('shiny:connected', function() {
+        $('.initially-hidden').removeClass('initially-hidden');
+      });
+    ")),
     
     page_navbar(
       title = "shinyssdtools",
@@ -82,16 +90,21 @@ app_ui <- function() {
                 )
               )
             ),
-            conditionalPanel(condition = "input.main_nav == 'data'",
-                             mod_data_ui("data_module")),
-            conditionalPanel(condition = "input.main_nav == 'fit'", 
-                             mod_fit_ui("fit_module")),
-            conditionalPanel(condition = "input.main_nav == 'predict'", 
-                             mod_predict_ui("predict_module")),
-            conditionalPanel(condition = "input.main_nav == 'report'", 
-                             mod_report_ui("report_module")),
-            conditionalPanel(condition = "input.main_nav == 'rcode'", 
-                             mod_rcode_ui("rcode_module"))
+            div(class = "initially-hidden",
+                conditionalPanel(condition = "input.main_nav == 'data'",
+                                 mod_data_ui("data_module"))),
+            div(class = "initially-hidden",
+                conditionalPanel(condition = "input.main_nav == 'fit'", 
+                                 mod_fit_ui("fit_module"))),
+            div(class = "initially-hidden",
+                conditionalPanel(condition = "input.main_nav == 'predict'", 
+                                 mod_predict_ui("predict_module"))),
+            div(class = "initially-hidden",
+                conditionalPanel(condition = "input.main_nav == 'report'", 
+                                 mod_report_ui("report_module"))),
+            div(class = "initially-hidden",
+                conditionalPanel(condition = "input.main_nav == 'rcode'", 
+                                 mod_rcode_ui("rcode_module")))
           )
         )
       ),
