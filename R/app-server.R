@@ -73,7 +73,8 @@ app_server <- function(input, output, session) {
   trans <- reactive({
     translations$trans <- translations[[current_lang()]]
     translations
-  })
+  }) %>% 
+    bindEvent(current_lang())
   
   client_translations <- reactive({
     id <- unique(translations$id)
@@ -86,22 +87,23 @@ app_server <- function(input, output, session) {
   })
   
   # Send to client
-  observeEvent(current_lang(), {
+  observe({
     session$sendCustomMessage(
       "updateTranslations",
       list(translations = client_translations(), language = current_lang())
     )
-  })
+  }) %>% 
+    bindEvent(client_translations())
   
   
   # Module Server Calls -----------------------------------------------------
   
   # Call module servers with shared values
-  data_module <- mod_data_server("data_module", trans, current_lang)
-  # fit_module <- mod_fit_server("fit_module", shared_values, trans)
-  # predict_module <- mod_predict_server("predict_module", shared_values, trans)
-  # report_module <- mod_report_server("report_module", shared_values, trans)
-  # rcode_module <- mod_rcode_server("rcode_module", shared_values, trans)
+  data_mod <- mod_data_server("data_mod", trans, current_lang)
+  fit_mod <- mod_fit_server("fit_mod", trans, data_mod)
+  # predict_mod <- mod_predict_server("predict_mod", shared_values, trans)
+  # report_mod <- mod_report_server("report_mod", shared_values, trans)
+  # rcode_mod <- mod_rcode_server("rcode_mod", shared_values, trans)
   
   
   
