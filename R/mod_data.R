@@ -56,11 +56,12 @@ mod_data_ui <- function(id) {
             rhandsontable::rHandsontableOutput(ns("hot"))
           )
         )),
+      
       conditionalPanel(
         condition = glue::glue("input.main_nav == 'data' && {paste_js('showDataResults', ns)} == true"),
         card(
           card_header(span(`data-translate` = "ui_1preview", "Preview chosen dataset")),
-          card_body(DT::DTOutput("viewUpload"), min_height = "550px")
+          card_body(DT::DTOutput(ns("viewUpload")))
         ),
         card(class = "mt-3", card_body(span(`data-translate` = "ui_1note", "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value.")))
       )
@@ -68,14 +69,14 @@ mod_data_ui <- function(id) {
 }
 
 # Data Module Server
-mod_data_server <- function(id, shared_values, translations) {
+mod_data_server <- function(id, translations, translation_values) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     # Module-specific reactive values
     upload_values <- reactiveValues(
       upload_state = NULL,
-      data_ready = FALSE  # Explicit flag to prevent early flashing
+      data_ready = FALSE  
     )
     
     hot_values <- reactiveValues()
@@ -156,13 +157,13 @@ mod_data_server <- function(id, shared_values, translations) {
       data
     })
     
-    # Update shared values when data changes
-    observe({
-      data <- names_data()
-      shared_values$data <- data
-      shared_values$data_source <- upload_values$upload_state
-      shared_values$column_names <- names(data)
-    })
+    # # Update shared values when data changes
+    # observe({
+    #   data <- names_data()
+    #   shared_values$data <- data
+    #   shared_values$data_source <- upload_values$upload_state
+    #   shared_values$column_names <- names(data)
+    # })
     
     # Render handson table
     output$hot <- rhandsontable::renderRHandsontable({
@@ -172,15 +173,16 @@ mod_data_server <- function(id, shared_values, translations) {
       }
     })
     
+    # observe({print(lang())})
+    
     output$viewUpload <- DT::renderDataTable({
-      data <- shared_values$data
-      if (is.null(data) || nrow(data) == 0) {
-        return(NULL)
-      }
+      req(upload_values$data_ready)
+      data <- read_data()
+      print(data)
       
       DT::datatable(
         data,
-        options = dt_options(translation.value$lang),
+        options = dt_options(translation_values$lang),
         class = 'table-striped table-hover table-bordered',
         selection = 'none',
         extensions = 'Buttons'

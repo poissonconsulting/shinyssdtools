@@ -12,6 +12,10 @@
 
 utils::globalVariables(c("."))
 
+tr <- function(id, trans) {
+  trans$trans[trans$id == id]
+}
+
 paste_js <- function(x, ns){
   paste0("output['", ns(x), "']")
 }
