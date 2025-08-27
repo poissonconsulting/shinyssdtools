@@ -10,8 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 app_server <- function(input, output, session) {
-
-# Shared reactive values for inter-module communication
+  # Shared reactive values for inter-module communication
   shared_values <- reactiveValues(
     # From data module
     data = NULL,
@@ -19,7 +18,7 @@ app_server <- function(input, output, session) {
     column_names = NULL,
     upload_filename = NULL,
     
-    # From fit module  
+    # From fit module
     fitted_dist = NULL,
     selected_conc = NULL,
     selected_dists = NULL,
@@ -65,61 +64,49 @@ app_server <- function(input, output, session) {
     translations = NULL,
     current_language = "English"
   )
-
-# --- Translations Setup
-translation_values <- reactiveValues(lang = "English")
-
-# Get all translation keys automatically from your translations table
-translation_id <- reactive({
-  unique(translations$id)
-})
-
-# Generate translations dynamically
-client_translations <- reactive({
-  id <- unique(translations$id)
-  trans_data <- trans()
   
-  translations <- sapply(id, function(x) tr(x, trans_data))
-  names(translations) <- id
-  as.list(translations)
-})
-
-# Language switching
-observeEvent(input$english, {translation_values$lang <- "English"})
-observeEvent(input$french, {translation_values$lang <- "French"})
-
-# Translation data reactive
-trans <- reactive({
-  if(translation_values$lang == "English"){
-    translations$trans <- translations$english
-  } else {
-    translations$trans <- translations$french
-  }
-  translations
-})
-
-# Send to client
-observeEvent(translation_values$lang, {
-  session$sendCustomMessage("updateTranslations", list(
-    translations = client_translations(),
-    language = translation_values$lang
-  ))
-})
+  # --- Translations
+  current_lang <- reactive({
+    ifelse (input$english > input$french | input$english == input$french, "english", "french")
+  })
+  
+  trans <- reactive({
+    translations$trans <- translations[[current_lang()]]
+    translations
+  })
+  
+  client_translations <- reactive({
+    id <- unique(translations$id)
+    trans_data <- trans()
+    
+    translations <- sapply(id, function(x)
+      tr(x, trans_data))
+    names(translations) <- id
+    as.list(translations)
+  })
+  
+  # Send to client
+  observeEvent(current_lang(), {
+    session$sendCustomMessage(
+      "updateTranslations",
+      list(translations = client_translations(), language = current_lang())
+    )
+  })
   
   
-# Module Server Calls -----------------------------------------------------
+  # Module Server Calls -----------------------------------------------------
   
   # Call module servers with shared values
-  data_module <- mod_data_server("data_module", trans, translation_values)
+  data_module <- mod_data_server("data_module", trans, current_lang)
   # fit_module <- mod_fit_server("fit_module", shared_values, trans)
   # predict_module <- mod_predict_server("predict_module", shared_values, trans)
   # report_module <- mod_report_server("report_module", shared_values, trans)
   # rcode_module <- mod_rcode_server("rcode_module", shared_values, trans)
-
-
-
-
-
+  
+  
+  
+  
+  
   # --- get confidence intervals
   table_cl <- eventReactive(input$getCl, {
     dist <- fit_dist()
@@ -133,9 +120,10 @@ observeEvent(translation_values$lang, {
     waiter::waiter_hide()
     y
   })
-
+  
   estimate_time <- reactive({
-    if (translation_values$lang == "English") {
+    lang <- current_lang()
+    if (lang == "english") {
       df <- data.frame(
         n = c("500", "1,000", "5,000", "10,000"),
         time = c("10 seconds", "20 seconds", "2 minutes", "5 minutes")
@@ -146,15 +134,15 @@ observeEvent(translation_values$lang, {
         time = c("10 secondes", "20 secondes", "2 minutes", "5 minutes")
       )
     }
-
+    
     df[df$n == input$bootSamp, ]$time
   })
-
+  
   ########### Outputs --------------------
-
-
-
-
+  
+  
+  
+  
   # dtopt <- reactive({
   #   url <- paste0("//cdn.datatables.net/plug-ins/1.10.11/i18n/", translation.value$lang, ".json")
   #   list(
@@ -162,36 +150,48 @@ observeEvent(translation_values$lang, {
   #     pageLength = 10
   #   )
   # })
-
+  
   # --- render fit results ----
   output$distPlot1 <- renderPlot({
     shared_values$fit_plot
   })
-
+  
   output$gofTable <- DT::renderDataTable({
     if (!is.null(shared_values$gof_table)) {
       DT::datatable(shared_values$gof_table, options = list(dom = "t"))
     }
   })
-
+  
   output$fitFail <- renderText({
     failed_fits <- fit_module$fit_fail()
     req(failed_fits != "")
-    HTML(paste0("<font color='grey'>", paste(failed_fits, tr("ui_hintfail", trans())), "</font>"))
+    HTML(paste0("<font color='grey'>", paste(
+      failed_fits, tr("ui_hintfail", trans())
+    ), "</font>"))
   })
   
   # --- render predict results ----
   output$modelAveragePlot <- renderPlot({
     tryCatch({
-      waiter::waiter_show(id = "modelAveragePlot", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
+      waiter::waiter_show(
+        id = "modelAveragePlot",
+        html = waiter::spin_2(),
+        color = "white",
+        hide_on_render = TRUE
+      )
       shared_values$model_average_plot
     }, error = function(e) {
       # Close any open devices on error to prevent leaks
-      tryCatch(while(dev.cur() > 1) dev.off(), error = function(e2) {})
+      tryCatch(
+        while (dev.cur() > 1)
+          dev.off(),
+        error = function(e2) {
+        }
+      )
       stop(e)
     })
   })
-
+  
   output$estHc <- renderUI({
     req(input$thresh_type)
     percent <- thresh_rv$percent
@@ -199,26 +199,37 @@ observeEvent(translation_values$lang, {
     percent_bold <- paste0("<b>", thresh_rv$percent, "</b>")
     conc <- paste0("<b>", thresh_rv$conc, "</b>")
     if (input$thresh_type != "Concentration") {
-      return(HTML(glue::glue(tr("ui_3hc2", trans()), percent = percent_bold, conc = conc)))
+      return(HTML(glue::glue(
+        tr("ui_3hc2", trans()),
+        percent = percent_bold,
+        conc = conc
+      )))
     }
-    div(
-      HTML(glue::glue("HC{percent}/PC{percent_pc}: {conc}", percent = percent, conc = conc)),
-      br(),
-      HTML(glue::glue(tr("ui_3hc", trans()), percent = percent_bold, conc = conc))
-    )
+    div(HTML(
+      glue::glue(
+        "HC{percent}/PC{percent_pc}: {conc}",
+        percent = percent,
+        conc = conc
+      )
+    ), br(), HTML(glue::glue(
+      tr("ui_3hc", trans()), percent = percent_bold, conc = conc
+    )))
   })
-
+  
   output$clTable <- DT::renderDataTable({
     DT::datatable(table_cl(), options = list(dom = "t"))
   })
-
+  
   describe_cl <- reactive({
-    desc1 <- paste(tr("ui_3cldesc1", trans()), paste0("<b>", thresh_rv$percent, "</b>"))
+    desc1 <- paste(tr("ui_3cldesc1", trans()),
+                   paste0("<b>", thresh_rv$percent, "</b>"))
     if (input$thresh_type != "Concentration") {
-      desc1 <- paste(tr("ui_3cldesc11", trans()), paste0("<b>", thresh_rv$conc, "</b>"))
+      desc1 <- paste(tr("ui_3cldesc11", trans()),
+                     paste0("<b>", thresh_rv$conc, "</b>"))
     }
     HTML(
-      desc1, tr("ui_3cldesc2", trans()),
+      desc1,
+      tr("ui_3cldesc2", trans()),
       paste0("<b>", input$bootSamp, ".</b>"),
       "<br/>",
       tr("ui_3cldesc3", trans()),
@@ -229,11 +240,27 @@ observeEvent(translation_values$lang, {
   output$describeCl <- renderText({
     describe_cl()
   })
-
+  
   # --- render UI ----
-  shinyjs::onclick("linkFormatPredict", shinyjs::toggle("divFormatPredict", anim = TRUE, animType = "slide", time = 0.2))
-  shinyjs::onclick("linkPngFormatPredict", shinyjs::toggle("divPngFormatPredict", anim = TRUE, animType = "slide", time = 0.2))
-
+  shinyjs::onclick(
+    "linkFormatPredict",
+    shinyjs::toggle(
+      "divFormatPredict",
+      anim = TRUE,
+      animType = "slide",
+      time = 0.2
+    )
+  )
+  shinyjs::onclick(
+    "linkPngFormatPredict",
+    shinyjs::toggle(
+      "divPngFormatPredict",
+      anim = TRUE,
+      animType = "slide",
+      time = 0.2
+    )
+  )
+  
   # params_list <- reactive({
   #   req(plot_model_average())
   #   toxicant <- input$toxicant
@@ -251,12 +278,13 @@ observeEvent(translation_values$lang, {
   #   )
   #   params
   # })
-
+  
   ########### Render UI Translations -------------------
   
   # Navigation titles and data controls now handled by client-side JavaScript
   output$ui_2select <- renderUI({
-    selectizeInput("selectDist",
+    selectizeInput(
+      "selectDist",
       label = tr("ui_2dist", trans()),
       multiple = TRUE,
       choices = c(default.dists, extra.dists),
@@ -268,83 +296,105 @@ observeEvent(translation_values$lang, {
       )
     )
   })
-
-
+  
+  
   output$ui_unit <- renderUI({
-    selectInput("selectUnit",
+    selectInput(
+      "selectUnit",
       label = tr("ui_2unit", trans()),
       choices = units(),
       selected = units()[1]
     )
   })
-
+  
   output$ui_2rescale <- renderUI({
     checkboxInput("rescale",
-      label = tr("ui_2rescale", trans()),
-      value = FALSE
+                  label = tr("ui_2rescale", trans()),
+                  value = FALSE)
+  })
+  
+  output$ui_2xlab <- renderUI({
+    textInput("xaxis2",
+              value = "Concentration",
+              label = tr("ui_3xlab", trans()))
+  })
+  
+  output$ui_2ylab <- renderUI({
+    textInput(
+      "yaxis2",
+      value = tr("ui_2ploty", trans()),
+      label = tr("ui_3ylab", trans())
     )
   })
-
-  output$ui_2xlab <- renderUI({
-    textInput("xaxis2", value = "Concentration", label = tr("ui_3xlab", trans()))
-  })
-
-  output$ui_2ylab <- renderUI({
-    textInput("yaxis2", value = tr("ui_2ploty", trans()), label = tr("ui_3ylab", trans()))
-  })
-
+  
   output$ui_thresh_type <- renderUI({
     thresh_label <- tr("ui_3threshlabel", trans())
     thresh <- tr("ui_3thresh", trans())
-    radioButtons("thresh_type", 
-                 label = span(`data-translate` = "ui_3threshlabel", "Threshold type"),
-                 choices = c("Concentration", thresh),
-                 selected = "Concentration", inline = TRUE
+    radioButtons(
+      "thresh_type",
+      label = span(`data-translate` = "ui_3threshlabel", "Threshold type"),
+      choices = c("Concentration", thresh),
+      selected = "Concentration",
+      inline = TRUE
     )
   })
-
+  
   output$ui_3thresh <- renderUI({
     req(input$thresh_type)
     if (input$thresh_type != "Concentration") {
-      return(numericInput("conc",
-        label = span(`data-translate` = "ui_3byconc", "By concentration"),
-        value = 1, min = 0,
-        max = 100, step = 0.1, width = "100px"
-      ))
+      return(
+        numericInput(
+          "conc",
+          label = span(`data-translate` = "ui_3byconc", "By concentration"),
+          value = 1,
+          min = 0,
+          max = 100,
+          step = 0.1,
+          width = "100px"
+        )
+      )
     }
-    div(
-      inline(selectizeInput("thresh",
+    div(inline(
+      selectizeInput(
+        "thresh",
         label = span(`data-translate` = "ui_3affecting", "% affecting"),
         choices = c(1, 5, 10, 20),
         options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
-        selected = 5, width = "100px"
-      )),
-      inline(selectizeInput("thresh_pc",
+        selected = 5,
+        width = "100px"
+      )
+    ), inline(
+      selectizeInput(
+        "thresh_pc",
         label = span(`data-translate` = "ui_3protecting", "% protecting"),
         choices = c(99, 95, 90, 80),
         options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
-        selected = 95, width = "100px"
-      ))
+        selected = 95,
+        width = "100px"
+      )
+    ))
+  })
+  
+  
+  
+  
+  output$ui_3pal <- renderUI({
+    selectInput(
+      "selectPalette",
+      label = span(`data-translate` = "ui_3pal", "Palette"),
+      choices = pals,
+      selected = pals[2]
     )
   })
-
-
-
-
-  output$ui_3pal <- renderUI({
-    selectInput("selectPalette", 
-                label = span(`data-translate` = "ui_3pal", "Palette"), 
-                choices = pals, selected = pals[2])
-  })
-
+  
   output$ui_3pngopts <- renderUI({
     actionLink("linkPngFormatPredict", label = tr("ui_3pngopts", trans()))
   })
-
+  
   output$ui_3model <- renderUI({
     h4(tr("ui_3model", trans()))
   })
-
+  
   output$ui_3cl <- renderUI({
     h4(
       tr("ui_3cl", trans()),
@@ -355,40 +405,41 @@ observeEvent(translation_values$lang, {
       )
     )
   })
-
+  
   output$ui_3help <- renderUI({
     tr("ui_3help", trans())
   })
-
+  
   output$ui_5format <- renderUI({
     radioButtons("report_format", "Report format")
   })
-
+  
   output$ui_about <- renderUI({
+    lang <- current_lang()
     ver <- paste("ssdtools version:", utils::packageVersion("ssdtools"))
-    sver <- paste("shinyssdtools version:", utils::packageVersion("shinyssdtools"))
-    if (translation_values$lang == "English") {
+    sver <- paste("shinyssdtools version:",
+                  utils::packageVersion("shinyssdtools"))
+    if (lang == "english") {
       return({
-        tagList(
-          p(ver),
-          p(sver),
-          includeHTML(system.file("extdata/about-en.html", package = "shinyssdtools"))
-        )
+        tagList(p(ver), p(sver), includeHTML(
+          system.file("extdata/about-en.html", package = "shinyssdtools")
+        ))
       })
     } else {
       return({
-        tagList(
-          p(ver),
-          p(sver),
-          includeHTML(system.file("extdata/about-fr.html", package = "shinyssdtools"))
-        )
+        tagList(p(ver), p(sver), includeHTML(
+          system.file("extdata/about-fr.html", package = "shinyssdtools")
+        ))
       })
     }
   })
-
+  
   output$ui_userguide <- renderUI({
-    if (translation_values$lang == "English") {
-      return(includeHTML(system.file(package = "shinyssdtools", "extdata/user-en.html")))
+    lang <- current_lang()
+    if (lang == "english") {
+      return(includeHTML(
+        system.file(package = "shinyssdtools", "extdata/user-en.html")
+      ))
     }
     includeHTML(system.file(package = "shinyssdtools", "extdata/user-fr.html"))
   })

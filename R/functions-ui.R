@@ -1,6 +1,6 @@
-dt_options <- function(lang = "English"){
+dt_options <- function(lang = "english"){
   # Language-specific translations
-  lang_options <- if (lang == "French") {
+  lang_options <- if (lang == "french") {
     list(
       search = "Rechercher :",
       lengthMenu = "Afficher _MENU_ entrées",

@@ -69,7 +69,7 @@ mod_data_ui <- function(id) {
 }
 
 # Data Module Server
-mod_data_server <- function(id, translations, translation_values) {
+mod_data_server <- function(id, translations, lang) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -182,7 +182,7 @@ mod_data_server <- function(id, translations, translation_values) {
       
       DT::datatable(
         data,
-        options = dt_options(translation_values$lang),
+        options = dt_options(lang()),
         class = 'table-striped table-hover table-bordered',
         selection = 'none',
         extensions = 'Buttons'
