@@ -132,6 +132,17 @@ mod_report_server <- function(id, shared_values, translations) {
       }
     )
     
+    waiting_screen_report <- reactive({
+      tagList(
+        waiter::spin_flower(),
+        tagList(
+          h3(tr("ui_4gentitle", trans())),
+          br(),
+          h4(tr("ui_4genbody", trans()))
+        )
+      )
+    })
+    
     # Return reactive indicators
     return(
       list(

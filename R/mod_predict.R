@@ -7,12 +7,18 @@ mod_predict_ui <- function(id) {
     gap = "1rem",
     sidebar = sidebar(
       width = 350,
-      uiOutput(ns("ui_thresh_type")),
+      radioButtons(ns("thresh_type"), 
+                   label = span(`data-translate` = "ui_3threshlabel", "Threshold type"),
+                   choices = c("Concentration", span(`data-translate` = "ui_3thresh", "Fraction affected")),
+                   selected = "Concentration", inline = TRUE
+      ),
       uiOutput(ns("ui_3thresh")),
       uiOutput(ns("selectLabel")),
       uiOutput(ns("selectColour")),
       uiOutput(ns("selectShape")),
-      uiOutput(ns("ui_3pal")),
+      selectInput(ns("selectPalette"), 
+                  label = span(`data-translate` = "ui_3pal", "Palette"), 
+                  choices = pals, selected = pals[2]),
       textInput(ns("xaxis"), 
                 value = "Concentration", 
                 label = span(`data-translate` = "ui_3xlab", "X-axis label")),
@@ -153,18 +159,13 @@ mod_predict_server <- function(id, shared_values, translations) {
       shared_values$column_names
     })
     
-    # Guess species column
-    guess_spp <- reactive({
-      name <- column_names()
-      name[grepl("sp", name %>% tolower())][1]
-    })
-    
     # Render UI components based on data
     output$selectLabel <- renderUI({
+      cols <- column_names()
       selectInput(ns("selectLabel"),
         label = span(`data-translate` = "ui_3label", "Label"),
-        choices = c("-none-", column_names()),
-        selected = guess_spp()
+        choices = c("-none-", cols),
+        selected = guess_spp(cols)
       )
     })
     
@@ -196,17 +197,6 @@ mod_predict_server <- function(id, shared_values, translations) {
                 value = input$selectShape)
     })
     
-    output$ui_thresh_type <- renderUI({
-      trans_obj <- translations()
-      thresh_label <- tr("ui_3threshlabel", trans_obj)
-      thresh <- tr("ui_3thresh", trans_obj)
-      radioButtons(ns("thresh_type"), 
-                   label = span(`data-translate` = "ui_3threshlabel", "Threshold type"),
-                   choices = c("Concentration", thresh),
-                   selected = "Concentration", inline = TRUE
-      )
-    })
-    
     output$ui_3thresh <- renderUI({
       req(input$thresh_type)
       if (input$thresh_type != "Concentration") {
@@ -231,12 +221,7 @@ mod_predict_server <- function(id, shared_values, translations) {
         ))
       )
     })
-    
-    output$ui_3pal <- renderUI({
-      selectInput(ns("selectPalette"), 
-                  label = span(`data-translate` = "ui_3pal", "Palette"), 
-                  choices = pals, selected = pals[2])
-    })
+  
     
     # Threshold logic observers
     observeEvent(input$thresh, {
@@ -424,6 +409,40 @@ mod_predict_server <- function(id, shared_values, translations) {
       )
     })
     
+    output$predDlPlot <- downloadHandler(
+      filename = function() {
+        "ssdtools_modelAveragePlot.png"
+      },
+      content = function(file) {
+        ggplot2::ggsave(file,
+                        plot = plot_model_average(), device = "png",
+                        width = get_width(), height = get_height(), dpi = get_dpi()
+        )
+      }
+    )
+    
+    output$predDlRds <- downloadHandler(
+      filename = function() {
+        "ssdtools_modelAveragePlot.rds"
+      },
+      content = function(file) {
+        saveRDS(plot_model_average(), file = file)
+      }
+    )
+    
+    output$predDlTable <- downloadHandler(
+      filename = function() {
+        "ssdtools_predictTable.csv"
+      },
+      content <- function(file) {
+        if (!is.null(table_cl())) {
+          return(readr::write_csv(table_cl() %>% dplyr::as_tibble(), file))
+        } else {
+          return()
+        }
+      }
+    )
+    
     # Update shared values when predictions change
     observe({
       shared_values$predictions <- predict_hc()
@@ -433,6 +452,31 @@ mod_predict_server <- function(id, shared_values, translations) {
       )
       shared_values$model_average_plot <- plot_model_average()
     })
+    
+    waiting_screen_cl <- reactive({
+      tagList(
+        waiter::spin_flower(),
+        tagList(
+          h3(paste(tr("ui_3cl", trans()), "...")),
+          br(),
+          describe_cl()
+        )
+      )
+    })
+    
+    output$checkpred <- reactive({
+      check_pred() != ""
+    })
+    outputOptions(output, "checkpred", suspendWhenHidden = FALSE)
+    
+    output$showPredictResults <- reactive({
+      return(show_predict_results())
+    })
+    outputOptions(output, "showPredictResults", suspendWhenHidden = FALSE)
+    
+    
+    output$hintPr <- renderText(hint(check_pred()))
+    
     
     # Return reactive values for use by other modules
     return(

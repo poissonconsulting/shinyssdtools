@@ -92,19 +92,19 @@ app_ui <- function() {
             ),
             div(class = "initially-hidden",
                 conditionalPanel(condition = "input.main_nav == 'data'",
-                                 mod_data_ui("data_module"))),
+                                 mod_data_ui("data_mod"))),
             div(class = "initially-hidden",
                 conditionalPanel(condition = "input.main_nav == 'fit'", 
-                                 mod_fit_ui("fit_module"))),
+                                 mod_fit_ui("fit_mod"))),
             div(class = "initially-hidden",
                 conditionalPanel(condition = "input.main_nav == 'predict'", 
-                                 mod_predict_ui("predict_module"))),
+                                 mod_predict_ui("predict_mod"))),
             div(class = "initially-hidden",
                 conditionalPanel(condition = "input.main_nav == 'report'", 
-                                 mod_report_ui("report_module"))),
+                                 mod_report_ui("report_mod"))),
             div(class = "initially-hidden",
                 conditionalPanel(condition = "input.main_nav == 'rcode'", 
-                                 mod_rcode_ui("rcode_module")))
+                                 mod_rcode_ui("rcode_mod")))
           )
         )
       ),

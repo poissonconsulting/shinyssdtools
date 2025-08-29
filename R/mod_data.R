@@ -58,7 +58,7 @@ mod_data_ui <- function(id) {
         )),
       
       conditionalPanel(
-        condition = glue::glue("input.main_nav == 'data' && {paste_js('showDataResults', ns)} == true"),
+        condition = glue::glue("input.main_nav == 'data' && {paste_js('has_data', ns)} == true"),
         card(
           card_header(span(`data-translate` = "ui_1preview", "Preview chosen dataset")),
           card_body(DT::DTOutput(ns("viewUpload")))
@@ -73,57 +73,53 @@ mod_data_server <- function(id, translations, lang) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Module-specific reactive values
     upload_values <- reactiveValues(
       upload_state = NULL,
       data_ready = FALSE  
     )
     
-    hot_values <- reactiveValues()
-    
-    # Demo data reactive
     demo_data <- reactive({
       df <- boron.data
-      trans_obj <- translations()
-      conc <- tr("ui_1htconc", trans_obj)
-      spp <- tr("ui_1htspp", trans_obj)
-      grp <- tr("ui_1htgrp", trans_obj)
-      chm <- tr("ui_1htchm", trans_obj)
-      unt <- tr("ui_1htunt", trans_obj)
+      trans <- translations()
+      conc <- tr("ui_1htconc", trans)
+      spp <- tr("ui_1htspp", trans)
+      grp <- tr("ui_1htgrp", trans)
+      chm <- tr("ui_1htchm", trans)
+      unt <- tr("ui_1htunt", trans)
       
       colnames(df) <- c(chm, spp, conc, grp, unt)
       df
-    })
+    }) %>% 
+      bindEvent(translations(), input$demoData)
     
-    # Handson table reactive
+    hot_values <- reactiveValues()
+    # Handson table 
     hot_data <- reactive({
-      trans_obj <- translations()
-      conc <- tr("ui_1htconc", trans_obj)
-      spp <- tr("ui_1htspp", trans_obj)
-      grp <- tr("ui_1htgrp", trans_obj)
+      trans <- translations()
+      conc <- tr("ui_1htconc", trans)
+      spp <- tr("ui_1htspp", trans)
+      grp <- tr("ui_1htgrp", trans)
       
       if (!is.null(input$hot)) {
-        DF <- rhandsontable::hot_to_r(input$hot)
-        colnames(DF) <- c(conc, spp, grp)
-        DF <- dplyr::mutate_if(DF, is.factor, as.character)
+        df <- rhandsontable::hot_to_r(input$hot)
+        colnames(df) <- c(conc, spp, grp)
+        df <- dplyr::mutate_if(df, is.factor, as.character)
       } else {
-        if (is.null(hot_values[["DF"]])) {
-          DF <- data.frame(
+        if (is.null(hot_values[["df"]])) {
+          df <- data.frame(
             "Concentration" = rep(NA_real_, 10),
             "Species" = rep(NA_character_, 10),
             "Group" = rep(NA_character_, 10)
           )
         } else {
-          DF <- hot_values[["DF"]]
+          df <- hot_values[["df"]]
         }
       }
-      hot_values[["DF"]] <- DF
-      DF
+      hot_values[["df"]] <- df
+      df
     })
     
-    # Read data based on selected method
     read_data <- reactive({
-      req(upload_values$upload_state)
       if (upload_values$upload_state == "upload") {
         data <- input$uploadData
         if (!grepl(".csv", data$name, fixed = TRUE)) {
@@ -136,9 +132,9 @@ mod_data_server <- function(id, translations, lang) {
       } else if (upload_values$upload_state == "hot") {
         return(hot_data())
       }
-    })
+    }) %>% 
+      bindEvent(upload_values$upload_state)
     
-    # Clean data
     clean_data <- reactive({
       data <- read_data()
       if (length(data)) {
@@ -148,22 +144,15 @@ mod_data_server <- function(id, translations, lang) {
         data <- data[!(rowSums(is.na(data) | data == "") == ncol(data)), ]
       }
       data
-    })
+    }) %>% 
+      bindEvent(read_data())
     
     # Deal with unacceptable column names
     names_data <- reactive({
       data <- clean_data()
-      names(data) %<>% make.names
+      names(data) %<>% make.names()
       data
     })
-    
-    # # Update shared values when data changes
-    # observe({
-    #   data <- names_data()
-    #   shared_values$data <- data
-    #   shared_values$data_source <- upload_values$upload_state
-    #   shared_values$column_names <- names(data)
-    # })
     
     # Render handson table
     output$hot <- rhandsontable::renderRHandsontable({
@@ -173,12 +162,8 @@ mod_data_server <- function(id, translations, lang) {
       }
     })
     
-    # observe({print(lang())})
-    
     output$viewUpload <- DT::renderDataTable({
-      req(upload_values$data_ready)
       data <- read_data()
-      print(data)
       
       DT::datatable(
         data,
@@ -192,29 +177,32 @@ mod_data_server <- function(id, translations, lang) {
           backgroundColor = 'white',
           border = '1px solid #ddd'
         )
-    })
+    }) %>% 
+      bindEvent(upload_values$data_ready, lang())
     
     # Event observers
-    observeEvent(input$uploadData, {
+    observe({
       upload_values$upload_state <- "upload"
       upload_values$data_ready <- TRUE
-    })
+    }) %>% 
+      bindEvent(input$uploadData)
     
-    observeEvent(input$demoData, {
+    observe({
       upload_values$upload_state <- "demo"
       upload_values$data_ready <- TRUE
-    })
+    }) %>% 
+      bindEvent(input$demoData)
     
-    observeEvent(input$hot, {
+    observe({
       upload_values$upload_state <- "hot"
       # For hot table, only set ready if there's actual data
       data <- hot_data()
       if (!is.null(data) && nrow(data) > 0 && !all(is.na(data[[1]]))) {
         upload_values$data_ready <- TRUE
       }
-    })
+    }) %>% 
+      bindEvent(input$hot)
     
-    # Reactive indicator for data availability
     has_data <- reactive({
       if (!upload_values$data_ready) return(FALSE)
       data <- tryCatch({
@@ -223,20 +211,18 @@ mod_data_server <- function(id, translations, lang) {
       if (is.null(data) || nrow(data) == 0) return(FALSE)
       
       TRUE
-    })
-    output$showDataResults <- reactive({
-      has_data()
-    })
-    outputOptions(output, "showDataResults", suspendWhenHidden = FALSE)
+    }) %>% 
+      bindEvent(names_data())
     
-    # Return reactive data for use by other modules
+    output$has_data <- has_data
+    outputOptions(output, "has_data", suspendWhenHidden = FALSE)
+    
     return(
       list(
-        data = reactive({ names_data() }),
-        clean_data = reactive({ clean_data() }),
-        column_names = reactive({ names(clean_data()) }),
-        data_source = reactive({ upload_values$upload_state }),
-        has_data = reactive({ has_data()})
+        data = names_data,
+        clean_data = clean_data,
+        # data_source = reactive({ upload_values$upload_state }),
+        has_data = has_data
       )
     )
   })

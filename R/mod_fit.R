@@ -94,7 +94,7 @@ conditionalPanel(
 }
 
 # Fit Module Server
-mod_fit_server <- function(id, shared_values, translations) {
+mod_fit_server <- function(id, translations, data_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -102,82 +102,78 @@ mod_fit_server <- function(id, shared_values, translations) {
     waiter_gof <- waiter::Waiter$new(id = "gofDiv", html = waiter::spin_2(), color = "white")
     waiter_distplot <- waiter::Waiter$new(id = "distPlot1", html = waiter::spin_2(), color = "white")
     
-    # Reactive for column names from data module
-    column_names <- reactive({
-      req(shared_values$column_names)
-      shared_values$column_names
-    })
-    
-    # Guess concentration column
-    guess_conc <- reactive({
-      name <- column_names()
-      name[grepl("conc", name %>% tolower())][1]
-    })
-    
+    # --- render column choices
     # Update concentration selectInput when data changes
     observe({
-      choices <- column_names()
-      selected <- guess_conc()
+      choices <- names(data_mod$clean_data())
+      selected <- guess_conc(choices)
       updateSelectInput(session, "selectConc",
                         choices = choices,
                         selected = selected)
-    })
+    }) %>% 
+      bindEvent(data_mod$clean_data())
+    
+    # observe({
+    #   print(check_fit())
+    # })
     
     # Check fit validation
-    check_fit <- reactive({
+    check_fit_args <- reactive({
       req(input$selectConc)
       req(input$selectDist)
-      req(shared_values$data)
+      req(data_mod$data())
       
       conc <- input$selectConc
       dist <- input$selectDist
-      data <- shared_values$data
-      trans_obj <- translations()
+      data <- data_mod$data()
+      trans <- translations()
       
       if (length(data[[conc]]) == 0L) {
-        return(tr("ui_hintdata", trans_obj))
+        return(tr("ui_hintdata", trans))
       }
       if (!is.numeric(data[[conc]])) {
-        return(tr("ui_hintnum", trans_obj))
+        return(tr("ui_hintnum", trans))
       }
       if (any(is.na(data[[conc]]))) {
-        return(tr("ui_hintmiss", trans_obj))
+        return(tr("ui_hintmiss", trans))
       }
       if (any(data[[conc]] <= 0)) {
-        return(tr("ui_hintpos", trans_obj))
+        return(tr("ui_hintpos", trans))
       }
       if (any(is.infinite(data[[conc]]))) {
-        return(tr("ui_hintfin", trans_obj))
+        return(tr("ui_hintfin", trans))
       }
       if (zero_range(data[[conc]])) {
-        return(tr("ui_hintident", trans_obj))
+        return(tr("ui_hintident", trans))
       }
       if (length(data[[conc]]) < 6) {
-        return(tr("ui_hint6", trans_obj))
+        return(tr("ui_hint6", trans))
       }
       if (is.null(dist)) {
-        return(tr("ui_hintdist", trans_obj))
+        return(tr("ui_hintdist", trans))
       }
       ""
     })
     
     # Fit distributions
     fit_dist <- reactive({
-      req(input$selectConc)
-      req(input$selectDist)
-      req(check_fit() == "")
-      req(shared_values$data)
+      # req(input$selectConc)
+      # req(input$selectDist)
+      print("hi")
+      req(check_fit_args() == "")
+      print("hi2")
+      # req(data_mod$data())
       
       waiter_gof$show()
       waiter_distplot$show()
       
-      data <- shared_values$data
+      data <- data_mod$data()
       conc <- input$selectConc %>% make.names()
       dist <- input$selectDist
       
       x <- try(ssdtools::ssd_fit_dists(data,
         left = conc,
-        dists = input$selectDist,
+        dists = dist,
         silent = TRUE,
         rescale = input$rescale
       ), silent = TRUE)
@@ -185,12 +181,13 @@ mod_fit_server <- function(id, shared_values, translations) {
       if (inherits(x, "try-error")) {
         x <- NULL
       }
+      print("hi2")
+      print(x)
       x
-    })
+    }) 
     
     # Plot distributions
     plot_dist <- reactive({
-      req(fit_dist())
       dist <- fit_dist()
       gp <- plot_distributions(dist,
         ylab = input$yaxis2,
@@ -199,53 +196,124 @@ mod_fit_server <- function(id, shared_values, translations) {
       )
       waiter_distplot$hide()
       gp
-    })
+    }) %>% 
+      bindEvent(fit_dist())
     
     # Goodness of fit table
     table_gof <- reactive({
-      req(fit_dist())
-      
       dist <- fit_dist()
-      trans_obj <- translations()
+      trans <- translations()
       gof <-
         ssdtools::ssd_gof(dist) %>%
         dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
         dplyr::arrange(dplyr::desc(.data$weight))
-      names(gof) <- gsub("weight", tr("ui_2weight", trans_obj), names(gof))
+      names(gof) <- gsub("weight", tr("ui_2weight", trans), names(gof))
       waiter_gof$hide()
       gof
-    })
+    }) %>% 
+      bindEvent(fit_dist())
     
     # Failed fits
     fit_fail <- reactive({
-      req(input$selectDist)
       dist <- fit_dist()
       x <- paste0(setdiff(input$selectDist, names(dist)), collapse = ", ")
       x
+    }) %>% 
+      bindEvent(fit_dist())
+    
+    # --- render fit results ----
+    output$distPlot1 <- renderPlot({
+      plot_dist()
+    }) %>% 
+      bindEvent(plot_dist())
+    
+    output$gofTable <- DT::renderDataTable({
+      DT::datatable(table_gof(), options = list(dom = "t"))
+    }) %>% 
+      bindEvent(table_gof())
+    
+    output$fitFail <- renderText({
+      failed <- fit_fail()
+      req(failed != "")
+      HTML(paste0("<font color='grey'>", paste(
+        failed_fits, tr("ui_hintfail", trans())
+      ), "</font>"))
     })
     
-    # Update shared values when fit changes
-    observe({
-      shared_values$fitted_dist <- fit_dist()
-      shared_values$selected_conc <- input$selectConc
-      shared_values$selected_dists <- input$selectDist
-      shared_values$selected_unit <- input$selectUnit
-      shared_values$fit_plot <- plot_dist()
-      shared_values$gof_table <- table_gof()
-      shared_values$rescale <- input$rescale
-    })
+ 
     
-    # Return reactive values for use by other modules
+    has_fit <- reactive({
+      check_fit_args() != "" &&
+        !is.null(fit_dist()) && 
+        !inherits(fit_dist(), "try-error")
+    })
+    output$has_fit <- has_fit
+    outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
+    
+    # output$showFitResults <- reactive({
+    #   return(show_fit_results())
+    # })
+    # outputOptions(output, "showFitResults", suspendWhenHidden = FALSE)
+    # 
+    output$hintFi <- renderText(hint(check_fit_args()))
+    
+    # # Update shared values when fit changes
+    # observe({
+    #   shared_values$fitted_dist <- fit_dist()
+    #   shared_values$selected_conc <- input$selectConc
+    #   shared_values$selected_dists <- input$selectDist
+    #   shared_values$selected_unit <- input$selectUnit
+    #   shared_values$fit_plot <- plot_dist()
+    #   shared_values$gof_table <- table_gof()
+    #   shared_values$rescale <- input$rescale
+    # })
+    
+
+# downloads ---------------------------------------------------------------
+    output$fitDlPlot <- downloadHandler(
+      filename = function() {
+        "ssdtools_distFitPlot.png"
+      },
+      content = function(file) {
+        ggplot2::ggsave(file,
+                        plot = plot_dist(), device = "png",
+                        width = get_width2(), height = get_height2(), dpi = get_dpi2()
+        )
+      }
+    )
+    
+    output$fitDlRds <- downloadHandler(
+      filename = function() {
+        "ssdtools_distFitPlot.rds"
+      },
+      content = function(file) {
+        saveRDS(plot_dist(), file = file)
+      }
+    )
+    
+    output$fitDlTableHidden <- downloadHandler(
+      filename = function() {
+        "ssdtools_distGofTable.csv"
+      },
+      content <- function(file) {
+        readr::write_csv(table_gof() %>% dplyr::as_tibble(), file)
+      }
+    )
+    
+    observeEvent(input$dlFitTable, {
+      # Trigger the hidden download button
+      shinyjs::click("fitDlTableHidden")
+    })    
+    
+# return ------------------------------------------------------------------
     return(
       list(
-        fitted_dist = reactive({ fit_dist() }),
-        plot_dist = reactive({ plot_dist() }),
-        table_gof = reactive({ table_gof() }),
-        check_fit = reactive({ check_fit() }),
-        fit_fail = reactive({ fit_fail() }),
-        show_fit_results = reactive({ 
-          !is.null(fit_dist()) && !inherits(fit_dist(), "try-error")
-        })
+        fit_dist = fit_dist,
+        # plot_dist = plot_dist,
+        # table_gof = table_gof,
+        # check_fit = check_fit,
+        # fit_fail = fit_fail,
+        has_fit = has_fit
       )
     )
   })

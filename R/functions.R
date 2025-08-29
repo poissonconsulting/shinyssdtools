@@ -24,6 +24,10 @@ guess_sp <- function(name){
   name[grepl("sp", name %>% tolower())][1]
 }
 
+guess_conc <- function(name){
+  name[grepl("conc", name %>% tolower())][1]
+}
+
 # functions
 label_mandatory <- function(label) {
   tagList(label, span("*", class = "mandatory_star"))

@@ -114,16 +114,16 @@ mod_rcode_server <- function(id, shared_values, translations) {
       HTML(tr("ui_4help", trans_obj))
     })
     
+    # render code 
     output$codeHead <- renderUI({
-      if (shared_values$data_source == "hot" && is.null(shared_values$data)) {
+      if (upload.values$upload_state == "hot" && is.na(read_data()$Concentration[1])) {
         return()
       }
-      
       l1 <- "install.packages('ssdtools')"
       l2 <- "library(ssdtools)"
       l3 <- "library(ggplot2)"
       l4 <- "library(dplyr)"
-      if (shared_values$data_source == "upload") {
+      if (upload.values$upload_state == "upload") {
         l5 <- "library(readr)"
       } else {
         l5 <- NULL
@@ -132,41 +132,33 @@ mod_rcode_server <- function(id, shared_values, translations) {
     })
     
     output$codeData <- renderUI({
-      req(shared_values$data)
-      
-      hot <- paste0("data <- ", utils::capture.output(dput(shared_values$data)) %>% glue::glue_collapse())
-      upload <- paste0("data <- read_csv(file = '", shared_values$upload_filename, "')")
+      hot <- paste0("data <- ", utils::capture.output(dput(clean_data())) %>% glue::glue_collapse())
+      upload <- paste0("data <- read_csv(file = '", input$uploadData$name, "')")
       demo <- "data <- ssddata::ccme_boron"
       name <- "colnames(data) <- make.names(colnames(data))"
-      
-      if (shared_values$data_source == "hot") {
+      if (upload.values$upload_state == "hot") {
         return(HTML(paste(hot, name, sep = "<br/>")))
       }
-      if (shared_values$data_source == "upload") {
+      if (upload.values$upload_state == "upload") {
         return(HTML(paste(upload, name, sep = "<br/>")))
       }
-      if (shared_values$data_source == "demo") {
+      if (upload.values$upload_state == "demo") {
         return(HTML(paste(demo, name, sep = "<br/>")))
       }
     })
     
     output$codeFit <- renderUI({
-      req(shared_values$fitted_dist)
-      req(shared_values$selected_conc)
-      req(shared_values$selected_dists)
-      
-      ylab <- shared_values$fit_yaxis %||% "Percent"
-      xlab <- shared_values$fit_xaxis %||% "Concentration"
-      text_size <- shared_values$fit_text_size %||% 12
-      rescale <- shared_values$rescale %||% FALSE
-      
+      req(check_fit() == "")
+      ylab <- input$yaxis2
+      xlab <- input$xaxis2
+      text_size <- input$size2
       fit <- paste0(
         "dist <- ssd_fit_dists(data, left = '",
-        shared_values$selected_conc %>% make.names(),
+        input$selectConc %>% make.names(),
         "', dists = c(",
-        paste0("'", shared_values$selected_dists, "'", collapse = ", "), ")",
+        paste0("'", input$selectDist, "'", collapse = ", "), ")",
         ", silent = TRUE, reweight = FALSE",
-        ", rescale = ", rescale, ")"
+        ", rescale = ", input$rescale, ")"
       )
       plot <- paste0(
         "ssd_plot_cdf(dist, ylab = '", ylab, "', xlab = '", xlab,
@@ -179,88 +171,76 @@ mod_rcode_server <- function(id, shared_values, translations) {
     })
     
     output$codePredPlot <- renderUI({
-      req(shared_values$fitted_dist)
-      req(shared_values$predictions)
-      req(shared_values$threshold_values)
-      
-      threshold_vals <- shared_values$threshold_values
-      xmax <- shared_values$predict_xmax
-      xmin <- shared_values$predict_xmin
+      req(check_fit() == "")
+      req(check_pred() == "")
+      req(input$selectLabel)
+      xmax <- input$xMax
+      xmin <- input$xMin
       xlimits <- ifelse(is.na(xmin) & is.na(xmax), "NULL", paste0("c(", xmin, ", ", xmax, ")"))
-      legend_colour <- shared_values$legend_colour %||% "NULL"
-      legend_shape <- shared_values$legend_shape %||% "NULL"
-      text_size <- shared_values$predict_text_size %||% 12
-      xlab <- shared_values$predict_xaxis %||% "Concentration"
-      ylab <- shared_values$predict_yaxis %||% "Percent"
-      title <- shared_values$predict_title %||% ""
-      big_mark <- ifelse(shared_values$current_language == "French", " ", ",")
-      trans <- shared_values$transformation %||% "log10"
-      xbreaks <- shared_values$xbreaks %||% c()
-      xbreaks_str <- paste0("c(", paste(xbreaks, collapse = ", "), ")")
-      label_size <- shared_values$predict_label_size %||% 3
-      shift_x <- shared_values$predict_shift_x %||% 1.05
-      palette <- shared_values$predict_palette %||% "Set1"
-      
-      pred <- paste0("pred <- predict(dist, proportion = unique(c(1:99, ", threshold_vals$percent, ")/100))")
+      legend.colour <- ifelse(is.null(input$legendColour) || input$legendColour == "-none-", "NULL", paste0("'", input$legendColour, "'"))
+      legend.shape <- ifelse(is.null(input$legendShape) || input$legendShape == "-none-", "NULL", paste0("'", input$legendShape, "'"))
+      text_size <- input$size3
+      xlab <- input$xaxis
+      ylab <- input$yaxis
+      title <- input$title
+      big.mark <- ifelse(translation.value$lang == "French", " ", ",")
+      trans <- transformation()
+      xbreaks <- input$xbreaks
+      xbreaks <- paste0("c(", paste(xbreaks, collapse = ", "), ")")
+      pred <- paste0("pred <- predict(dist, proportion = unique(c(1:99, ", thresh_rv$percent, ")/100))")
       plot <- paste0(
-        "ssd_plot(data, pred, left = '", make.names(shared_values$selected_conc),
+        "ssd_plot(data, pred, left = '", make.names(input$selectConc),
         "', label = ", code_label(),
         ", shape = ", code_shape(),
         ", color = ", code_colour(),
-        ",  <br/>label_size = ", label_size,
+        ",  <br/>label_size = ", input$sizeLabel3,
         ", ylab = '", ylab,
         "', xlab = '", xlab,
-        "', ci = FALSE, shift_x = ", shift_x,
+        "', ci = FALSE, shift_x = ", input$adjustLabel,
         ", hc = ", code_hc(),
-        ", <br/>big.mark = '", big_mark,
+        ", <br/>big.mark = '", big.mark,
         "', trans = '", trans,
         "', xlimits = ", xlimits,
-        ", xbreaks = ", xbreaks_str,
+        ", xbreaks = ", xbreaks,
         ", text_size = ", text_size,
         ", theme_classic = TRUE",
         ") + <br/> ggtitle('", title,
-        "') + <br/>scale_color_brewer(palette = '", palette, "', name = ", legend_colour, ") +<br/>
-                         scale_shape(name = ", legend_shape, ")"
+        "') + <br/>scale_color_brewer(palette = '", input$selectPalette, "', name = ", legend.colour, ") +<br/>
+                     scale_shape(name = ", legend.shape, ")"
       )
       HTML(paste(pred, plot, sep = "<br/>"))
     })
     
     output$codePredCl <- renderUI({
-      req(shared_values$bootstrap_samples)
-      req(shared_values$fitted_dist)
-      req(shared_values$threshold_values)
-      
-      threshold_vals <- shared_values$threshold_values
-      thresh_type <- shared_values$thresh_type %||% "Concentration"
-      
+      req(input$getCl)
+      req(check_fit() == "")
+      req(check_pred() == "")
       form <- "ssd_hc"
       arg <- "proportion"
-      thresh <- threshold_vals$percent / 100
-      if (thresh_type != "Concentration") {
+      thresh <- thresh_rv$percent / 100
+      if (input$thresh_type != "Concentration") {
         form <- "ssd_hp"
         arg <- "conc"
-        thresh <- threshold_vals$conc
+        thresh <- thresh_rv$conc
       }
-      
-      nboot <- as.integer(gsub(",", "", shared_values$bootstrap_samples))
       
       conf <- paste0(
         paste0(form, "(dist, ", arg, " = "), thresh, ", ci = TRUE",
-        ", nboot = ", nboot, "L, min_pboot = 0.8)"
+        ", nboot = ", input$bootSamp %>% gsub(",", "", .) %>% as.integer(), "L, min_pboot = 0.8)"
       )
       conf2 <- paste0(
         paste0(form, "(dist, ", arg, " = "), thresh, ", ci = TRUE, average = FALSE",
-        ", nboot = ", nboot, "L, min_pboot = 0.8)"
+        ", nboot = ", input$bootSamp %>% gsub(",", "", .) %>% as.integer(), "L, min_pboot = 0.8)"
       )
       bind <- paste0("dplyr::bind_rows(", conf, ", ", conf2, ")")
       HTML(paste(bind, sep = "<br/>"))
     })
     
     output$codeSaveFit <- renderUI({
-      req(shared_values$fitted_dist)
+      req(check_fit() == "")
       save <- paste0(
         "ggsave('fit_dist_plot.png',
-                      width = ", get_width2(),
+                    width = ", get_width2(),
         " , height = ", get_height2(),
         " , dpi = ", get_dpi2(),
         ")"
@@ -269,11 +249,12 @@ mod_rcode_server <- function(id, shared_values, translations) {
     })
     
     output$codeSavePred <- renderUI({
-      req(shared_values$fitted_dist)
-      req(shared_values$predictions)
+      req(check_fit() == "")
+      req(check_pred() == "")
+      req(input$selectLabel)
       save <- paste0(
         "ggsave('model_average_plot.png',
-                      width = ", get_width(),
+                    width = ", get_width(),
         " , height = ", get_height(),
         " , dpi = ", get_dpi(),
         ")"

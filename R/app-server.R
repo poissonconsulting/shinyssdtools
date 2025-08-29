@@ -153,24 +153,7 @@ app_server <- function(input, output, session) {
   #   )
   # })
   
-  # --- render fit results ----
-  output$distPlot1 <- renderPlot({
-    shared_values$fit_plot
-  })
-  
-  output$gofTable <- DT::renderDataTable({
-    if (!is.null(shared_values$gof_table)) {
-      DT::datatable(shared_values$gof_table, options = list(dom = "t"))
-    }
-  })
-  
-  output$fitFail <- renderText({
-    failed_fits <- fit_module$fit_fail()
-    req(failed_fits != "")
-    HTML(paste0("<font color='grey'>", paste(
-      failed_fits, tr("ui_hintfail", trans())
-    ), "</font>"))
-  })
+
   
   # --- render predict results ----
   output$modelAveragePlot <- renderPlot({
