@@ -168,45 +168,62 @@ mod_fit_server <- function(id, translations, data_mod) {
       bindEvent(data_mod$clean_data())
     
     # Validation check
-    check_fit_args <- reactive({
-      req(input$selectConc, input$selectDist, data_mod$data())
-      
-      conc <- input$selectConc
+    iv <- InputValidator$new()
+    
+    # Add rules for both concentration and distribution selection
+    iv$add_rule("selectConc", function(value) {
+      req(data_mod$data())
       data <- data_mod$data()
       trans <- translations()
       
-      if (length(data[[conc]]) == 0L) {
-        return(tr("ui_hintdata", trans))
+      if (is.null(value) || value == "") return("Please select a concentration column")
+      
+      conc_data <- data[[value]]
+      
+      if (length(conc_data) == 0L) {
+        return(as.character(tr("ui_hintdata", trans)[1]))
       }
-      if (!is.numeric(data[[conc]])) {
-        return(tr("ui_hintnum", trans))
+      if (!is.numeric(conc_data)) {
+        return(as.character(tr("ui_hintnum", trans)[1]))
       }
-      if (any(is.na(data[[conc]]))) {
-        return(tr("ui_hintmiss", trans))
+      if (any(is.na(conc_data))) {
+        return(as.character(tr("ui_hintmiss", trans)[1]))
       }
-      if (any(data[[conc]] <= 0)) {
-        return(tr("ui_hintpos", trans))
+      if (any(conc_data <= 0)) {
+        return(as.character(tr("ui_hintpos", trans)[1]))
       }
-      if (any(is.infinite(data[[conc]]))) {
-        return(tr("ui_hintfin", trans))
+      if (any(is.infinite(conc_data))) {
+        return(as.character(tr("ui_hintfin", trans)[1]))
       }
-      if (zero_range(data[[conc]])) {
-        return(tr("ui_hintident", trans))
+      if (zero_range(conc_data)) {
+        return(as.character(tr("ui_hintident", trans)[1]))
       }
-      if (length(data[[conc]]) < 6) {
-        return(tr("ui_hint6", trans))
+      if (length(conc_data) < 6) {
+        return(as.character(tr("ui_hint6", trans)[1]))
       }
-      if (is.null(input$selectDist)) {
-        return(tr("ui_hintdist", trans))
+      NULL  # Valid
+    })
+    
+    iv$add_rule("selectDist", function(value) {
+      trans <- translations()
+      if (is.null(value) || length(value) == 0) {
+        return(as.character(tr("ui_hintdist", trans)[1]))
       }
-      ""
-    }) %>%
-      bindCache(input$selectConc, input$selectDist, data_mod$data(), translations()) %>% 
-      bindEvent(input$selectConc, input$selectDist, data_mod$data(), translations()) 
+      NULL  # Valid
+    })
+    
+    iv$enable()
+    
+    # Your existing reactive logic but simplified
+    fit_args_fail <- reactive({
+      !iv$is_valid()
+    })
+    
+    output$fit_args_fail <- reactive({ fit_args_fail() })
+    outputOptions(output, "fit_args_fail", suspendWhenHidden = FALSE)
     
     # Fit distributions - heavy computation, good for caching
     fit_dist <- reactive({
-      req(check_fit_args() == "")
       req(update_trigger() > 0)
       
       waiter_gof$show()
@@ -282,11 +299,10 @@ mod_fit_server <- function(id, translations, data_mod) {
       
     # Failed fits
     fit_fail <- reactive({
-      req(fit_dist(), input$selectDist)
       dist <- fit_dist()
       paste0(setdiff(input$selectDist, names(dist)), collapse = ", ")
     }) %>%
-      bindEvent(fit_dist(), input$selectDist)
+      bindEvent(fit_dist())
     
     # Check if fit is valid
     has_fit <- reactive({
@@ -296,15 +312,6 @@ mod_fit_server <- function(id, translations, data_mod) {
     
     output$has_fit <- reactive({ has_fit() })
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
-    
-    # Check if fit args fail
-    fit_args_fail <- reactive({
-      check_fit_args() != ""
-    }) %>%
-      bindEvent(check_fit_args())
-    
-    output$fit_args_fail <- reactive({ fit_args_fail() })
-    outputOptions(output, "fit_args_fail", suspendWhenHidden = FALSE)
     
     # Render status tracking for waiters
     render_status <- reactiveValues(plot_ready = FALSE, table_ready = FALSE)
@@ -356,11 +363,6 @@ mod_fit_server <- function(id, translations, data_mod) {
       ), "</font>"))
     }) %>%
       bindEvent(fit_fail())
-    
-    output$hintFi <- renderText({
-      hint(check_fit_args())
-    }) %>%
-      bindEvent(check_fit_args())
     
     # Download handlers
     output$fitDlPlot <- downloadHandler(
