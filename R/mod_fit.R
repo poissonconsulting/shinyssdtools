@@ -219,35 +219,38 @@ mod_fit_server <- function(id, translations, data_mod) {
       bindEvent(fit_dist())
     
     # --- render fit results ----
-    render_status <- reactiveValues(plot_ready = FALSE, table_ready = FALSE)
-    observe({
-      render_status$plot_ready <- FALSE
-      render_status$table_ready <- FALSE
-    }) %>%
-      bindEvent(fit_dist())
+    # render_status <- reactiveValues(plot_ready = FALSE, table_ready = FALSE)
+    # observe({
+    #   render_status$plot_ready <- FALSE
+    #   render_status$table_ready <- FALSE
+    # }) %>%
+    #   bindEvent(fit_dist())
     
     output$distPlot1 <- renderPlot({
       result <- plot_dist()
-      render_status$plot_ready <- TRUE
+      waiter_distplot$hide()
       result
     }) %>% 
       bindEvent(plot_dist())
     
     output$gofTable <- DT::renderDataTable({
-      result <- DT::datatable(table_gof(), options = list(dom = "t"))
-      render_status$table_ready <- TRUE
+      result <- DT::datatable(table_gof(), options = list(dom = "t", 
+                                                          processing = FALSE, 
+                                                          # autoWidth = FALSE,
+                                                          deferRender = TRUE))
+      waiter_gof$hide()
       result
     }) %>% 
       bindEvent(table_gof())
     
-    observe({
-      if (render_status$plot_ready && render_status$table_ready) {
-        waiter_distplot$hide()
-        waiter_gof$hide()
-      }
-    }) %>%
-      bindEvent(render_status$plot_ready, render_status$table_ready)
-    
+    # observe({
+    #   if (render_status$plot_ready && render_status$table_ready) {
+    #     
+    #     
+    #   }
+    # }) %>%
+    #   bindEvent(render_status$plot_ready, render_status$table_ready)
+    # 
     output$fitFail <- renderText({
       failed <- fit_fail()
       req(failed != "")
