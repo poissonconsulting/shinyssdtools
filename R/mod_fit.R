@@ -42,7 +42,7 @@ mod_fit_ui <- function(id) {
             actionButton(ns("updateFit"), 
                          label = tagList(
                            uiOutput(ns("update_icon")), 
-                           "Update Fit"
+                           span(`data-translate` = "ui_update_fit", "Update Fit")
                          ),
                          class = "btn-primary w-100")
         ),
