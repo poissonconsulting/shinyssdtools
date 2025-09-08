@@ -1,3 +1,6 @@
+library(dplyr)
+library(readxl)
+
 translations <- readxl::read_xlsx(system.file(package = "shinyssdtools", "extdata/translations.xlsx"), sheet = 1)
 translations$id <- paste0("ui_", translations$id)
 
@@ -166,6 +169,11 @@ translations <- dplyr::bind_rows(
     id = "ui_bcanz_filename",
     english = "bcanz_report",
     french = "rapport_bcanz"
+  ),
+  dplyr::tibble(
+    id = "ui_update_fit",
+    english = "Update Fit",
+    french = "Mettre à jour l'ajustement"
   )
 )
 
