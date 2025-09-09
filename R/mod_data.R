@@ -73,10 +73,7 @@ mod_data_server <- function(id, translations, lang) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    upload_values <- reactiveValues(
-      upload_state = NULL,
-      data_ready = FALSE  
-    )
+    active_source <- reactiveVal("none")
     
     demo_data <- reactive({
       df <- boron.data
@@ -92,51 +89,54 @@ mod_data_server <- function(id, translations, lang) {
     }) %>% 
       bindEvent(translations(), input$demoData)
     
-    hot_values <- reactiveValues()
-    # Handson table 
-    hot_data <- reactive({
-      trans <- translations()
-      conc <- tr("ui_1htconc", trans)
-      spp <- tr("ui_1htspp", trans)
-      grp <- tr("ui_1htgrp", trans)
-      
-      if (!is.null(input$hot)) {
-        df <- rhandsontable::hot_to_r(input$hot)
-        colnames(df) <- c(conc, spp, grp)
-        df <- dplyr::mutate_if(df, is.factor, as.character)
-      } else {
-        if (is.null(hot_values[["df"]])) {
-          df <- data.frame(
-            "Concentration" = rep(NA_real_, 10),
-            "Species" = rep(NA_character_, 10),
-            "Group" = rep(NA_character_, 10)
-          )
-        } else {
-          df <- hot_values[["df"]]
-        }
+    upload_data <- reactive({
+      data <- input$uploadData
+      if (!grepl(".csv", data$name, fixed = TRUE)) {
+        Sys.sleep(1)
+        return(p("We're not sure what to do with that file type. Please upload a csv."))
       }
-      hot_values[["df"]] <- df
-      df
+      readr::read_csv(data$datapath)
+    }) %>% 
+      bindEvent(input$uploadData)
+    
+    hot_data <- reactive({
+      if (!is.null(input$hot)) {
+        trans <- translations()
+        df <- rhandsontable::hot_to_r(input$hot)
+        colnames(df) <- c(tr("ui_1htconc", trans), tr("ui_1htspp", trans), tr("ui_1htgrp", trans))
+        dplyr::mutate_if(df, is.factor, as.character)
+      } else {
+        data.frame(
+          "Concentration" = rep(NA_real_, 10),
+          "Species" = rep(NA_character_, 10),
+          "Group" = rep(NA_character_, 10)
+        )
+      }
     })
     
-    read_data <- reactive({
-      if (upload_values$upload_state == "upload") {
-        data <- input$uploadData
-        if (!grepl(".csv", data$name, fixed = TRUE)) {
-          Sys.sleep(1)
-          return(p("We're not sure what to do with that file type. Please upload a csv."))
-        }
-        return(readr::read_csv(data$datapath))
-      } else if (upload_values$upload_state == "demo") {
-        return(demo_data())
-      } else if (upload_values$upload_state == "hot") {
-        return(hot_data())
-      }
-    }) %>% 
-      bindEvent(upload_values$upload_state)
+    observe({
+      active_source("upload")
+    }) %>% bindEvent(input$uploadData)
+    
+    observe({
+      active_source("demo") 
+    }) %>% bindEvent(input$demoData)
+    
+    observe({
+      active_source("hot")
+    }) %>% bindEvent(input$hot)
+    
+    current_data <- reactive({
+      switch(active_source(),
+             "demo" = demo_data(),
+             "upload" = upload_data(),
+             "hot" = hot_data(),
+             NULL)
+    })
     
     clean_data <- reactive({
-      data <- read_data()
+      req(current_data())
+      data <- current_data()
       if (length(data)) {
         # Remove any column names like X1, X2 (blank headers from excel/numbers)
         data[, colnames(data) %in% paste0("X", 1:200)] <- NULL
@@ -144,8 +144,7 @@ mod_data_server <- function(id, translations, lang) {
         data <- data[!(rowSums(is.na(data) | data == "") == ncol(data)), ]
       }
       data
-    }) %>% 
-      bindEvent(read_data())
+    }) 
     
     # Deal with unacceptable column names
     names_data <- reactive({
@@ -153,6 +152,21 @@ mod_data_server <- function(id, translations, lang) {
       names(data) %<>% make.names()
       data
     })
+    
+   has_data <- reactive({
+      data <- tryCatch({
+        names_data()
+      }, error = function(e) NULL)
+      
+      if (is.null(data) || nrow(data) == 0) return(FALSE)
+      
+      if (active_source() == "hot" && all(is.na(data[[1]]))) return(FALSE)
+      
+      TRUE
+    })
+    
+    output$has_data <- has_data
+    outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     
     # Render handson table
     output$hot <- rhandsontable::renderRHandsontable({
@@ -163,7 +177,8 @@ mod_data_server <- function(id, translations, lang) {
     })
     
     output$viewUpload <- DT::renderDataTable({
-      data <- read_data()
+      data <- current_data()
+      req(data)
       
       DT::datatable(
         data,
@@ -177,45 +192,7 @@ mod_data_server <- function(id, translations, lang) {
           backgroundColor = 'white',
           border = '1px solid #ddd'
         )
-    }) %>% 
-      bindEvent(upload_values$data_ready, lang())
-    
-    # Event observers
-    observe({
-      upload_values$upload_state <- "upload"
-      upload_values$data_ready <- TRUE
-    }) %>% 
-      bindEvent(input$uploadData)
-    
-    observe({
-      upload_values$upload_state <- "demo"
-      upload_values$data_ready <- TRUE
-    }) %>% 
-      bindEvent(input$demoData)
-    
-    observe({
-      upload_values$upload_state <- "hot"
-      # For hot table, only set ready if there's actual data
-      data <- hot_data()
-      if (!is.null(data) && nrow(data) > 0 && !all(is.na(data[[1]]))) {
-        upload_values$data_ready <- TRUE
-      }
-    }) %>% 
-      bindEvent(input$hot)
-    
-    has_data <- reactive({
-      if (!upload_values$data_ready) return(FALSE)
-      data <- tryCatch({
-        names_data()
-      }, error = function(e) NULL)
-      if (is.null(data) || nrow(data) == 0) return(FALSE)
-      
-      TRUE
-    }) %>% 
-      bindEvent(names_data())
-    
-    output$has_data <- has_data
-    outputOptions(output, "has_data", suspendWhenHidden = FALSE)
+    })
     
     return(
       list(
