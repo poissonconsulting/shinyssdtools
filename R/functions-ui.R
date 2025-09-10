@@ -57,6 +57,13 @@ dt_options <- function(lang = "english"){
   )
 }
 
+ui_dashbox <- function(x){
+  div(
+    class = "text-muted text-center p-5",
+    style = "border: 2px dashed #dee2e6; border-radius: 8px; margin: 2rem;",
+    x
+  )
+}
 ui_download_popover <- function(tab = "fit"){
   bslib::popover(
     actionButton(paste0(tab, "DownloadBtn"), 
