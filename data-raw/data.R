@@ -174,6 +174,11 @@ translations <- dplyr::bind_rows(
     id = "ui_update_fit",
     english = "Update Fit",
     french = "Mettre à jour l'ajustement"
+  ),
+  dplyr::tibble(
+    id = "ui_update_data",
+    english = "Update",
+    french = "Mettre à jour"
   )
 )
 

@@ -11,10 +11,12 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 app_ui <- function() {
+  
   tagList(
     # Dependencies
     shinyjs::useShinyjs(),
     waiter::useWaiter(),
+    shinytoastr::useToastr(),
     
     # Include custom JavaScript for translations
     tags$script(src = "translation.js"),

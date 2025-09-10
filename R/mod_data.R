@@ -53,7 +53,12 @@ mod_data_ui <- function(id) {
               span(`data-translate` = "ui_1table", "3. Fill out table below:")
             ),
             value = "data_table",
-            rhandsontable::rHandsontableOutput(ns("hot"))
+            rhandsontable::rHandsontableOutput(ns("handson")),
+            div(class = "mt-3",
+                actionButton(ns("handson_done"), 
+                             label = span(`data-translate` = "ui_update_data", "Update"),
+                             class = "btn-primary w-100")
+            )
           )
         )),
       
@@ -99,10 +104,10 @@ mod_data_server <- function(id, translations, lang) {
     }) %>% 
       bindEvent(input$uploadData)
     
-    hot_data <- reactive({
-      if (!is.null(input$hot)) {
+    handson_data <- reactive({
+      if (!is.null(input$handson)) {
         trans <- translations()
-        df <- rhandsontable::hot_to_r(input$hot)
+        df <- rhandsontable::hot_to_r(input$handson)
         colnames(df) <- c(tr("ui_1htconc", trans), tr("ui_1htspp", trans), tr("ui_1htgrp", trans))
         dplyr::mutate_if(df, is.factor, as.character)
       } else {
@@ -112,7 +117,12 @@ mod_data_server <- function(id, translations, lang) {
           "Group" = rep(NA_character_, 10)
         )
       }
-    })
+    }) 
+    
+    handson_data_done <- reactive({
+      handson_data()
+    }) %>% 
+      bindEvent(input$handson_done)
     
     observe({
       active_source("upload")
@@ -123,14 +133,14 @@ mod_data_server <- function(id, translations, lang) {
     }) %>% bindEvent(input$demoData)
     
     observe({
-      active_source("hot")
-    }) %>% bindEvent(input$hot)
+      active_source("handson")
+    }) %>% bindEvent(input$handson_done)
     
     current_data <- reactive({
       switch(active_source(),
              "demo" = demo_data(),
              "upload" = upload_data(),
-             "hot" = hot_data(),
+             "handson" = handson_data_done(),
              NULL)
     })
     
@@ -169,8 +179,8 @@ mod_data_server <- function(id, translations, lang) {
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     
     # Render handson table
-    output$hot <- rhandsontable::renderRHandsontable({
-      x <- hot_data()
+    output$handson <- rhandsontable::renderRHandsontable({
+      x <- handson_data()
       if (!is.null(x)) {
         rhandsontable::rhandsontable(x, width = 600, useTypes = FALSE)
       }

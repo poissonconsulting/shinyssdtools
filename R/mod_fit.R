@@ -4,6 +4,7 @@
 mod_fit_ui <- function(id) {
   ns <- NS(id)
   
+  
   tagList(
     # Show full layout with sidebar when data exists
     conditionalPanel(
@@ -133,6 +134,7 @@ mod_fit_server <- function(id, translations, data_mod) {
     # for conditional panel
     output$has_data <- data_mod$has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
+    # clean_data <- reactive({clean_data()})
     
     waiter_gof <- waiter::Waiter$new(id = ns("gofDiv"), html = waiter::spin_2(), color = "white")
     waiter_distplot <- waiter::Waiter$new(id = ns("distPlot1"), html = waiter::spin_2(), color = "white")
@@ -158,6 +160,8 @@ mod_fit_server <- function(id, translations, data_mod) {
     
     # Auto-update for critical changes (and reset flag)
     observe({
+      cat("Auto-update triggered at:", Sys.time(), "\n")
+      print(input$selectConc)
       needs_update(FALSE)
       update_trigger(update_trigger() + 1)
     }) %>%
@@ -238,6 +242,7 @@ mod_fit_server <- function(id, translations, data_mod) {
     # Fit distributions - heavy computation, good for caching
     fit_dist <- reactive({
       req(update_trigger() > 0)
+      cat("fit_dist executing at:", Sys.time(), "\n")
       
       waiter_gof$show()
       waiter_distplot$show()
@@ -266,6 +271,10 @@ mod_fit_server <- function(id, translations, data_mod) {
         data_mod$data()
       ) %>% 
       bindEvent(update_trigger())
+    
+    observe({
+      cat("update_trigger changed to:", update_trigger(), "at", Sys.time(), "\n")
+    }) %>% bindEvent(update_trigger())
     
     # Plot - auto-updates with formatting changes
     plot_dist <- reactive({
@@ -351,19 +360,19 @@ mod_fit_server <- function(id, translations, data_mod) {
     }) %>%
       bindEvent(render_status$plot_ready, render_status$table_ready)
     
-    shinytoastr::useToastr()
-    
     # Replace your current fitFail output with this observer:
     observe({
       failed <- fit_fail()
       req(failed != "")
+      print(failed)
       
       failed_dists <- strsplit(failed, ", ")[[1]]
       message <- paste(failed_dists, tr("ui_hintfail", translations()))
+      print(message)
       
       shinytoastr::toastr_warning(
         message = message,
-        # title = "Distribution Fitting",
+        title = "Distribution Fitting",
         timeOut = 8000,  # 8 seconds before auto-dismiss
         closeButton = TRUE
       )
