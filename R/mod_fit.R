@@ -4,106 +4,123 @@
 mod_fit_ui <- function(id) {
   ns <- NS(id)
   
-  layout_sidebar(
-    padding = "1rem",
-    gap = "1rem",
-    sidebar = sidebar(
-      width = 350,
-      
-      tagList(
-        tags$label(
-          `for` = ns("selectConc"),
-          class = "control-label",
-          span(`data-translate` = "ui_2conc", "Concentration")
-        ),
-        selectInput(ns("selectConc"),
-                    label = NULL,
-                    choices = NULL,
-                    selected = NULL
-        ),
-        selectizeInput(ns("selectDist"),
-                       label = span(`data-translate` = "ui_2dist", "Select distributions to fit"),
-                       multiple = TRUE,
-                       choices = c(default.dists, extra.dists),
-                       selected = default.dists,
-                       options = list(
-                         "plugins" = list("remove_button"),
-                         "create" = TRUE,
-                         "persist" = FALSE
-                       )
-        ),
-        checkboxInput(ns("rescale"),
-                      label = span(`data-translate` = "ui_2rescale", "Rescale"),
-                      value = FALSE
+  tagList(
+    # Show full layout with sidebar when data exists
+    conditionalPanel(
+      condition = paste_js("has_data", ns),
+      layout_sidebar(
+        padding = "1rem",
+        gap = "1rem",
+        
+        sidebar = sidebar(
+          width = 350,
+          tagList(
+            tags$label(
+              `for` = ns("selectConc"),
+              class = "control-label",
+              span(`data-translate` = "ui_2conc", "Concentration")
+            ),
+            selectInput(ns("selectConc"),
+                        label = NULL,
+                        choices = NULL,
+                        selected = NULL
+            ),
+            selectizeInput(ns("selectDist"),
+                           label = span(`data-translate` = "ui_2dist", "Select distributions to fit"),
+                           multiple = TRUE,
+                           choices = c(default.dists, extra.dists),
+                           selected = default.dists,
+                           options = list(
+                             "plugins" = list("remove_button"),
+                             "create" = TRUE,
+                             "persist" = FALSE
+                           )
+            ),
+            checkboxInput(ns("rescale"),
+                          label = span(`data-translate` = "ui_2rescale", "Rescale"),
+                          value = FALSE
+            ),
+            
+            # Update button with conditional icon
+            div(class = "mt-3",
+                actionButton(ns("updateFit"), 
+                             label = tagList(
+                               uiOutput(ns("update_icon")), 
+                               span(`data-translate` = "ui_update_fit", "Update Fit")
+                             ),
+                             class = "btn-primary w-100")
+            ),
+            
+            # Formatting controls
+            hr(),
+            selectInput(ns("selectUnit"),
+                        label = span(`data-translate` = "ui_2unit", "Select units"),
+                        choices = units(),
+                        selected = units()[1]
+            ),
+            textInput(ns("xaxis2"),
+                      label = span(`data-translate` = "ui_3xlab", "X-axis label"),
+                      value = "Concentration"
+            ),
+            textInput(ns("yaxis2"),
+                      label = span(`data-translate` = "ui_3ylab", "Y-axis label"),
+                      value = "Percent"
+            ),
+            numericInput(ns("size2"),
+                         label = span(`data-translate` = "ui_size", "Text size"),
+                         value = 12, min = 1, max = 100
+            )
+          )
         ),
         
-        # Update button with conditional icon
-        div(class = "mt-3",
-            actionButton(ns("updateFit"), 
-                         label = tagList(
-                           uiOutput(ns("update_icon")), 
-                           span(`data-translate` = "ui_update_fit", "Update Fit")
-                         ),
-                         class = "btn-primary w-100")
-        ),
-        
-        # Formatting controls
-        hr(),
-        selectInput(ns("selectUnit"),
-                    label = span(`data-translate` = "ui_2unit", "Select units"),
-                    choices = units(),
-                    selected = units()[1]
-        ),
-        textInput(ns("xaxis2"),
-                  label = span(`data-translate` = "ui_3xlab", "X-axis label"),
-                  value = "Concentration"
-        ),
-        textInput(ns("yaxis2"),
-                  label = span(`data-translate` = "ui_3ylab", "Y-axis label"),
-                  value = "Percent"
-        ),
-        numericInput(ns("size2"),
-                     label = span(`data-translate` = "ui_size", "Text size"),
-                     value = 12, min = 1, max = 100
+        # Main content area when data exists
+        div(
+          class = "p-3",
+          
+          # Validation hints
+          conditionalPanel(
+            condition = paste_js("fit_args_fail", ns), 
+            htmlOutput(ns("hintFi"))
+          ),
+          
+          # Results when fit is successful
+          conditionalPanel(
+            condition = paste_js('has_fit', ns), 
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                span(`data-translate` = "ui_2plot", "Plot Fitted Distributions"),
+                ui_download_popover()
+              ),
+              card_body(
+                htmlOutput(ns("fitFail")),
+                plotOutput(ns("distPlot1"))
+              )
+            ),
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                span(`data-translate` = "ui_2table", "Goodness of Fit"),
+                actionButton(ns("dlFitTable"),
+                             label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
+                             style = "padding:4px; font-size:80%"
+                )
+              ),
+              card_body(
+                div(id = ns("gofDiv"),
+                    DT::dataTableOutput(ns("gofTable")))
+              )
+            )
+          )
         )
       )
     ),
     
     conditionalPanel(
-      condition = "input.main_nav == 'fit'",
-      div(
-        class = "p-3",
-        conditionalPanel(condition = paste_js("fit_args_fail", ns), htmlOutput(ns("hintFi"))),
-        conditionalPanel(condition = paste_js('has_fit', ns), 
-                         card(
-                           full_screen = TRUE,
-                           card_header(
-                             class = "d-flex justify-content-between align-items-center",
-                             span(`data-translate` = "ui_2plot", "Plot Fitted Distributions"),
-                             ui_download_popover()
-                           ),
-                           card_body(
-                             htmlOutput(ns("fitFail")),
-                             plotOutput(ns("distPlot1"))
-                           )
-                         ),
-                         card(
-                           full_screen = TRUE,
-                           card_header(
-                             class = "d-flex justify-content-between align-items-center",
-                             span(`data-translate` = "ui_2table", "Goodness of Fit"),
-                             actionButton(ns("dlFitTable"),
-                                          label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                                          style = "padding:4px; font-size:80%"
-                             )
-                           ),
-                           card_body(
-                             div(id = ns("gofDiv"),
-                                 DT::dataTableOutput(ns("gofTable")))
-                           )
-                         )
-        )
-      )
+      condition =  paste0("!output['", ns("has_data"), "']"),
+      ui_dashbox(span(`data-translate` = "ui_hintdata", "You have not added a dataset."))
     )
   )
 }
@@ -113,7 +130,10 @@ mod_fit_server <- function(id, translations, data_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Waiters for async operations (properly namespaced)
+    # for conditional panel
+    output$has_data <- data_mod$has_data
+    outputOptions(output, "has_data", suspendWhenHidden = FALSE)
+    
     waiter_gof <- waiter::Waiter$new(id = ns("gofDiv"), html = waiter::spin_2(), color = "white")
     waiter_distplot <- waiter::Waiter$new(id = ns("distPlot1"), html = waiter::spin_2(), color = "white")
     
@@ -174,9 +194,12 @@ mod_fit_server <- function(id, translations, data_mod) {
     
     # Add rules for both concentration and distribution selection
     iv$add_rule("selectConc", function(value) {
-      dat <- data_mod$data()
-      req(dat)
       trans <- translations()
+      
+      if (value == "") {
+        return(as.character(tr("ui_hintdata", trans)[1]))
+      }
+      dat <- data_mod$data()
       
       conc_data <- dat[[value]]
       
@@ -201,7 +224,7 @@ mod_fit_server <- function(id, translations, data_mod) {
       if (length(conc_data) < 6) {
         return(as.character(tr("ui_hint6", trans)[1]))
       }
-      NULL  # Valid
+      NULL  
     })
     
     iv$add_rule("selectDist", function(value) {
@@ -209,7 +232,7 @@ mod_fit_server <- function(id, translations, data_mod) {
       if (is.null(value) || length(value) == 0) {
         return(as.character(tr("ui_hintdist", trans)[1]))
       }
-      NULL  # Valid
+      NULL  
     })
     
     iv$enable()
