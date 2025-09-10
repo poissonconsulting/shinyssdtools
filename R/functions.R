@@ -21,11 +21,11 @@ paste_js <- function(x, ns){
 }
 
 guess_sp <- function(name){
-  name[grepl("sp", name %>% tolower())][1]
+  name[grepl("sp", tolower(name))][1]
 }
 
 guess_conc <- function(name){
-  name[grepl("conc", name %>% tolower())][1]
+  name[grepl("conc", tolower(name))][1]
 }
 
 # functions
