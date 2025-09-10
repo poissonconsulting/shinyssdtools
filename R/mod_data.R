@@ -56,7 +56,10 @@ mod_data_ui <- function(id) {
             rhandsontable::rHandsontableOutput(ns("handson")),
             div(class = "mt-3",
                 actionButton(ns("handson_done"), 
-                             label = span(`data-translate` = "ui_update_data", "Update"),
+                             label = tagList(
+                               icon("refresh", class = "text-white me-1"), 
+                               span(`data-translate` = "ui_update_data", "Update")
+                             ),
                              class = "btn-primary w-100")
             )
           )
@@ -122,7 +125,7 @@ mod_data_server <- function(id, translations, lang) {
     handson_data_done <- reactive({
       handson_data()
     }) %>% 
-      bindEvent(input$handson_done)
+      bindEvent(input$handson_done, translations())
     
     observe({
       active_source("upload")
