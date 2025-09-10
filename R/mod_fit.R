@@ -75,6 +75,7 @@ mod_fit_ui <- function(id) {
           class = "p-3",
           conditionalPanel(
             condition = paste_js('has_fit', ns), 
+            div(id = ns("divPlotDist"),
             card(
               full_screen = TRUE,
               card_header(
@@ -86,7 +87,8 @@ mod_fit_ui <- function(id) {
                 htmlOutput(ns("fitFail")),
                 plotOutput(ns("plotDist"))
               )
-            ),
+            )),
+            div(id = ns("divGof"),
             card(
               full_screen = TRUE,
               card_header(
@@ -95,7 +97,7 @@ mod_fit_ui <- function(id) {
                 ui_download_popover_table(ns = ns)
               ),
               card_body(
-                div(id = ns("divGof"),
+                
                     DT::dataTableOutput(ns("tableGof")))
               )
             )
@@ -119,7 +121,7 @@ mod_fit_server <- function(id, translations, data_mod) {
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     
     waiter_gof <- waiter::Waiter$new(id = ns("divGof"), html = waiter::spin_2(), color = "white")
-    waiter_distplot <- waiter::Waiter$new(id = ns("plotDist"), html = waiter::spin_2(), color = "white")
+    waiter_distplot <- waiter::Waiter$new(id = ns("divPlotDist"), html = waiter::spin_2(), color = "white")
     
     needs_update <- reactiveVal(FALSE)
     update_trigger <- reactiveVal(0)
