@@ -49,7 +49,7 @@ app_ui <- function() {
             
             # nav ---------------------------------------------------------------------
             sidebar = sidebar(
-              width = 175,
+              width = 180,
               bg = "#e5eff7",
               navset_underline(
                 id = "main_nav",
