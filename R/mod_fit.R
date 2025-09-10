@@ -127,31 +127,9 @@ mod_fit_ui <- function(id) {
 }
 
 # Fit Module Server
-mod_fit_server <- function(id, translations, data_mod, main_nav) {
-  
+mod_fit_server <- function(id, translations, data_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    # observe({print(main_nav())})
-    
-    # Track if fit tab has been visited
-    fit_tab_active <- reactiveVal(FALSE)
-    
-    # observe({print(fit_tab_active())})
-    
-    # Check if user has visited the fit tab
-    observe({
-      if (main_nav() == "fit") {
-        fit_tab_active(TRUE)
-      } else {
-        fit_tab_active(FALSE)
-      }
-    }) %>% 
-      bindEvent(main_nav())
-    
-    # # Only allow expensive operations if tab has been visited
-    # fit_tab_ready <- reactive({
-    #   fit_tab_visited() && data_mod$has_data()
-    # })
     
     # for conditional panel
     output$has_data <- data_mod$has_data
@@ -179,12 +157,6 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       update_trigger(update_trigger() + 1)
     }) %>%
       bindEvent(input$updateFit)
-    
-    # observe({
-    #   if(fit_tab_active())
-    #     update_trigger(update_trigger() + 1)
-    # }) %>% 
-    #   bindEvent(main_nav())
     
     # Auto-update for critical changes (and reset flag)
     observe({
@@ -245,6 +217,7 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       if (zero_range(conc_data)) {
         return(as.character(tr("ui_hintident", trans)[1]))
       }
+     
       NULL  
     })
     
@@ -268,13 +241,7 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
     
     # Fit distributions - heavy computation, good for caching
     fit_dist <- reactive({
-      # print(fit_tab_ready())
-      # print(fit_tab_visited())
-      print(fit_tab_active())
-      
       req(update_trigger() > 0)
-      req(fit_tab_active())
-      
       cat("fit_dist executing at:", Sys.time(), "\n")
       
       waiter_gof$show()
@@ -303,7 +270,7 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         input$rescale,
         data_mod$data()
       ) %>% 
-      bindEvent(update_trigger(), fit_tab_active())
+      bindEvent(update_trigger())
     
     observe({
       cat("update_trigger changed to:", update_trigger(), "at", Sys.time(), "\n")
@@ -392,25 +359,6 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       }
     }) %>%
       bindEvent(render_status$plot_ready, render_status$table_ready)
-    
-    # Replace your current fitFail output with this observer:
-    observe({
-      failed <- fit_fail()
-      req(failed != "")
-      print(failed)
-      
-      failed_dists <- strsplit(failed, ", ")[[1]]
-      message <- paste(failed_dists, tr("ui_hintfail", translations()))
-      print(message)
-      
-      shinytoastr::toastr_warning(
-        message = message,
-        title = "Distribution Fitting",
-        timeOut = 8000,  # 8 seconds before auto-dismiss
-        closeButton = TRUE
-      )
-    }) %>%
-      bindEvent(fit_fail())
     
     output$fitFail <- renderText({
       failed <- fit_fail()

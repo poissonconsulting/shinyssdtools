@@ -16,7 +16,6 @@ app_ui <- function() {
     # Dependencies
     shinyjs::useShinyjs(),
     waiter::useWaiter(),
-    shinytoastr::useToastr(),
     
     # Include custom JavaScript for translations
     tags$script(src = "translation.js"),
