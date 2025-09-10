@@ -161,6 +161,8 @@ mod_fit_server <- function(id, translations, data_mod) {
     observe({
       choices <- names(data_mod$clean_data())
       selected <- guess_conc(choices)
+      if(is.na(selected))
+        selected <- choices[1]
       updateSelectInput(session, "selectConc",
                         choices = choices,
                         selected = selected)
@@ -172,13 +174,11 @@ mod_fit_server <- function(id, translations, data_mod) {
     
     # Add rules for both concentration and distribution selection
     iv$add_rule("selectConc", function(value) {
-      req(data_mod$data())
-      data <- data_mod$data()
+      dat <- data_mod$data()
+      req(dat)
       trans <- translations()
       
-      if (is.null(value) || value == "") return("Please select a concentration column")
-      
-      conc_data <- data[[value]]
+      conc_data <- dat[[value]]
       
       if (length(conc_data) == 0L) {
         return(as.character(tr("ui_hintdata", trans)[1]))
