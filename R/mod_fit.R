@@ -6,7 +6,6 @@ mod_fit_ui <- function(id) {
   
   
   tagList(
-    # Show full layout with sidebar when data exists
     conditionalPanel(
       condition = paste_js("has_data", ns),
       layout_sidebar(
@@ -42,7 +41,6 @@ mod_fit_ui <- function(id) {
                           value = FALSE
             ),
             
-            # Update button with conditional icon
             div(class = "mt-3",
                 actionButton(ns("updateFit"), 
                              label = tagList(
@@ -52,7 +50,6 @@ mod_fit_ui <- function(id) {
                              class = "btn-primary w-100")
             ),
             
-            # Formatting controls
             hr(),
             selectInput(ns("selectUnit"),
                         label = span(`data-translate` = "ui_2unit", "Select units"),
@@ -74,17 +71,8 @@ mod_fit_ui <- function(id) {
           )
         ),
         
-        # Main content area when data exists
         div(
           class = "p-3",
-          
-          # Validation hints
-          conditionalPanel(
-            condition = paste_js("fit_args_fail", ns), 
-            htmlOutput(ns("hintFi"))
-          ),
-          
-          # Results when fit is successful
           conditionalPanel(
             condition = paste_js('has_fit', ns), 
             card(
@@ -92,11 +80,11 @@ mod_fit_ui <- function(id) {
               card_header(
                 class = "d-flex justify-content-between align-items-center",
                 span(`data-translate` = "ui_2plot", "Plot Fitted Distributions"),
-                ui_download_popover()
+                ui_download_popover(ns = ns)
               ),
               card_body(
                 htmlOutput(ns("fitFail")),
-                plotOutput(ns("distPlot1"))
+                plotOutput(ns("plotDist"))
               )
             ),
             card(
@@ -104,14 +92,11 @@ mod_fit_ui <- function(id) {
               card_header(
                 class = "d-flex justify-content-between align-items-center",
                 span(`data-translate` = "ui_2table", "Goodness of Fit"),
-                actionButton(ns("dlFitTable"),
-                             label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                             style = "padding:4px; font-size:80%"
-                )
+                ui_download_popover_table(ns = ns)
               ),
               card_body(
-                div(id = ns("gofDiv"),
-                    DT::dataTableOutput(ns("gofTable")))
+                div(id = ns("divGof"),
+                    DT::dataTableOutput(ns("tableGof")))
               )
             )
           )
@@ -126,18 +111,15 @@ mod_fit_ui <- function(id) {
   )
 }
 
-# Fit Module Server
 mod_fit_server <- function(id, translations, data_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # for conditional panel
     output$has_data <- data_mod$has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
-    # clean_data <- reactive({clean_data()})
     
-    waiter_gof <- waiter::Waiter$new(id = ns("gofDiv"), html = waiter::spin_2(), color = "white")
-    waiter_distplot <- waiter::Waiter$new(id = ns("distPlot1"), html = waiter::spin_2(), color = "white")
+    waiter_gof <- waiter::Waiter$new(id = ns("divGof"), html = waiter::spin_2(), color = "white")
+    waiter_distplot <- waiter::Waiter$new(id = ns("plotDist"), html = waiter::spin_2(), color = "white")
     
     needs_update <- reactiveVal(FALSE)
     update_trigger <- reactiveVal(0)
@@ -151,17 +133,15 @@ mod_fit_server <- function(id, translations, data_mod) {
         ignoreInit = TRUE
       )
     
-    # Update button click - reset flag and trigger fit
+    # Manual update with button 
     observe({
       needs_update(FALSE)
       update_trigger(update_trigger() + 1)
     }) %>%
       bindEvent(input$updateFit)
     
-    # Auto-update for critical changes (and reset flag)
+    # Auto-update for critical changes 
     observe({
-      cat("Auto-update triggered at:", Sys.time(), "\n")
-      print(input$selectConc)
       needs_update(FALSE)
       update_trigger(update_trigger() + 1)
     }) %>%
@@ -177,7 +157,6 @@ mod_fit_server <- function(id, translations, data_mod) {
     }) %>%
       bindEvent(needs_update())
     
-    # Update concentration choices when data changes  
     observe({
       choices <- names(data_mod$clean_data())
       selected <- guess_conc(choices)
@@ -189,10 +168,10 @@ mod_fit_server <- function(id, translations, data_mod) {
     }) %>%
       bindEvent(data_mod$clean_data())
     
-    # Validation check
+
+# validation --------------------------------------------------------------
     iv <- InputValidator$new()
     
-    # Add rules for both concentration and distribution selection
     iv$add_rule("selectConc", function(value) {
       trans <- translations()
       dat <- data_mod$data()
@@ -231,19 +210,11 @@ mod_fit_server <- function(id, translations, data_mod) {
     
     iv$enable()
     
-    # Your existing reactive logic but simplified
-    fit_args_fail <- reactive({
-      !iv$is_valid()
-    })
-    
-    output$fit_args_fail <- reactive({ fit_args_fail() })
-    outputOptions(output, "fit_args_fail", suspendWhenHidden = FALSE)
-    
-    # Fit distributions - heavy computation, good for caching
+
+# fit reactives and outputs -----------------------------------------------
     fit_dist <- reactive({
       req(update_trigger() > 0)
-      cat("fit_dist executing at:", Sys.time(), "\n")
-      
+
       waiter_gof$show()
       waiter_distplot$show()
       
@@ -272,11 +243,6 @@ mod_fit_server <- function(id, translations, data_mod) {
       ) %>% 
       bindEvent(update_trigger())
     
-    observe({
-      cat("update_trigger changed to:", update_trigger(), "at", Sys.time(), "\n")
-    }) %>% bindEvent(update_trigger())
-    
-    # Plot - auto-updates with formatting changes
     plot_dist <- reactive({
       req(fit_dist())
       
@@ -289,7 +255,6 @@ mod_fit_server <- function(id, translations, data_mod) {
       gp
     }) 
       
-    # Goodness of fit table
     table_gof <- reactive({
       req(fit_dist())
       
@@ -302,41 +267,23 @@ mod_fit_server <- function(id, translations, data_mod) {
       names(gof) <- gsub("weight", tr("ui_2weight", trans), names(gof))
       gof
     }) 
-      
-    # Failed fits
-    fit_fail <- reactive({
-      dist <- fit_dist()
-      paste0(setdiff(input$selectDist, names(dist)), collapse = ", ")
-    }) %>%
-      bindEvent(fit_dist())
     
-    # Check if fit is valid
-    has_fit <- reactive({
-      !is.null(fit_dist()) && !inherits(fit_dist(), "try-error")
-    }) %>%
-      bindEvent(fit_dist())
-    
-    output$has_fit <- reactive({ has_fit() })
-    outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
-    
-    # Render status tracking for waiters
+    # render plot and table - waiter stops when plot and table ready
     render_status <- reactiveValues(plot_ready = FALSE, table_ready = FALSE)
     
-    # Reset render status when new fitting starts
     observe({
       render_status$plot_ready <- FALSE
       render_status$table_ready <- FALSE
     }) %>%
       bindEvent(fit_dist())
     
-    # Render outputs
-    output$distPlot1 <- renderPlot({
+    output$plotDist <- renderPlot({
       result <- plot_dist()
       render_status$plot_ready <- TRUE
       result
     }) 
     
-    output$gofTable <- DT::renderDataTable({
+    output$tableGof <- DT::renderDataTable({
       result <- DT::datatable(
         table_gof(),
         options = list(
@@ -346,12 +293,10 @@ mod_fit_server <- function(id, translations, data_mod) {
           deferRender = TRUE
         )
       )
-      # required as datatable render can be slow
       render_status$table_ready <- TRUE
       result
     }) 
     
-    # Hide waiters when both renders complete
     observe({
       if (render_status$plot_ready && render_status$table_ready) {
         waiter_distplot$hide()
@@ -359,6 +304,13 @@ mod_fit_server <- function(id, translations, data_mod) {
       }
     }) %>%
       bindEvent(render_status$plot_ready, render_status$table_ready)
+    
+    # Notify when failed fits
+    fit_fail <- reactive({
+      dist <- fit_dist()
+      paste0(setdiff(input$selectDist, names(dist)), collapse = ", ")
+    }) %>%
+      bindEvent(fit_dist())
     
     output$fitFail <- renderText({
       failed <- fit_fail()
@@ -369,7 +321,7 @@ mod_fit_server <- function(id, translations, data_mod) {
     }) %>%
       bindEvent(fit_fail())
     
-    # Download handlers
+# download handlers -------------------------------------------------------
     output$fitDlPlot <- downloadHandler(
       filename = function() {
         "ssdtools_distFitPlot.png"
@@ -378,37 +330,55 @@ mod_fit_server <- function(id, translations, data_mod) {
         ggplot2::ggsave(file,
                         plot = plot_dist(), 
                         device = "png",
-                        width = get_width2(), 
-                        height = get_height2(), 
-                        dpi = get_dpi2()
+                        width = input$width2, 
+                        height = input$height2, 
+                        dpi = input$dpi2
         )
       }
     )
     
     output$fitDlRds <- downloadHandler(
       filename = function() {
-        "ssdtools_distFitPlot.rds"
+        "ssdtools_fit_plot.rds"
       },
       content = function(file) {
         saveRDS(plot_dist(), file = file)
       }
     )
     
-    output$fitDlTableHidden <- downloadHandler(
+    output$fitDlCsv <- downloadHandler(
       filename = function() {
-        "ssdtools_distGofTable.csv"
+        "ssdtools_gof_table.csv"
       },
       content = function(file) {
-        readr::write_csv(table_gof() %>% dplyr::as_tibble(), file)
+        readr::write_csv(dplyr::as_tibble(table_gof()), file)
       }
     )
     
-    observe({
-      shinyjs::click("fitDlTableHidden")
-    }) %>%
-      bindEvent(input$dlFitTable)
+    output$fitDlXlsx <- downloadHandler(
+      filename = function() {
+        "ssdtools_gof_table.xlsx"
+      },
+      content = function(file) {
+        writexl::write_xlsx(dplyr::as_tibble(table_gof()), file)
+      }
+    )
     
-    # Return reactive values for use by other modules
+    # observe({
+    #   shinyjs::click("fitDlTableHidden")
+    # }) %>%
+    #   bindEvent(input$dlFitTable)
+    
+
+# return values ------------------------------------------------------------
+    has_fit <- reactive({
+      !is.null(fit_dist()) && !inherits(fit_dist(), "try-error")
+    }) %>%
+      bindEvent(fit_dist())
+    
+    output$has_fit <- has_fit
+    outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
+    
     return(
       list(
         fit_dist = fit_dist,

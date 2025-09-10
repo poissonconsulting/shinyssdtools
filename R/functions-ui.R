@@ -64,9 +64,10 @@ ui_dashbox <- function(x){
     x
   )
 }
-ui_download_popover <- function(tab = "fit"){
+
+ui_download_popover_table <- function(tab = "fit", ns){
   bslib::popover(
-    actionButton(paste0(tab, "DownloadBtn"), 
+    actionButton(ns(paste0(tab, "DownloadBtnTbl")), 
                  label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
                  style = "padding:4px; font-size:80%"
     ),
@@ -75,12 +76,40 @@ ui_download_popover <- function(tab = "fit"){
       card_body(
         div(
           style = "display: grid; gap: 8px;",
-          downloadButton(paste0(tab, "DlPlot"),
+          downloadButton(ns(paste0(tab, "DlXlsx")),
+                         label = span(`data-translate` = "ui_2dlxlsx", "XLSX file"),
+                         style = "width: 100%; padding: 6px; font-size: 12px;",
+                         class = "btn-primary btn-sm"
+          ),
+          downloadButton(ns(paste0(tab, "DlCsv")),
+                         label = span(`data-translate` = "ui_2dlcsv", "CSV File"),
+                         style = "width: 100%; padding: 6px; font-size: 12px;",
+                         class = "btn-primary btn-sm"
+          )
+        )
+      )
+    ),
+    placement = "bottom"
+  )
+}
+
+ui_download_popover <- function(tab = "fit", ns){
+  bslib::popover(
+    actionButton(ns(paste0(tab, "DownloadBtn")), 
+                 label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
+                 style = "padding:4px; font-size:80%"
+    ),
+    card(
+      style = "width: 250px; margin-top: 10px;",
+      card_body(
+        div(
+          style = "display: grid; gap: 8px;",
+          downloadButton(ns(paste0(tab, "DlPlot")),
                          label = span(`data-translate` = "ui_2dlplot", "PNG file"),
                          style = "width: 100%; padding: 6px; font-size: 12px;",
                          class = "btn-primary btn-sm"
           ),
-          downloadButton(paste0(tab, "DlRds"),
+          downloadButton(ns(paste0(tab, "DlRds")),
                          label = span(`data-translate` = "ui_2dlrds", "RDS File"),
                          style = "width: 100%; padding: 6px; font-size: 12px;",
                          class = "btn-primary btn-sm"
@@ -92,21 +121,21 @@ ui_download_popover <- function(tab = "fit"){
             style = "display: flex; gap: 5px; justify-content: space-between;",
             div(
               style = "flex: 1; min-width: 0;",
-              numericInput("width2", 
+              numericInput(ns("width2"), 
                            label = span(`data-translate` = "ui_2width", "Width"), 
                            value = 6, min = 1, max = 50, step = 1
               )
             ),
             div(
               style = "flex: 1; min-width: 0;",
-              numericInput("height2", 
+              numericInput(ns("height2"), 
                            label = span(`data-translate` = "ui_2height", "Height"),
                            value = 4, min = 1, max = 50, step = 1
               )
             ),
             div(
               style = "flex: 1; min-width: 0;",
-              numericInput("dpi2", 
+              numericInput(ns("dpi2"), 
                            label = span(`data-translate` = "ui_2dpi", "DPI"),
                            value = 300, min = 50, max = 2000, step = 50
               )
