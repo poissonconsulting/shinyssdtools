@@ -127,9 +127,31 @@ mod_fit_ui <- function(id) {
 }
 
 # Fit Module Server
-mod_fit_server <- function(id, translations, data_mod) {
+mod_fit_server <- function(id, translations, data_mod, main_nav) {
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    # observe({print(main_nav())})
+    
+    # Track if fit tab has been visited
+    fit_tab_active <- reactiveVal(FALSE)
+    
+    # observe({print(fit_tab_active())})
+    
+    # Check if user has visited the fit tab
+    observe({
+      if (main_nav() == "fit") {
+        fit_tab_active(TRUE)
+      } else {
+        fit_tab_active(FALSE)
+      }
+    }) %>% 
+      bindEvent(main_nav())
+    
+    # # Only allow expensive operations if tab has been visited
+    # fit_tab_ready <- reactive({
+    #   fit_tab_visited() && data_mod$has_data()
+    # })
     
     # for conditional panel
     output$has_data <- data_mod$has_data
@@ -157,6 +179,12 @@ mod_fit_server <- function(id, translations, data_mod) {
       update_trigger(update_trigger() + 1)
     }) %>%
       bindEvent(input$updateFit)
+    
+    # observe({
+    #   if(fit_tab_active())
+    #     update_trigger(update_trigger() + 1)
+    # }) %>% 
+    #   bindEvent(main_nav())
     
     # Auto-update for critical changes (and reset flag)
     observe({
@@ -217,7 +245,6 @@ mod_fit_server <- function(id, translations, data_mod) {
       if (zero_range(conc_data)) {
         return(as.character(tr("ui_hintident", trans)[1]))
       }
-     
       NULL  
     })
     
@@ -241,7 +268,13 @@ mod_fit_server <- function(id, translations, data_mod) {
     
     # Fit distributions - heavy computation, good for caching
     fit_dist <- reactive({
+      # print(fit_tab_ready())
+      # print(fit_tab_visited())
+      print(fit_tab_active())
+      
       req(update_trigger() > 0)
+      req(fit_tab_active())
+      
       cat("fit_dist executing at:", Sys.time(), "\n")
       
       waiter_gof$show()
@@ -270,7 +303,7 @@ mod_fit_server <- function(id, translations, data_mod) {
         input$rescale,
         data_mod$data()
       ) %>% 
-      bindEvent(update_trigger())
+      bindEvent(update_trigger(), fit_tab_active())
     
     observe({
       cat("update_trigger changed to:", update_trigger(), "at", Sys.time(), "\n")

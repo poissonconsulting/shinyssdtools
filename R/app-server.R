@@ -100,7 +100,7 @@ app_server <- function(input, output, session) {
   
   # Call module servers with shared values
   data_mod <- mod_data_server("data_mod", trans, current_lang)
-  fit_mod <- mod_fit_server("fit_mod", trans, data_mod)
+  fit_mod <- mod_fit_server("fit_mod", trans, data_mod, reactive(input$main_nav))
   # predict_mod <- mod_predict_server("predict_mod", shared_values, trans)
   # report_mod <- mod_report_server("report_mod", shared_values, trans)
   # rcode_mod <- mod_rcode_server("rcode_mod", shared_values, trans)
