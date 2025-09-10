@@ -137,19 +137,15 @@ mod_fit_server <- function(id, translations, data_mod) {
     waiter_gof <- waiter::Waiter$new(id = ns("gofDiv"), html = waiter::spin_2(), color = "white")
     waiter_distplot <- waiter::Waiter$new(id = ns("distPlot1"), html = waiter::spin_2(), color = "white")
     
-    # Simple flag for tracking if update is needed
     needs_update <- reactiveVal(FALSE)
     update_trigger <- reactiveVal(0)
     
-    # Set needs_update to TRUE whenever fitting inputs change
     observe({
       needs_update(TRUE)
     }) %>%
       bindEvent(
-        input$selectConc,
         input$selectDist, 
         input$rescale,
-        data_mod$data(),
         ignoreInit = TRUE
       )
     
@@ -195,17 +191,10 @@ mod_fit_server <- function(id, translations, data_mod) {
     # Add rules for both concentration and distribution selection
     iv$add_rule("selectConc", function(value) {
       trans <- translations()
-      
-      if (value == "") {
-        return(as.character(tr("ui_hintdata", trans)[1]))
-      }
       dat <- data_mod$data()
       
       conc_data <- dat[[value]]
       
-      if (length(conc_data) == 0L) {
-        return(as.character(tr("ui_hintdata", trans)[1]))
-      }
       if (!is.numeric(conc_data)) {
         return(as.character(tr("ui_hintnum", trans)[1]))
       }
@@ -218,12 +207,13 @@ mod_fit_server <- function(id, translations, data_mod) {
       if (any(is.infinite(conc_data))) {
         return(as.character(tr("ui_hintfin", trans)[1]))
       }
-      if (zero_range(conc_data)) {
-        return(as.character(tr("ui_hintident", trans)[1]))
-      }
       if (length(conc_data) < 6) {
         return(as.character(tr("ui_hint6", trans)[1]))
       }
+      if (zero_range(conc_data)) {
+        return(as.character(tr("ui_hintident", trans)[1]))
+      }
+     
       NULL  
     })
     
@@ -288,21 +278,7 @@ mod_fit_server <- function(id, translations, data_mod) {
                                text_size = input$size2
       )
       gp
-    }) %>%
-      bindCache(
-        fit_dist(),
-        input$yaxis2,
-        input$xaxis2,
-        input$selectUnit,
-        input$size2
-      ) %>% 
-      bindEvent(
-        fit_dist(),
-        input$yaxis2,
-        input$xaxis2,
-        input$selectUnit,
-        input$size2
-      ) 
+    }) 
       
     # Goodness of fit table
     table_gof <- reactive({
@@ -316,9 +292,7 @@ mod_fit_server <- function(id, translations, data_mod) {
         dplyr::arrange(dplyr::desc(.data$weight))
       names(gof) <- gsub("weight", tr("ui_2weight", trans), names(gof))
       gof
-    }) %>%
-      bindCache(fit_dist(), translations()) %>% 
-      bindEvent(fit_dist(), translations()) 
+    }) 
       
     # Failed fits
     fit_fail <- reactive({
@@ -351,8 +325,7 @@ mod_fit_server <- function(id, translations, data_mod) {
       result <- plot_dist()
       render_status$plot_ready <- TRUE
       result
-    }) %>%
-      bindEvent(plot_dist())
+    }) 
     
     output$gofTable <- DT::renderDataTable({
       result <- DT::datatable(
@@ -364,10 +337,10 @@ mod_fit_server <- function(id, translations, data_mod) {
           deferRender = TRUE
         )
       )
+      # required as datatable render can be slow
       render_status$table_ready <- TRUE
       result
-    }) %>%
-      bindEvent(table_gof())
+    }) 
     
     # Hide waiters when both renders complete
     observe({
@@ -377,6 +350,25 @@ mod_fit_server <- function(id, translations, data_mod) {
       }
     }) %>%
       bindEvent(render_status$plot_ready, render_status$table_ready)
+    
+    shinytoastr::useToastr()
+    
+    # Replace your current fitFail output with this observer:
+    observe({
+      failed <- fit_fail()
+      req(failed != "")
+      
+      failed_dists <- strsplit(failed, ", ")[[1]]
+      message <- paste(failed_dists, tr("ui_hintfail", translations()))
+      
+      shinytoastr::toastr_warning(
+        message = message,
+        # title = "Distribution Fitting",
+        timeOut = 8000,  # 8 seconds before auto-dismiss
+        closeButton = TRUE
+      )
+    }) %>%
+      bindEvent(fit_fail())
     
     output$fitFail <- renderText({
       failed <- fit_fail()
