@@ -205,7 +205,3 @@ mod_data_server <- function(id, translations, lang) {
   })
 }
 
-# Helper function for translations (will need to be accessible)
-tr <- function(id, trans) {
-  trans$trans[trans$id == id]
-}
