@@ -101,13 +101,9 @@ app_server <- function(input, output, session) {
   # Call module servers with shared values
   data_mod <- mod_data_server("data_mod", trans, current_lang)
   fit_mod <- mod_fit_server("fit_mod", trans, data_mod)
-  # predict_mod <- mod_predict_server("predict_mod", shared_values, trans)
+  predict_mod <- mod_predict_server("predict_mod", trans, current_lang, data_mod, fit_mod)
   # report_mod <- mod_report_server("report_mod", shared_values, trans)
   # rcode_mod <- mod_rcode_server("rcode_mod", shared_values, trans)
-  
-  
-  
-  
   
   # --- get confidence intervals
   table_cl <- eventReactive(input$getCl, {
@@ -155,27 +151,7 @@ app_server <- function(input, output, session) {
   
 
   
-  # --- render predict results ----
-  output$modelAveragePlot <- renderPlot({
-    tryCatch({
-      waiter::waiter_show(
-        id = "modelAveragePlot",
-        html = waiter::spin_2(),
-        color = "white",
-        hide_on_render = TRUE
-      )
-      shared_values$model_average_plot
-    }, error = function(e) {
-      # Close any open devices on error to prevent leaks
-      tryCatch(
-        while (dev.cur() > 1)
-          dev.off(),
-        error = function(e2) {
-        }
-      )
-      stop(e)
-    })
-  })
+
   
   output$estHc <- renderUI({
     req(input$thresh_type)
