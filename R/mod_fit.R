@@ -221,21 +221,16 @@ mod_fit_server <- function(id, translations, data_mod) {
       waiter_distplot$show()
       
       data <- data_mod$data()
-      conc <- input$selectConc %>% make.names()
+      conc <- make.names(input$selectConc) 
       dists <- input$selectDist
       rescale <- input$rescale
       
-      x <- try(ssdtools::ssd_fit_dists(data,
-                                       left = conc,
-                                       dists = dists,
-                                       silent = TRUE,
-                                       rescale = rescale
-      ), silent = TRUE)
-      
-      if (inherits(x, "try-error")) {
-        x <- NULL
-      }
-      x
+      safely_try(ssdtools::ssd_fit_dists(data,
+                                         left = conc,
+                                         dists = dists,
+                                         silent = TRUE,
+                                         rescale = rescale
+      ))
     }) %>%
       bindCache(
         input$selectConc,
@@ -246,21 +241,20 @@ mod_fit_server <- function(id, translations, data_mod) {
       bindEvent(update_trigger())
     
     plot_dist <- reactive({
-      req(fit_dist())
-      
       dist <- fit_dist()
-      gp <- plot_distributions(dist,
+      req(dist)
+      
+      plot_distributions(dist,
                                ylab = input$yaxis2,
                                xlab = append_unit(input$xaxis2, input$selectUnit),
                                text_size = input$size2
       )
-      gp
     }) 
       
     table_gof <- reactive({
-      req(fit_dist())
-      
       dist <- fit_dist()
+      req(dist)
+      
       trans <- translations()
       gof <-
         ssdtools::ssd_gof(dist) %>%
@@ -384,6 +378,8 @@ mod_fit_server <- function(id, translations, data_mod) {
     return(
       list(
         fit_dist = fit_dist,
+        conc_column = reactive({input$selectConc}),
+        units = reactive({input$selectUnit}),
         has_fit = has_fit
       )
     )
