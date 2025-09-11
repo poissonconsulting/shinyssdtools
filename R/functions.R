@@ -12,6 +12,14 @@
 
 utils::globalVariables(c("."))
 
+safely_try <- function(expr, silent = TRUE) {
+  result <- try(expr, silent = silent)
+  if (inherits(result, "try-error")) {
+    return(NULL)
+  }
+  result
+}
+
 tr <- function(id, trans) {
   trans$trans[trans$id == id]
 }

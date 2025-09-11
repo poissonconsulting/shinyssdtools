@@ -87,19 +87,11 @@ mod_predict_ui <- function(id) {
                   span(`data-translate` = "ui_3cl", "Confidence Limits"),
                   bslib::tooltip(
                     bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                    uiOutput("ui_3help"),
+                    uiOutput(ns("ui_3help")),
                     placement = "right"
                   )
                 ),
-                downloadButton(
-                  ns("dlPredTable"),
-                  label = tagList(
-                    bsicons::bs_icon("download"),
-                    span(`data-translate` = "ui_2download", "Download")
-                  ),
-                  icon = NULL,
-                  style = "padding:4px; font-size:80%"
-                )
+                ui_download_popover_table(tab = "pred", ns = ns)
               ),
               card_body(
                 div(class = "d-flex gap-4 align-items-start mb-3", div(
@@ -132,7 +124,7 @@ mod_predict_ui <- function(id) {
                 )),
                 div(class = "mb-3", htmlOutput(ns("describeCl"))),
                 # Results table
-                conditionalPanel(condition = "output.showPredictResults", DT::dataTableOutput(ns("clTable")))
+                conditionalPanel(condition = paste_js("has_predict", ns = ns), DT::dataTableOutput(ns("clTable")))
               )
             )
           ),
@@ -152,7 +144,7 @@ mod_predict_ui <- function(id) {
 }
 
 # Predict Module Server
-mod_predict_server <- function(id, translations, data_mod, fit_mod) {
+mod_predict_server <- function(id, translations, lang, data_mod, fit_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -271,39 +263,43 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
     })
   
     # Threshold logic observers
-    observeEvent(input$thresh, {
+    observe({
       thresh_pc <- 100 - as.numeric(input$thresh)
       choices <- unique(c(99, 95, 90, 80, thresh_pc))
       updateSelectizeInput(session, "thresh_pc", choices = choices, selected = isolate(thresh_pc))
-    })
-
-    observeEvent(input$thresh_pc, {
+    }) %>% 
+      bindEvent(input$thresh)
+    
+    observe({
       thresh <- 100 - as.numeric(input$thresh_pc)
       choices <- c(1, 5, 10, 20, thresh)
       updateSelectizeInput(session, "thresh", choices = choices, selected = isolate(thresh))
-    })
+    }) %>% 
+      bindEvent(input$thresh_pc)
 
     # Update threshold reactive values
     observe({
-      req(fit_mod$fit_dist())
-      req(input$thresh_type)
-      x <- fit_mod$fit_dist()
-      # print(x)
+      fit <- fit_mod$fit_dist()
+      thresh_type <- input$thresh_type
+      req(fit)
+      req(thresh_type)
 
-      if (input$thresh_type != "Concentration") {
-        req(input$conc)
+      if (thresh_type != "Concentration") {
         conc <- input$conc
-        thresh <- signif(estimate_hp(x, conc), 3)
+        req(conc)
+        
+        thresh <- signif(estimate_hp(fit, conc), 3)
         if (thresh < 1 | thresh > 99) {
           return()
         }
         thresh_rv$conc <- conc
         thresh_rv$percent <- thresh
       } else {
-        req(input$thresh)
         thresh <- as.numeric(input$thresh)
+        req(thresh)
+        
         thresh_rv$percent <- thresh
-        conc <- signif(estimate_hc(x, thresh), 3)
+        conc <- signif(estimate_hc(fit, thresh), 3)
         thresh_rv$conc <- conc
       }
     })
@@ -332,29 +328,31 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
     })
     
     observe({print(predict_hc())})
-    # 
-    # # Transformation
-    # transformation <- reactive({
-    #   trans <- "log10"
-    #   if (!input$xlog) {
-    #     trans <- "identity"
-    #   }
-    #   trans
-    # })
-    # 
+
+    # Transformation
+    transformation <- reactive({
+      trans <- "log10"
+      if (!input$xlog) {
+        trans <- "identity"
+      }
+      trans
+    })
+
     # Plot model average with xbreaks
     plot_model_average_xbreaks <- reactive({
-      req(predict_hc())
-      req(data_mod$data())
-      req(fit_mod$conc_column())
-      req(input$selectLabel)
-      req(thresh_rv$conc)
-
       pred <- predict_hc()
       data <- data_mod$data()
       conc <- thresh_rv$conc
       percent <- thresh_rv$percent
-      conc_col <- make.names(fit_mod$conc_column())
+      conc_col <- fit_mod$conc_column()
+      req(pred)
+      req(data)
+      req(input$selectLabel)
+      req(conc)
+      req(conc_col)
+      req(percent)
+      
+      conc_col <- make.names(conc_col)
       label_col <- ifelse(input$selectLabel == "-none-", NULL, make.names(input$selectLabel))
 
       gp <- ssdtools::ssd_plot(data,
@@ -368,28 +366,23 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
 
     # Main model average plot
     plot_model_average <- reactive({
-      print("hi")
+      dat <- data_mod$data()
+      pred <- predict_hc()
+      conc_col <- fit_mod$conc_column()
+      thresh_type <- input$thresh_type
+      conc <- thresh_rv$conc
+      perc <- thresh_rv$percent
+      units <- fit_mod$units()
       
       req(input$thresh)
-      print("hi2")
-      
       req(input$selectColour)
       req(input$selectLabel)
       req(input$selectShape)
-      req(fit_mod$conc_column())
-      req(input$thresh_type)
+      req(conc_col)
+      req(thresh_type)
       req(input$adjustLabel)
-      req(thresh_rv$percent)
-      req(thresh_rv$conc)
-      req(data_mod$data())
-      
-      req(fit_mod$units())
-      
-    
-
-      data <- data_mod$data()
-      pred <- predict_hc()
-      conc <- fit_mod$conc_column()
+      req(conc)
+      req(dat)
       
       colour <- if (input$selectColour == "-none-") {
         NULL
@@ -406,7 +399,7 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
       } else {
         input$selectShape %>% make.names()
       }
-      percent <- if (!input$checkHc || is.null(thresh_rv$percent)) {
+      percent <- if (!input$checkHc || is.null(perc)) {
         NULL
       } else {
         thresh_rv$percent
@@ -439,25 +432,14 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
 
       trans <- transformation()
       big.mark <- ","
-      if (shared_values$current_language == "French") {
+      if (lang() == "French") {
         big.mark <- " "
       }
-      x <- plot_predictions(data, pred,
-                            conc = conc, label = label, colour = colour,
-                            shape = shape, percent = percent, xbreaks = as.numeric(input$xbreaks),
-                            label_adjust = shift_label, xaxis = append_unit(input$xaxis, shared_values$selected_unit),
-                            yaxis = input$yaxis, title = input$title, xmax = xmax, xmin = xmin,
-                            palette = input$selectPalette, legend_colour = input$legendColour,
-                            legend_shape = input$legendShape, trans = trans, text_size = input$size3,
-                            label_size = input$sizeLabel3, conc_value = thresh_rv$conc, big.mark = big.mark
-      )
-      
-      print(x)
 
-      silent_plot(plot_predictions(data, pred,
-        conc = conc, label = label, colour = colour,
+      silent_plot(plot_predictions(dat, pred,
+        conc = conc_col, label = label, colour = colour,
         shape = shape, percent = percent, xbreaks = as.numeric(input$xbreaks),
-        label_adjust = shift_label, xaxis = append_unit(input$xaxis, shared_values$selected_unit),
+        label_adjust = shift_label, xaxis = append_unit(input$xaxis, units),
         yaxis = input$yaxis, title = input$title, xmax = xmax, xmin = xmin,
         palette = input$selectPalette, legend_colour = input$legendColour,
         legend_shape = input$legendShape, trans = trans, text_size = input$size3,
@@ -468,18 +450,18 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
     # --- render predict results ----
     output$modelAveragePlot <- renderPlot({
       # waiter::waiter_show(id = "modelAveragePlot", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
-     print("hi3")
       plot_model_average()
     })
 
     has_predict <- reactive({
-      
-    })
-    
-    has_predict <- reactive({
-      !is.null(predict_hc()) && !inherits(predict_hc(), "try-error")
+      !is.null(predict_hc())
     }) %>%
       bindEvent(predict_hc())
+    
+    output$has_predict <- has_predict
+    outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
+    
+    
     
     # 
     # output$predDlPlot <- downloadHandler(
