@@ -62,87 +62,84 @@ mod_predict_ui <- function(id) {
                         value = TRUE),
           uiOutput(ns("uiXbreaks"))
         ),
-        conditionalPanel(
-          condition = "input.main_nav == 'predict'",
-          div(
-            class = "p-3",
-            conditionalPanel(condition = "output.checkpred", htmlOutput("hintPr")),
-            conditionalPanel(
-              condition = paste_js('has_predict', ns), 
-              card(
-                full_screen = TRUE,
-                card_header(
-                  class = "d-flex justify-content-between align-items-center",
-                  span(`data-translate` = "ui_3model", "Model Average Plot"),
-                  ui_download_popover(tab = "pred", ns = ns)
-                ),
-                card_body(
-                  plotOutput("modelAveragePlot"),
-                  conditionalPanel(condition = "output.showPredictResults", htmlOutput("estHc"))
-                )
+        div(
+          class = "p-3",
+          conditionalPanel(condition = "output.checkpred", htmlOutput(ns("hintPr"))),
+          conditionalPanel(
+            condition = paste_js('has_predict', ns),
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                span(`data-translate` = "ui_3model", "Model Average Plot"),
+                ui_download_popover(tab = "pred", ns = ns)
               ),
-              card(
-                full_screen = TRUE,
-                card_header(
-                  class = "d-flex justify-content-between align-items-center",
-                  div(
-                    span(`data-translate` = "ui_3cl", "Confidence Limits"),
-                    bslib::tooltip(
-                      bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                      uiOutput("ui_3help"),
-                      placement = "right"
-                    )
-                  ),
-                  downloadButton(
-                    "dlPredTable",
-                    label = tagList(
-                      bsicons::bs_icon("download"),
-                      span(`data-translate` = "ui_2download", "Download")
-                    ),
-                    icon = NULL,
-                    style = "padding:4px; font-size:80%"
-                  )
-                ),
-                card_body(
-                  div(class = "d-flex gap-4 align-items-start mb-3", div(
-                    selectInput(
-                      "bootSamp",
-                      label = div(
-                        span(`data-translate` = "ui_3samples", "Bootstrap samples"),
-                        bslib::tooltip(
-                          bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                          span(`data-translate` = "ui_3bshint", "10,000 bootstrap samples recommended"),
-                          placement = "right"
-                        )
-                      ),
-                      choices = c(
-                        "500" = "500",
-                        "1,000" = "1000",
-                        "5,000" = "5000",
-                        "10,000" = "10000"
-                      ),
-                      selected = "1000",
-                      width = "190px"
-                    )
-                  ), div(
-                    actionButton(
-                      "getCl",
-                      label = span(`data-translate` = "ui_3clbutton", "Get CL"),
-                      class = "btn-primary",
-                      style = "white-space: nowrap;"
-                    )
-                  )),
-                  div(class = "mb-3", htmlOutput("describeCl")),
-                  # Results table
-                  conditionalPanel(condition = "output.showPredictResults", DT::dataTableOutput("clTable"))
-                )
+              card_body(
+                plotOutput(ns("modelAveragePlot")),
+                conditionalPanel(condition = "output.showPredictResults", htmlOutput(ns("estHc")))
               )
             ),
-            # conditionalPanel(
-            #   condition = "output.showPredictResults",
-            # 
-            # )
-          )
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                div(
+                  span(`data-translate` = "ui_3cl", "Confidence Limits"),
+                  bslib::tooltip(
+                    bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                    uiOutput("ui_3help"),
+                    placement = "right"
+                  )
+                ),
+                downloadButton(
+                  ns("dlPredTable"),
+                  label = tagList(
+                    bsicons::bs_icon("download"),
+                    span(`data-translate` = "ui_2download", "Download")
+                  ),
+                  icon = NULL,
+                  style = "padding:4px; font-size:80%"
+                )
+              ),
+              card_body(
+                div(class = "d-flex gap-4 align-items-start mb-3", div(
+                  selectInput(
+                    ns("bootSamp"),
+                    label = div(
+                      span(`data-translate` = "ui_3samples", "Bootstrap samples"),
+                      bslib::tooltip(
+                        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                        span(`data-translate` = "ui_3bshint", "10,000 bootstrap samples recommended"),
+                        placement = "right"
+                      )
+                    ),
+                    choices = c(
+                      "500" = "500",
+                      "1,000" = "1000",
+                      "5,000" = "5000",
+                      "10,000" = "10000"
+                    ),
+                    selected = "1000",
+                    width = "190px"
+                  )
+                ), div(
+                  actionButton(
+                    ns("getCl"),
+                    label = span(`data-translate` = "ui_3clbutton", "Get CL"),
+                    class = "btn-primary",
+                    style = "white-space: nowrap;"
+                  )
+                )),
+                div(class = "mb-3", htmlOutput(ns("describeCl"))),
+                # Results table
+                conditionalPanel(condition = "output.showPredictResults", DT::dataTableOutput(ns("clTable")))
+              )
+            )
+          ),
+          # conditionalPanel(
+          #   condition = "output.showPredictResults",
+          # 
+          # )
         ))
     ),
     conditionalPanel(
@@ -178,9 +175,9 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
     }) %>%
       bindEvent(translations())
     
-    observe({
-      print(fit_mod$has_fit())
-    })
+    # observe({
+    #   print(fit_mod$has_fit())
+    # })
     
     # Threshold reactive values
     thresh_rv <- reactiveValues(
@@ -192,8 +189,7 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
     column_names <- reactive({
       names(data_mod$clean_data())
     })
-    
-
+     
 # output renders ----------------------------------------------------------
     output$selectLabel <- renderUI({
       cols <- column_names()
@@ -232,32 +228,48 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
                 value = input$selectShape)
     })
     
+    # X-breaks UI
+    output$uiXbreaks <- renderUI({
+      xbreaks <- plot_model_average_xbreaks()
+      selectizeInput(ns("xbreaks"),
+                     label = span(`data-translate` = "ui_xbreaks", "X breaks"),
+                     options = list(create = TRUE, plugins = list("remove_button")),
+                     choices = xbreaks,
+                     selected = xbreaks,
+                     multiple = TRUE
+      )
+    })
+    
     output$ui_3thresh <- renderUI({
       req(input$thresh_type)
       if (input$thresh_type != "Concentration") {
-        return(numericInput(ns("conc"),
-          label = span(`data-translate` = "ui_3byconc", "By concentration"),
-          value = 1, min = 0,
-          max = 100, step = 0.1, width = "100px"
-        ))
+        return(
+          layout_column_wrap(
+            width = 1/2,
+            numericInput(ns("conc"),
+                         label = span(`data-translate` = "ui_3byconc", "by concentration"),
+                         value = 1, min = 0,
+                         max = 100, step = 0.1
+            )
+          ))
       }
-      div(
-        inline(selectizeInput(ns("thresh"),
-          label = span(`data-translate` = "ui_3affecting", "% affecting"),
-          choices = c(1, 5, 10, 20),
-          options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
-          selected = 5, width = "100px"
-        )),
-        inline(selectizeInput(ns("thresh_pc"),
-          label = span(`data-translate` = "ui_3protecting", "% protecting"),
-          choices = c(99, 95, 90, 80),
-          options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
-          selected = 95, width = "100px"
-        ))
+      layout_column_wrap(
+        width = 1/2,
+        selectizeInput(ns("thresh"),
+                       label = span(`data-translate` = "ui_3affecting", "% affecting"),
+                       choices = c(1, 5, 10, 20),
+                       options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
+                       selected = 5
+        ),
+        selectizeInput(ns("thresh_pc"),
+                       label = span(`data-translate` = "ui_3protecting", "% protecting"),
+                       choices = c(99, 95, 90, 80),
+                       options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
+                       selected = 95
+        )
       )
     })
   
-    
     # Threshold logic observers
     observeEvent(input$thresh, {
       thresh_pc <- 100 - as.numeric(input$thresh)
@@ -270,31 +282,32 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
       choices <- c(1, 5, 10, 20, thresh)
       updateSelectizeInput(session, "thresh", choices = choices, selected = isolate(thresh))
     })
-    # 
-    # # Update threshold reactive values
-    # observe({
-    #   req(mod_fit$fit_dist())
-    #   req(input$thresh_type)
-    #   x <- mod_fit$fit_dist()
-    #   
-    #   if (input$thresh_type != "Concentration") {
-    #     req(input$conc)
-    #     conc <- input$conc
-    #     thresh <- signif(estimate_hp(x, conc), 3)
-    #     if (thresh < 1 | thresh > 99) {
-    #       return()
-    #     }
-    #     thresh_rv$conc <- conc
-    #     thresh_rv$percent <- thresh
-    #   } else {
-    #     req(input$thresh)
-    #     thresh <- as.numeric(input$thresh)
-    #     thresh_rv$percent <- thresh
-    #     conc <- signif(estimate_hc(x, thresh), 3)
-    #     thresh_rv$conc <- conc
-    #   }
-    # })
-    # 
+
+    # Update threshold reactive values
+    observe({
+      req(fit_mod$fit_dist())
+      req(input$thresh_type)
+      x <- fit_mod$fit_dist()
+      # print(x)
+
+      if (input$thresh_type != "Concentration") {
+        req(input$conc)
+        conc <- input$conc
+        thresh <- signif(estimate_hp(x, conc), 3)
+        if (thresh < 1 | thresh > 99) {
+          return()
+        }
+        thresh_rv$conc <- conc
+        thresh_rv$percent <- thresh
+      } else {
+        req(input$thresh)
+        thresh <- as.numeric(input$thresh)
+        thresh_rv$percent <- thresh
+        conc <- signif(estimate_hc(x, thresh), 3)
+        thresh_rv$conc <- conc
+      }
+    })
+
     # # Check prediction validation
     # check_pred <- reactive({
     #   req(mod_data$data())
@@ -311,13 +324,14 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
     #   ""
     # })
     # 
-    # # Predict hazard concentration
-    # predict_hc <- reactive({
-    #   req(mod_fit$fit_dist())
-    #   req(thresh_rv$percent)
-    #   dist <- mod_fit$fit_dist()
-    #   stats::predict(dist, proportion = unique(c(1:99, thresh_rv$percent)) / 100)
-    # })
+    # Predict hazard concentration
+    predict_hc <- reactive({
+      req(fit_mod$fit_dist())
+      req(thresh_rv$percent)
+      stats::predict(fit_mod$fit_dist(), proportion = unique(c(1:99, thresh_rv$percent)) / 100)
+    })
+    
+    observe({print(predict_hc())})
     # 
     # # Transformation
     # transformation <- reactive({
@@ -328,121 +342,145 @@ mod_predict_server <- function(id, translations, data_mod, fit_mod) {
     #   trans
     # })
     # 
-    # # Plot model average with xbreaks
-    # plot_model_average_xbreaks <- reactive({
-    #   req(predict_hc())
-    #   req(mod_data$data())
-    #   req(mod_fit$conc_column())
-    #   req(input$selectLabel)
-    #   req(thresh_rv$conc)
-    #   
-    #   pred <- predict_hc()
-    #   data <- mod_data$data()
-    #   conc <- thresh_rv$conc
-    #   percent <- thresh_rv$percent
-    #   conc_col <- make.names(mod_fit$conc_column())
-    #   label_col <- ifelse(input$selectLabel == "-none-", NULL, make.names(input$selectLabel))
-    #   
-    #   gp <- ssdtools::ssd_plot(data,
-    #     pred = pred,
-    #     left = conc_col, label = label_col,
-    #     hc = percent / 100
-    #   )
-    #   xbreaks <- gp_xbreaks(gp)
-    #   xbreaks[xbreaks != conc]
-    # })
-    # 
-    # # Main model average plot
-    # plot_model_average <- reactive({
-    #   req(input$thresh)
-    #   req(input$selectColour)
-    #   req(input$selectLabel)
-    #   req(input$selectShape)
-    #   req(mod_fit$conc_column())
-    #   req(input$thresh_type)
-    #   req(input$adjustLabel)
-    #   req(thresh_rv$percent)
-    #   req(thresh_rv$conc)
-    #   req(mod_data$data())
-    #   req(mod_fit$units())
-    #   
-    #   data <- mod_data$data()
-    #   pred <- predict_hc()
-    #   conc <- shared_values$selected_conc %>% make.names()
-    #   colour <- if (input$selectColour == "-none-") {
-    #     NULL
-    #   } else {
-    #     input$selectColour %>% make.names()
-    #   }
-    #   label <- if (input$selectLabel == "-none-") {
-    #     NULL
-    #   } else {
-    #     input$selectLabel %>% make.names()
-    #   }
-    #   shape <- if (input$selectShape == "-none-") {
-    #     NULL
-    #   } else {
-    #     input$selectShape %>% make.names()
-    #   }
-    #   percent <- if (!input$checkHc || is.null(thresh_rv$percent)) {
-    #     NULL
-    #   } else {
-    #     thresh_rv$percent
-    #   }
-    #   
-    #   shape_data <- if (is.null(shape)) {
-    #     NULL
-    #   } else {
-    #     data[[shape]]
-    #   }
-    #   
-    #   trans <- translations()
-    #   validate(need(is.null(shape_data) | is.character(shape_data) | is.factor(shape_data), 
-    #                message = tr("ui_hintsym", trans)))
-    #   
-    #   shift_label <- input$adjustLabel
-    #   if (shift_label < 1) {
-    #     shift_label <- 1
-    #   }
-    #   
-    #   xmax <- NA
-    #   if (!is.null(input$xMax)) {
-    #     xmax <- input$xMax
-    #   }
-    #   
-    #   xmin <- NA
-    #   if (!is.null(input$xMin)) {
-    #     xmin <- input$xMin
-    #   }
-    #   
-    #   trans <- transformation()
-    #   big.mark <- ","
-    #   if (shared_values$current_language == "French") {
-    #     big.mark <- " "
-    #   }
-    #   
-    #   silent_plot(plot_predictions(data, pred,
-    #     conc = conc, label = label, colour = colour,
-    #     shape = shape, percent = percent, xbreaks = as.numeric(input$xbreaks),
-    #     label_adjust = shift_label, xaxis = append_unit(input$xaxis, shared_values$selected_unit),
-    #     yaxis = input$yaxis, title = input$title, xmax = xmax, xmin = xmin,
-    #     palette = input$selectPalette, legend_colour = input$legendColour,
-    #     legend_shape = input$legendShape, trans = trans, text_size = input$size3,
-    #     label_size = input$sizeLabel3, conc_value = thresh_rv$conc, big.mark = big.mark
-    #   ))
-    # })
-    # 
-    # # X-breaks UI
-    # output$uiXbreaks <- renderUI({
-    #   xbreaks <- plot_model_average_xbreaks()
-    #   selectizeInput(ns("xbreaks"), 
-    #                  label = span(`data-translate` = "ui_xbreaks", "X breaks"),
-    #                  options = list(create = TRUE, plugins = list("remove_button")),
-    #                  choices = xbreaks,
-    #                  selected = xbreaks,
-    #                  multiple = TRUE
-    #   )
-    # })
+    # Plot model average with xbreaks
+    plot_model_average_xbreaks <- reactive({
+      req(predict_hc())
+      req(data_mod$data())
+      req(fit_mod$conc_column())
+      req(input$selectLabel)
+      req(thresh_rv$conc)
+
+      pred <- predict_hc()
+      data <- data_mod$data()
+      conc <- thresh_rv$conc
+      percent <- thresh_rv$percent
+      conc_col <- make.names(fit_mod$conc_column())
+      label_col <- ifelse(input$selectLabel == "-none-", NULL, make.names(input$selectLabel))
+
+      gp <- ssdtools::ssd_plot(data,
+        pred = pred,
+        left = conc_col, label = label_col,
+        hc = percent / 100
+      )
+      xbreaks <- gp_xbreaks(gp)
+      xbreaks[xbreaks != conc]
+    })
+
+    # Main model average plot
+    plot_model_average <- reactive({
+      print("hi")
+      
+      req(input$thresh)
+      print("hi2")
+      
+      req(input$selectColour)
+      req(input$selectLabel)
+      req(input$selectShape)
+      req(fit_mod$conc_column())
+      req(input$thresh_type)
+      req(input$adjustLabel)
+      req(thresh_rv$percent)
+      req(thresh_rv$conc)
+      req(data_mod$data())
+      
+      req(fit_mod$units())
+      
+    
+
+      data <- data_mod$data()
+      pred <- predict_hc()
+      conc <- fit_mod$conc_column()
+      
+      colour <- if (input$selectColour == "-none-") {
+        NULL
+      } else {
+        input$selectColour %>% make.names()
+      }
+      label <- if (input$selectLabel == "-none-") {
+        NULL
+      } else {
+        input$selectLabel %>% make.names()
+      }
+      shape <- if (input$selectShape == "-none-") {
+        NULL
+      } else {
+        input$selectShape %>% make.names()
+      }
+      percent <- if (!input$checkHc || is.null(thresh_rv$percent)) {
+        NULL
+      } else {
+        thresh_rv$percent
+      }
+
+      shape_data <- if (is.null(shape)) {
+        NULL
+      } else {
+        data[[shape]]
+      }
+
+      trans <- translations()
+      validate(need(is.null(shape_data) | is.character(shape_data) | is.factor(shape_data),
+                   message = tr("ui_hintsym", trans)))
+
+      shift_label <- input$adjustLabel
+      if (shift_label < 1) {
+        shift_label <- 1
+      }
+
+      xmax <- NA
+      if (!is.null(input$xMax)) {
+        xmax <- input$xMax
+      }
+
+      xmin <- NA
+      if (!is.null(input$xMin)) {
+        xmin <- input$xMin
+      }
+
+      trans <- transformation()
+      big.mark <- ","
+      if (shared_values$current_language == "French") {
+        big.mark <- " "
+      }
+      x <- plot_predictions(data, pred,
+                            conc = conc, label = label, colour = colour,
+                            shape = shape, percent = percent, xbreaks = as.numeric(input$xbreaks),
+                            label_adjust = shift_label, xaxis = append_unit(input$xaxis, shared_values$selected_unit),
+                            yaxis = input$yaxis, title = input$title, xmax = xmax, xmin = xmin,
+                            palette = input$selectPalette, legend_colour = input$legendColour,
+                            legend_shape = input$legendShape, trans = trans, text_size = input$size3,
+                            label_size = input$sizeLabel3, conc_value = thresh_rv$conc, big.mark = big.mark
+      )
+      
+      print(x)
+
+      silent_plot(plot_predictions(data, pred,
+        conc = conc, label = label, colour = colour,
+        shape = shape, percent = percent, xbreaks = as.numeric(input$xbreaks),
+        label_adjust = shift_label, xaxis = append_unit(input$xaxis, shared_values$selected_unit),
+        yaxis = input$yaxis, title = input$title, xmax = xmax, xmin = xmin,
+        palette = input$selectPalette, legend_colour = input$legendColour,
+        legend_shape = input$legendShape, trans = trans, text_size = input$size3,
+        label_size = input$sizeLabel3, conc_value = thresh_rv$conc, big.mark = big.mark
+      ))
+    })
+    
+    # --- render predict results ----
+    output$modelAveragePlot <- renderPlot({
+      # waiter::waiter_show(id = "modelAveragePlot", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
+     print("hi3")
+      plot_model_average()
+    })
+
+    has_predict <- reactive({
+      
+    })
+    
+    has_predict <- reactive({
+      !is.null(predict_hc()) && !inherits(predict_hc(), "try-error")
+    }) %>%
+      bindEvent(predict_hc())
+    
     # 
     # output$predDlPlot <- downloadHandler(
     #   filename = function() {
