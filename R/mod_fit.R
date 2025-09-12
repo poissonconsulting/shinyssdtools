@@ -75,8 +75,7 @@ mod_fit_ui <- function(id) {
           class = "p-3",
           conditionalPanel(
             condition = paste_js('has_fit', ns), 
-            div(id = ns("divPlot"),
-                card(id = ns("cardPlot"),
+                card(
                      full_screen = TRUE,
                      card_header(
                        class = "d-flex justify-content-between align-items-center",
@@ -87,9 +86,8 @@ mod_fit_ui <- function(id) {
                        htmlOutput(ns("fitFail")),
                        plotOutput(ns("plotDist"))
                      )
-                )),
-            div(id = ns("divGof"),
-                card(id = ns("cardGof"),
+                ),
+                card(
                      full_screen = TRUE,
                      card_header(
                        class = "d-flex justify-content-between align-items-center",
@@ -100,7 +98,7 @@ mod_fit_ui <- function(id) {
                        div(class = "table-responsive",
                            DT::dataTableOutput(ns("tableGof")))
                      )
-                ))
+                )
             )
         )
       )
