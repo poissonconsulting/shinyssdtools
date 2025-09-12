@@ -7,7 +7,7 @@ mod_fit_ui <- function(id) {
   
   tagList(
     conditionalPanel(
-      condition = paste_js("has_data", ns),
+      condition = paste_js('has_data', ns = ns),
       layout_sidebar(
         padding = "1rem",
         gap = "1rem",
@@ -75,33 +75,33 @@ mod_fit_ui <- function(id) {
           class = "p-3",
           conditionalPanel(
             condition = paste_js('has_fit', ns), 
-            div(id = ns("divPlotDist"),
-            card(
-              full_screen = TRUE,
-              card_header(
-                class = "d-flex justify-content-between align-items-center",
-                span(`data-translate` = "ui_2plot", "Plot Fitted Distributions"),
-                ui_download_popover(ns = ns)
-              ),
-              card_body(
-                htmlOutput(ns("fitFail")),
-                plotOutput(ns("plotDist"))
-              )
-            )),
+            div(id = ns("divPlot"),
+                card(id = ns("cardPlot"),
+                     full_screen = TRUE,
+                     card_header(
+                       class = "d-flex justify-content-between align-items-center",
+                       span(`data-translate` = "ui_2plot", "Plot Fitted Distributions"),
+                       ui_download_popover(ns = ns)
+                     ),
+                     card_body(
+                       htmlOutput(ns("fitFail")),
+                       plotOutput(ns("plotDist"))
+                     )
+                )),
             div(id = ns("divGof"),
-            card(
-              full_screen = TRUE,
-              card_header(
-                class = "d-flex justify-content-between align-items-center",
-                span(`data-translate` = "ui_2table", "Goodness of Fit"),
-                ui_download_popover_table(ns = ns)
-              ),
-              card_body(
-                
-                    DT::dataTableOutput(ns("tableGof")))
-              )
+                card(id = ns("cardGof"),
+                     full_screen = TRUE,
+                     card_header(
+                       class = "d-flex justify-content-between align-items-center",
+                       span(`data-translate` = "ui_2table", "Goodness of Fit"),
+                       ui_download_popover_table(ns = ns)
+                     ),
+                     card_body(padding = 25,
+                       div(class = "table-responsive",
+                           DT::dataTableOutput(ns("tableGof")))
+                     )
+                ))
             )
-          )
         )
       )
     ),
@@ -113,42 +113,104 @@ mod_fit_ui <- function(id) {
   )
 }
 
-mod_fit_server <- function(id, translations, data_mod) {
+mod_fit_server <- function(id, translations, data_mod, main_nav) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     output$has_data <- data_mod$has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     
-    waiter_gof <- waiter::Waiter$new(id = ns("divGof"), html = waiter::spin_2(), color = "white")
-    waiter_distplot <- waiter::Waiter$new(id = ns("divPlotDist"), html = waiter::spin_2(), color = "white")
+    waiter_gof <- ui_waiter(id = "tableGof", ns = ns)
+    waiter_distplot <- ui_waiter(id = "plotDist", ns = ns)
     
     needs_update <- reactiveVal(FALSE)
-    update_trigger <- reactiveVal(0)
     
+    fit_trigger <- reactiveVal(0)
+    
+    # trigger if navigate to fit tab
     observe({
-      needs_update(TRUE)
+      if(main_nav() == "fit") {
+        current_val <- isolate(fit_trigger())
+        fit_trigger(current_val + 1)
+      }
     }) %>%
-      bindEvent(
-        input$selectDist, 
-        input$rescale,
-        ignoreInit = TRUE
-      )
+      bindEvent(main_nav())
     
-    # Manual update with button 
+    # Also increment when manual update is needed
     observe({
       needs_update(FALSE)
-      update_trigger(update_trigger() + 1)
+      current_val <- isolate(fit_trigger())
+      fit_trigger(current_val + 1)
     }) %>%
       bindEvent(input$updateFit)
     
-    # Auto-update for critical changes 
+    # Auto-update for critical changes
     observe({
       needs_update(FALSE)
-      update_trigger(update_trigger() + 1)
+      if(isolate(main_nav()) == "fit") {  
+        current_val <- isolate(fit_trigger())
+        fit_trigger(current_val + 1)
+      }
     }) %>%
       bindEvent(input$selectConc, data_mod$data(), ignoreInit = TRUE)
     
+    fit_dist <- reactive({
+      req(fit_trigger() > 0)
+      req(main_nav() == "fit")  
+      req(data_mod$data())
+      req(input$selectConc)
+      req(input$selectDist)
+      
+      print(paste("Computing fit at trigger:", fit_trigger()))
+      
+      waiter_gof$show()
+      waiter_distplot$show()
+      
+      data <- data_mod$data()
+      conc <- make.names(input$selectConc) 
+      dists <- input$selectDist
+      rescale <- input$rescale
+      
+      safe_try(ssdtools::ssd_fit_dists(data,
+                                       left = conc,
+                                       dists = dists,
+                                       silent = TRUE,
+                                       rescale = rescale
+      ))
+    }) %>%
+      bindCache(
+        input$selectConc,
+        input$selectDist,
+        input$rescale,
+        data_mod$data()
+      ) %>% 
+      bindEvent(fit_trigger())  # Only bind to our explicit trigger
+    
+    # update_trigger <- reactiveVal(0)
+    # 
+    # observe({
+    #   needs_update(TRUE)
+    # }) %>%
+    #   bindEvent(
+    #     input$selectDist, 
+    #     input$rescale,
+    #     ignoreInit = TRUE
+    #   )
+    # 
+    # # Manual update with button 
+    # observe({
+    #   needs_update(FALSE)
+    #   update_trigger(update_trigger() + 1)
+    # }) %>%
+    #   bindEvent(input$updateFit)
+    # 
+    # # Auto-update for critical changes 
+    # observe({
+    #   needs_update(FALSE)
+    #   update_trigger(update_trigger() + 1)
+    # }) %>%
+    #   bindEvent(input$selectConc, data_mod$data(), ignoreInit = TRUE)
+    # 
     # Dynamic icon for update button
     output$update_icon <- renderUI({
       if (needs_update()) {
@@ -170,7 +232,6 @@ mod_fit_server <- function(id, translations, data_mod) {
     }) %>%
       bindEvent(data_mod$clean_data())
     
-
 # validation --------------------------------------------------------------
     iv <- InputValidator$new()
     
@@ -214,31 +275,31 @@ mod_fit_server <- function(id, translations, data_mod) {
     
 
 # fit reactives and outputs -----------------------------------------------
-    fit_dist <- reactive({
-      req(update_trigger() > 0)
-
-      waiter_gof$show()
-      waiter_distplot$show()
-      
-      data <- data_mod$data()
-      conc <- make.names(input$selectConc) 
-      dists <- input$selectDist
-      rescale <- input$rescale
-      
-      safely_try(ssdtools::ssd_fit_dists(data,
-                                         left = conc,
-                                         dists = dists,
-                                         silent = TRUE,
-                                         rescale = rescale
-      ))
-    }) %>%
-      bindCache(
-        input$selectConc,
-        input$selectDist,
-        input$rescale,
-        data_mod$data()
-      ) %>% 
-      bindEvent(update_trigger())
+    # fit_dist <- reactive({
+    #   req(update_trigger() > 0)
+    # 
+    #   waiter_gof$show()
+    #   waiter_distplot$show()
+    #   
+    #   data <- data_mod$data()
+    #   conc <- make.names(input$selectConc) 
+    #   dists <- input$selectDist
+    #   rescale <- input$rescale
+    #   
+    #   safe_try(ssdtools::ssd_fit_dists(data,
+    #                                      left = conc,
+    #                                      dists = dists,
+    #                                      silent = TRUE,
+    #                                      rescale = rescale
+    #   ))
+    # }) %>%
+    #   bindCache(
+    #     input$selectConc,
+    #     input$selectDist,
+    #     input$rescale,
+    #     data_mod$data()
+    #   ) %>% 
+    #   bindEvent(update_trigger())
     
     plot_dist <- reactive({
       dist <- fit_dist()
