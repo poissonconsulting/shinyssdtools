@@ -1,3 +1,7 @@
+ui_waiter <- function(id, ns){
+  waiter::Waiter$new(id = ns(id), html = waiter::spin_2(), color = "white")
+}
+
 dt_options <- function(lang = "english"){
   # Language-specific translations
   lang_options <- if (lang == "french") {

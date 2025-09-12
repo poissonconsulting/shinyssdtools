@@ -12,12 +12,27 @@
 
 utils::globalVariables(c("."))
 
-safely_try <- function(expr, silent = TRUE) {
+safe_try <- function(expr, silent = TRUE) {
   result <- try(expr, silent = silent)
   if (inherits(result, "try-error")) {
     return(NULL)
   }
   result
+}
+
+clean_nboot <- function(x){
+  as.integer(gsub("(,|\\s)", "", x))
+}
+
+estimate_time <- function(nboot, lang){
+  df <- 
+    data.frame(
+      n = c(500, 1000, 5000, 10000),
+      english = c("10 seconds", "20 seconds", "2 minutes", "5 minutes"),
+      french = c("10 secondes", "20 secondes", "2 minutes", "5 minutes")
+    )
+  
+  df[df$n == nboot,][[lang]]
 }
 
 tr <- function(id, trans) {

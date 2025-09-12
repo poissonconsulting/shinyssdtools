@@ -64,20 +64,22 @@ mod_predict_ui <- function(id) {
         ),
         div(
           class = "p-3",
-          conditionalPanel(condition = "output.checkpred", htmlOutput(ns("hintPr"))),
+          
           conditionalPanel(
             condition = paste_js('has_predict', ns),
-            card(
-              full_screen = TRUE,
-              card_header(
-                class = "d-flex justify-content-between align-items-center",
-                span(`data-translate` = "ui_3model", "Model Average Plot"),
-                ui_download_popover(tab = "pred", ns = ns)
-              ),
-              card_body(
-                plotOutput(ns("modelAveragePlot")),
-                conditionalPanel(condition = "output.showPredictResults", htmlOutput(ns("estHc")))
-              )
+            div(id = ns("divPred"),
+                card(
+                  full_screen = TRUE,
+                  card_header(
+                    class = "d-flex justify-content-between align-items-center",
+                    span(`data-translate` = "ui_3model", "Model Average Plot"),
+                    ui_download_popover(tab = "pred", ns = ns)
+                  ),
+                  card_body(
+                    plotOutput(ns("plotPred")),
+                    htmlOutput(ns("estHc"))
+                  )
+                )
             ),
             card(
               full_screen = TRUE,
@@ -123,15 +125,10 @@ mod_predict_ui <- function(id) {
                   )
                 )),
                 div(class = "mb-3", htmlOutput(ns("describeCl"))),
-                # Results table
                 conditionalPanel(condition = paste_js("has_predict", ns = ns), DT::dataTableOutput(ns("clTable")))
               )
             )
           ),
-          # conditionalPanel(
-          #   condition = "output.showPredictResults",
-          # 
-          # )
         ))
     ),
     conditionalPanel(
@@ -148,13 +145,11 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$has_data <- data_mod$has_data
-    outputOptions(output, "has_data", suspendWhenHidden = FALSE)
-    
     output$has_fit <- fit_mod$has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
     
-    # Update radio button choices with translations
+    waiter_pred <- ui_waiter(id = "divPred", ns = ns)
+    
     observe({
       trans <- translations()
       choices <- c(
@@ -167,17 +162,11 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod) {
     }) %>%
       bindEvent(translations())
     
-    # observe({
-    #   print(fit_mod$has_fit())
-    # })
-    
-    # Threshold reactive values
     thresh_rv <- reactiveValues(
       percent = NULL,
       conc = NULL
     )
     
-    # Column names from shared values
     column_names <- reactive({
       names(data_mod$clean_data())
     })
@@ -304,30 +293,16 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod) {
       }
     })
 
-    # # Check prediction validation
-    # check_pred <- reactive({
-    #   req(mod_data$data())
-    #   data <- mod_data$data()
-    #   trans <- translations()
-    #   
-    #   if ("Concentration" %in% names(data) && length(data[["Concentration"]]) == 0L) {
-    #     return(tr("ui_hintdata", trans))
-    #   }
-    #   if (is.null(shared_values$selected_conc)) {
-    #     return(tr("ui_hintpred", trans))
-    #   }
-    #   # Add fit check here if needed
-    #   ""
-    # })
-    # 
     # Predict hazard concentration
     predict_hc <- reactive({
-      req(fit_mod$fit_dist())
+      fit <- fit_mod$fit_dist()
+      req(fit)
       req(thresh_rv$percent)
-      stats::predict(fit_mod$fit_dist(), proportion = unique(c(1:99, thresh_rv$percent)) / 100)
+      waiter_pred$show()
+      stats::predict(fit, proportion = unique(c(1:99, thresh_rv$percent)) / 100)
     })
     
-    observe({print(predict_hc())})
+    # observe({print(predict_hc())})
 
     # Transformation
     transformation <- reactive({
@@ -408,10 +383,11 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod) {
       shape_data <- if (is.null(shape)) {
         NULL
       } else {
-        data[[shape]]
+        dat[[shape]]
       }
 
       trans <- translations()
+      
       validate(need(is.null(shape_data) | is.character(shape_data) | is.factor(shape_data),
                    message = tr("ui_hintsym", trans)))
 
@@ -448,9 +424,10 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod) {
     })
     
     # --- render predict results ----
-    output$modelAveragePlot <- renderPlot({
-      # waiter::waiter_show(id = "modelAveragePlot", html = waiter::spin_2(), color = "white", hide_on_render = TRUE)
-      plot_model_average()
+    output$plotPred <- renderPlot({
+      gp <- plot_model_average()
+      waiter_pred$hide()
+      gp
     })
 
     has_predict <- reactive({
@@ -460,6 +437,76 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod) {
     
     output$has_predict <- has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
+    
+    output$estHc <- renderUI({
+      req(input$thresh_type)
+      trans <- translations()
+      percent <- thresh_rv$percent
+      percent_pc <- 100 - as.numeric(percent)
+      percent_bold <- paste0("<b>", thresh_rv$percent, "</b>")
+      conc <- paste0("<b>", thresh_rv$conc, "</b>")
+      if (input$thresh_type != "Concentration") {
+        return(
+          div(HTML(glue::glue(
+          tr("ui_3hc2", trans),
+          percent = percent_bold,
+          conc = conc
+        ))))
+      }
+      div(HTML(
+        glue::glue(
+          "HC{percent}/PC{percent_pc}: {conc}",
+          percent = percent,
+          conc = conc
+        )
+      ), br(), HTML(glue::glue(
+        tr("ui_3hc", trans), percent = percent_bold, conc = conc
+      )))
+    })
+    
+    output$clTable <- DT::renderDataTable({
+      DT::datatable(table_cl(), options = list(dom = "t"))
+    })
+    
+    table_cl <- reactive({
+      dist <- fit_mod$fit_dist()
+      waiter::waiter_show(html = waiting_screen_cl(), color = "#759dbe")
+      nboot <- clean_nboot(input$bootSamp)
+      if (input$thresh_type != "Concentration") {
+        y <- ssd_hp_ave(dist, conc = thresh_rv$conc, nboot = nboot)
+      } else {
+        y <- ssd_hc_ave(dist, percent = thresh_rv$percent, nboot = nboot)
+      }
+      waiter::waiter_hide()
+      y
+    }) %>% 
+      bindEvent(input$getCl)
+    
+    describe_cl <- reactive({
+      trans <- translations()
+      desc1 <- paste(tr("ui_3cldesc1", trans),
+                     paste0("<b>", thresh_rv$percent, "</b>"))
+      nboot <- clean_nboot(input$bootSamp)
+      time <- estimate_time(nboot, lang())
+      if (input$thresh_type != "Concentration") {
+        desc1 <- paste(tr("ui_3cldesc11", trans),
+                       paste0("<b>", thresh_rv$conc, "</b>"))
+      }
+      HTML(
+        desc1,
+        tr("ui_3cldesc2", trans),
+        paste0("<b>", input$bootSamp, ".</b>"),
+        "<br/>",
+        tr("ui_3cldesc3", trans),
+        paste0("<b>", time, "</b>"),
+        tr("ui_3cldesc4", trans)
+      )
+    })
+    
+
+    output$describeCl <- renderText({
+      describe_cl()
+    })
     
     
     
@@ -508,16 +555,16 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod) {
     #   shared_values$model_average_plot <- plot_model_average()
     # })
     # 
-    # waiting_screen_cl <- reactive({
-    #   tagList(
-    #     waiter::spin_flower(),
-    #     tagList(
-    #       h3(paste(tr("ui_3cl", trans()), "...")),
-    #       br(),
-    #       describe_cl()
-    #     )
-    #   )
-    # })
+    waiting_screen_cl <- reactive({
+      tagList(
+        waiter::spin_flower(),
+        tagList(
+          h3(paste(tr("ui_3cl", trans()), "...")),
+          br(),
+          describe_cl()
+        )
+      )
+    })
     # 
     # output$checkpred <- reactive({
     #   check_pred() != ""
