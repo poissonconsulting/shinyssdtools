@@ -79,10 +79,10 @@ mod_fit_ui <- function(id) {
                      full_screen = TRUE,
                      card_header(
                        class = "d-flex justify-content-between align-items-center",
-                       span(`data-translate` = "ui_2plot", "Plot Fitted Distributions"),
-                       ui_download_popover(ns = ns)
+                       span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")
                      ),
                      card_body(
+                       ui_download_popover(ns = ns),
                        htmlOutput(ns("fitFail")),
                        plotOutput(ns("plotDist"))
                      )
@@ -91,11 +91,11 @@ mod_fit_ui <- function(id) {
                      full_screen = TRUE,
                      card_header(
                        class = "d-flex justify-content-between align-items-center",
-                       span(`data-translate` = "ui_2table", "Goodness of Fit"),
-                       ui_download_popover_table(ns = ns)
+                       span(`data-translate` = "ui_2table", "Goodness of Fit")
                      ),
                      card_body(padding = 25,
                        div(class = "table-responsive",
+                           ui_download_popover_table(ns = ns),
                            DT::dataTableOutput(ns("tableGof")))
                      )
                 )
@@ -159,8 +159,6 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       req(input$selectConc)
       req(input$selectDist)
       
-      print(paste("Computing fit at trigger:", fit_trigger()))
-      
       waiter_gof$show()
       waiter_distplot$show()
       
@@ -184,31 +182,6 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       ) %>% 
       bindEvent(fit_trigger())  # Only bind to our explicit trigger
     
-    # update_trigger <- reactiveVal(0)
-    # 
-    # observe({
-    #   needs_update(TRUE)
-    # }) %>%
-    #   bindEvent(
-    #     input$selectDist, 
-    #     input$rescale,
-    #     ignoreInit = TRUE
-    #   )
-    # 
-    # # Manual update with button 
-    # observe({
-    #   needs_update(FALSE)
-    #   update_trigger(update_trigger() + 1)
-    # }) %>%
-    #   bindEvent(input$updateFit)
-    # 
-    # # Auto-update for critical changes 
-    # observe({
-    #   needs_update(FALSE)
-    #   update_trigger(update_trigger() + 1)
-    # }) %>%
-    #   bindEvent(input$selectConc, data_mod$data(), ignoreInit = TRUE)
-    # 
     # Dynamic icon for update button
     output$update_icon <- renderUI({
       if (needs_update()) {
