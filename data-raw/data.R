@@ -25,16 +25,16 @@ translations <- dplyr::bind_rows(
     english = "Plot Threshold/Concentration",
     french = "Graphique seuil/concentration"
   ),
-  dplyr::tibble(
-    id = "ui_3hc",
-    english = "The model averaged estimate of the concentration that affects {percent} % of species is {conc}",
-    french = "Selon le modèle agrégé, la concentration affectant {percent} % des espèces est de {conc}"
-  ),
-  dplyr::tibble(
-    id = "ui_3hc2",
-    english = "The model averaged estimate of the fraction affected by a concentration of {conc} is {percent} % of species",
-    french = "L'estimation par inférence multimodèle du seuil pour une concentration de {conc} est de {percent} % des espèces."
-  ),
+  # dplyr::tibble(
+  #   id = "ui_3hc",
+  #   english = "The model averaged estimate of the concentration that affects {percent} % of species is {conc}",
+  #   french = "Selon le modèle agrégé, la concentration affectant {percent} % des espèces est de {conc}"
+  # ),
+  # dplyr::tibble(
+  #   id = "ui_3hc2",
+  #   english = "The model averaged estimate of the fraction affected by a concentration of {conc} is {percent} % of species",
+  #   french = "L'estimation par inférence multimodèle du seuil pour une concentration de {conc} est de {percent} % des espèces."
+  # ),
   dplyr::tibble(
     id = "ui_1table1",
     english = "Table",
