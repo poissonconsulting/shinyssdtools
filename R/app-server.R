@@ -100,8 +100,8 @@ app_server <- function(input, output, session) {
   
   # Call module servers with shared values
   data_mod <- mod_data_server("data_mod", trans, current_lang)
-  fit_mod <- mod_fit_server("fit_mod", trans, data_mod)
-  predict_mod <- mod_predict_server("predict_mod", trans, current_lang, data_mod, fit_mod)
+  fit_mod <- mod_fit_server("fit_mod", trans, data_mod, main_nav = reactive({input$main_nav}))
+  predict_mod <- mod_predict_server("predict_mod", trans, current_lang, data_mod, fit_mod, main_nav = reactive({input$main_nav}))
   # report_mod <- mod_report_server("report_mod", shared_values, trans)
   # rcode_mod <- mod_rcode_server("rcode_mod", shared_values, trans)
   
@@ -148,59 +148,6 @@ app_server <- function(input, output, session) {
   #     pageLength = 10
   #   )
   # })
-  
-
-  
-
-  
-  output$estHc <- renderUI({
-    req(input$thresh_type)
-    percent <- thresh_rv$percent
-    percent_pc <- 100 - as.numeric(percent)
-    percent_bold <- paste0("<b>", thresh_rv$percent, "</b>")
-    conc <- paste0("<b>", thresh_rv$conc, "</b>")
-    if (input$thresh_type != "Concentration") {
-      return(HTML(glue::glue(
-        tr("ui_3hc2", trans()),
-        percent = percent_bold,
-        conc = conc
-      )))
-    }
-    div(HTML(
-      glue::glue(
-        "HC{percent}/PC{percent_pc}: {conc}",
-        percent = percent,
-        conc = conc
-      )
-    ), br(), HTML(glue::glue(
-      tr("ui_3hc", trans()), percent = percent_bold, conc = conc
-    )))
-  })
-  
-  output$clTable <- DT::renderDataTable({
-    DT::datatable(table_cl(), options = list(dom = "t"))
-  })
-  
-  describe_cl <- reactive({
-    desc1 <- paste(tr("ui_3cldesc1", trans()),
-                   paste0("<b>", thresh_rv$percent, "</b>"))
-    if (input$thresh_type != "Concentration") {
-      desc1 <- paste(tr("ui_3cldesc11", trans()),
-                     paste0("<b>", thresh_rv$conc, "</b>"))
-    }
-    HTML(
-      desc1,
-      tr("ui_3cldesc2", trans()),
-      paste0("<b>", input$bootSamp, ".</b>"),
-      "<br/>",
-      tr("ui_3cldesc3", trans()),
-      paste0("<b>", estimate_time(), "</b>"),
-      tr("ui_3cldesc4", trans())
-    )
-  })
-  output$describeCl <- renderText({
-    describe_cl()
-  })
   
   # --- render UI ----
   shinyjs::onclick(
