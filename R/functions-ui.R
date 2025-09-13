@@ -73,7 +73,7 @@ ui_download_popover_table <- function(tab = "fit", ns){
   bslib::popover(
     actionButton(ns(paste0(tab, "DownloadBtnTbl")), 
                  label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                 style = "padding:4px; font-size:80%"
+                 style = "padding:4px; font-size:80%; width: 100px"
     ),
     card(
       style = "width: 250px; margin-top: 10px;",
@@ -101,7 +101,7 @@ ui_download_popover <- function(tab = "fit", ns){
   bslib::popover(
     actionButton(ns(paste0(tab, "DownloadBtn")), 
                  label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
-                 style = "padding:4px; font-size:80%"
+                 style = "padding:4px; font-size:80%; width: 100px;"
     ),
     card(
       style = "width: 250px; margin-top: 10px;",
