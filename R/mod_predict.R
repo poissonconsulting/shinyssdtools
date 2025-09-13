@@ -72,10 +72,10 @@ mod_predict_ui <- function(id) {
                   full_screen = TRUE,
                   card_header(
                     class = "d-flex justify-content-between align-items-center",
-                    span(`data-translate` = "ui_3model", "Model Average Plot"),
-                    ui_download_popover(tab = "pred", ns = ns)
+                    span(`data-translate` = "ui_3model", "Model Average Plot")
                   ),
                   card_body(
+                    ui_download_popover(tab = "pred", ns = ns),
                     plotOutput(ns("plotPred")),
                     div(
                       conditionalPanel(
@@ -120,8 +120,7 @@ mod_predict_ui <- function(id) {
                     uiOutput(ns("ui_3help")),
                     placement = "right"
                   )
-                ),
-                ui_download_popover_table(tab = "pred", ns = ns)
+                )
               ),
               card_body(
                 div(class = "d-flex gap-4 align-items-start", 
@@ -157,7 +156,11 @@ mod_predict_ui <- function(id) {
                   )
                 )),
                 div(class = "mb-3", htmlOutput(ns("describeCl"))),
-                conditionalPanel(condition = paste_js("has_predict", ns = ns), DT::dataTableOutput(ns("clTable")))
+                conditionalPanel(condition = paste_js("has_cl", ns = ns), 
+                                 div(
+                                   ui_download_popover_table(tab = "pred", ns = ns),
+                                   DT::dataTableOutput(ns("clTable"))
+                                 ))
               )
             )
           ),
@@ -510,6 +513,15 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     
     output$has_predict <- has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
+    
+    has_cl <- reactive({
+      !is.null(table_cl())
+    }) %>%
+      bindEvent(table_cl())
+    
+    output$has_cl <- has_cl
+    outputOptions(output, "has_cl", suspendWhenHidden = FALSE)
+    
     
     
     # Dynamic text outputs for HC/PC values
