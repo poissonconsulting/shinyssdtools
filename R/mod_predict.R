@@ -10,61 +10,105 @@ mod_predict_ui <- function(id) {
         gap = "1rem",
         sidebar = sidebar(
           width = 350,
-          radioButtons(ns("thresh_type"), 
-                       label = span(`data-translate` = "ui_3threshlabel", "Threshold type"),
-                       choices = c("Concentration" = "Concentration", "Fraction affected" = "Fraction"),
-                       selected = "Concentration", inline = TRUE
+          bslib::accordion(
+            open = c("hc_pred", "cl_pred"),
+            accordion_panel(
+              title = span(`data-translate` = "ui_3est", "Estimate hazard concentration"),
+              value = "hc_pred",
+              radioButtons(ns("thresh_type"), 
+                           label = span(`data-translate` = "ui_3threshlabel", "Threshold type"),
+                           choices = c("Concentration" = "Concentration", "Fraction affected" = "Fraction"),
+                           selected = "Concentration", inline = TRUE
+              ),
+              uiOutput(ns("ui_3thresh"))
+            ),
+          # section_break("Estimate hazard concentration"),
+          accordion_panel(
+            title = span(`data-translate` = "ui_3cl", "Get confidence limits"),
+            value = "cl_pred",
+            selectInput(
+              ns("bootSamp"),
+              label = div(
+                span(`data-translate` = "ui_3samples", "Bootstrap samples"),
+                bslib::tooltip(
+                  bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                  span(`data-translate` = "ui_3bshint", "10,000 bootstrap samples recommended"),
+                  placement = "right"
+                )
+              ),
+              choices = c(
+                "500" = "500",
+                "1,000" = "1000",
+                "5,000" = "5000",
+                "10,000" = "10000"
+              ),
+              selected = "1000",
+              width = "190px"
+            ),
+            actionButton(
+              ns("getCl"),
+              label = tagList(
+                bsicons::bs_icon("calculator"), 
+                span(`data-translate` = "ui_3clbutton", "Get CL")
+              ),
+              class = "btn-primary w-100",
+            )
           ),
-          uiOutput(ns("ui_3thresh")),
-          uiOutput(ns("selectLabel")),
-          uiOutput(ns("selectColour")),
-          uiOutput(ns("selectShape")),
-          selectInput(ns("selectPalette"), 
-                      label = span(`data-translate` = "ui_3pal", "Palette"), 
-                      choices = pals, selected = pals[2]),
-          textInput(ns("xaxis"), 
-                    value = "Concentration", 
-                    label = span(`data-translate` = "ui_3xlab", "X-axis label")),
-          textInput(ns("yaxis"), 
-                    value = "Percent", 
-                    label = span(`data-translate` = "ui_3ylab", "Y-axis label")),
-          textInput(ns("title"), 
-                    value = "", 
-                    label = span(`data-translate` = "ui_3title", "Title")),
-          uiOutput(ns("uiLegendColour")),
-          uiOutput(ns("uiLegendShape")),
-          layout_column_wrap(width = 1 / 2, 
-                             numericInput(ns("size3"), 
-                                          label = span(`data-translate` = "ui_size", "Text size"), 
-                                          value = 12, min = 1, max = 100),
-                             numericInput(ns("sizeLabel3"), 
-                                          label = span(`data-translate` = "ui_sizeLabel", "Label size"), 
-                                          value = 3, min = 1, max = 10)
-          ),
-          checkboxInput(ns("checkHc"), 
-                        label = span(`data-translate` = "ui_checkHc", "Show hazard concentration"), 
-                        value = TRUE),
-          layout_column_wrap(
-            width = 1 / 3,
-            numericInput(ns("adjustLabel"),
-                         value = 1.05, 
-                         label = span(`data-translate` = "ui_adjustLabel", "Adjust label"), 
-                         min = 0, max = 10, step = 0.1),
-            numericInput(ns("xMin"), 
-                         label = span(`data-translate` = "ui_xmin", "X min"), 
-                         min = 1, value = NULL),
-            numericInput(ns("xMax"), 
-                         label = span(`data-translate` = "ui_xmax", "X max"), 
-                         min = 1, value = NULL)
-          ),
-          checkboxInput(ns("xlog"), 
-                        label = span(`data-translate` = "ui_xlog", "Log scale"), 
-                        value = TRUE),
-          uiOutput(ns("uiXbreaks"))
+          # section_break("Get confidence limits"),
+            bslib::accordion_panel(
+              title = span(`data-translate` = "ui_3plotopts", "Plot formatting options"),
+              value = "plot_format_pred",
+              selected = FALSE, 
+              uiOutput(ns("selectLabel")),
+              uiOutput(ns("selectColour")),
+              uiOutput(ns("selectShape")),
+              selectInput(ns("selectPalette"), 
+                          label = span(`data-translate` = "ui_3pal", "Palette"), 
+                          choices = pals, selected = pals[2]),
+              textInput(ns("xaxis"), 
+                        value = "Concentration", 
+                        label = span(`data-translate` = "ui_3xlab", "X-axis label")),
+              textInput(ns("yaxis"), 
+                        value = "Percent", 
+                        label = span(`data-translate` = "ui_3ylab", "Y-axis label")),
+              textInput(ns("title"), 
+                        value = "", 
+                        label = span(`data-translate` = "ui_3title", "Title")),
+              uiOutput(ns("uiLegendColour")),
+              uiOutput(ns("uiLegendShape")),
+              layout_column_wrap(width = 1 / 2, 
+                                 numericInput(ns("size3"), 
+                                              label = span(`data-translate` = "ui_size", "Text size"), 
+                                              value = 12, min = 1, max = 100),
+                                 numericInput(ns("sizeLabel3"), 
+                                              label = span(`data-translate` = "ui_sizeLabel", "Label size"), 
+                                              value = 3, min = 1, max = 10)
+              ),
+              checkboxInput(ns("checkHc"), 
+                            label = span(`data-translate` = "ui_checkHc", "Show hazard concentration"), 
+                            value = TRUE),
+              layout_column_wrap(
+                width = 1 / 3,
+                numericInput(ns("adjustLabel"),
+                             value = 1.05, 
+                             label = span(`data-translate` = "ui_adjustLabel", "Adjust label"), 
+                             min = 0, max = 10, step = 0.1),
+                numericInput(ns("xMin"), 
+                             label = span(`data-translate` = "ui_xmin", "X min"), 
+                             min = 1, value = NULL),
+                numericInput(ns("xMax"), 
+                             label = span(`data-translate` = "ui_xmax", "X max"), 
+                             min = 1, value = NULL)
+              ),
+              checkboxInput(ns("xlog"), 
+                            label = span(`data-translate` = "ui_xlog", "Log scale"), 
+                            value = TRUE),
+              uiOutput(ns("uiXbreaks"))
+            )
+            ),
         ),
         div(
           class = "p-3",
-          
           conditionalPanel(
             condition = paste_js('has_predict', ns),
             div(id = ns("divPred"),
@@ -124,37 +168,6 @@ mod_predict_ui <- function(id) {
               ),
               card_body(
                 div(class = "d-flex gap-4 align-items-start", 
-                div(
-                  actionButton(
-                    ns("getCl"),
-                    label = tagList(
-                      bsicons::bs_icon("calculator"), 
-                      span(`data-translate` = "ui_3clbutton", "Get CL")
-                    ),
-                    class = "btn-primary w-100",
-                  )
-                ),
-                div(
-                  selectInput(
-                    ns("bootSamp"),
-                    label = div(
-                      span(`data-translate` = "ui_3samples", "Bootstrap samples"),
-                      bslib::tooltip(
-                        bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                        span(`data-translate` = "ui_3bshint", "10,000 bootstrap samples recommended"),
-                        placement = "right"
-                      )
-                    ),
-                    choices = c(
-                      "500" = "500",
-                      "1,000" = "1000",
-                      "5,000" = "5000",
-                      "10,000" = "10000"
-                    ),
-                    selected = "1000",
-                    width = "190px"
-                  )
-                )),
                 div(class = "mb-3", htmlOutput(ns("describeCl"))),
                 conditionalPanel(condition = paste_js("has_cl", ns = ns), 
                                  div(
@@ -163,8 +176,8 @@ mod_predict_ui <- function(id) {
                                  ))
               )
             )
-          ),
-        ))
+          )
+        )))
     ),
     conditionalPanel(
       condition =  paste0("!output['", ns("has_fit"), "']"),
@@ -290,6 +303,13 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
                      multiple = TRUE
       )
     })
+    
+    outputOptions(output, "uiXbreaks", suspendWhenHidden = FALSE)
+    outputOptions(output, "uiLegendColour", suspendWhenHidden = FALSE)
+    outputOptions(output, "uiLegendShape", suspendWhenHidden = FALSE)
+    outputOptions(output, "selectLabel", suspendWhenHidden = FALSE)
+    outputOptions(output, "selectColour", suspendWhenHidden = FALSE)
+    outputOptions(output, "selectShape", suspendWhenHidden = FALSE)
     
     output$ui_3thresh <- renderUI({
       req(input$thresh_type)
