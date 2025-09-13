@@ -154,6 +154,12 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
     }) %>%
       bindEvent(input$selectConc, data_mod$data(), ignoreInit = TRUE)
     
+    # monitor if out of date
+    observe({
+      needs_update(TRUE)
+    }) %>% 
+      bindEvent(input$selectDist, input$rescale)
+    
     fit_dist <- reactive({
       req(fit_trigger() > 0)
       req(main_nav() == "fit")  
