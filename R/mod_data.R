@@ -211,6 +211,7 @@ mod_data_server <- function(id, translations, lang) {
       list(
         data = names_data,
         clean_data = clean_data,
+        data_cols = reactive({names(data_mod$clean_data())}),
         # data_source = reactive({ upload_values$upload_state }),
         has_data = has_data
       )
