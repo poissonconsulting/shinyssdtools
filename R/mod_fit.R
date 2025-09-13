@@ -40,7 +40,6 @@ mod_fit_ui <- function(id) {
                           label = span(`data-translate` = "ui_2rescale", "Rescale"),
                           value = FALSE
             ),
-            
             div(class = "mt-3",
                 actionButton(ns("updateFit"), 
                              label = tagList(
@@ -49,8 +48,12 @@ mod_fit_ui <- function(id) {
                              ),
                              class = "btn-primary w-100")
             ),
-            
-            hr(),
+            bslib::accordion(
+              open = FALSE,
+              bslib::accordion_panel(
+                title = span(`data-translate` = "ui_3plotopts", "Plot formatting options"),
+                value = "plot_format_fit",
+                selected = FALSE, 
             selectInput(ns("selectUnit"),
                         label = span(`data-translate` = "ui_2unit", "Select units"),
                         choices = units(),
@@ -69,8 +72,7 @@ mod_fit_ui <- function(id) {
                          value = 12, min = 1, max = 100
             )
           )
-        ),
-        
+        ))),
         div(
           class = "p-3",
           conditionalPanel(
