@@ -252,6 +252,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     }) %>%
       bindEvent(main_nav())
     
+    
     output$estConc <- renderText({
       thresh_rv$conc
     })
@@ -279,13 +280,14 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     
     observe({
       trans <- translations()
+      frac <- tr("ui_3thresh", trans)
       choices <- c(
-        "Concentration",
-        tr("ui_3thresh", trans)
+        "Concentration" = "Concentration",
+        setNames("Fraction", frac)
       )
       updateRadioButtons(session, "threshType", 
-                        choices = choices,
-                        selected = input$threshType %||% "Concentration")
+                         choices = choices,
+                         selected = input$threshType)
     }) %>%
       bindEvent(translations())
     
@@ -477,12 +479,12 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     # Plot model average with xbreaks
     plot_model_average_xbreaks <- reactive({
       pred <- predict_hc()
-      data <- data_mod$data()
+      dat <- data_mod$data()
       conc <- thresh_rv$conc
       percent <- thresh_rv$percent
       conc_col <- fit_mod$conc_column()
       req(pred)
-      req(data)
+      req(dat)
       req(input$selectLabel)
       req(conc)
       req(conc_col)
@@ -491,13 +493,16 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       conc_col <- make.names(conc_col)
       label_col <- ifelse(input$selectLabel == "-none-", NULL, make.names(input$selectLabel))
 
-      gp <- ssdtools::ssd_plot(data,
-        pred = pred,
-        left = conc_col, label = label_col,
-        hc = percent / 100
-      )
-      xbreaks <- gp_xbreaks(gp)
-      xbreaks[xbreaks != conc]
+      if(label_col %in% names(dat) & conc_col %in% names(dat)){
+        gp <- safe_try(ssdtools::ssd_plot(dat,
+                                          pred = pred,
+                                          left = conc_col, label = label_col,
+                                          hc = percent / 100
+        )) 
+        xbreaks <- gp_xbreaks(gp)
+        return(xbreaks[xbreaks != conc])
+      } 
+      NULL
     })
 
     # Main model average plot
@@ -568,13 +573,8 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       if (lang() == "French") {
         big.mark <- " "
       }
-
-      print(dat)
-      print(conc_col)
-      print(label)
-      print(names(dat))
       
-      silent_plot(plot_predictions(dat, pred,
+      x <- safe_try(silent_plot(plot_predictions(dat, pred,
         conc = conc_col, label = label, colour = colour,
         shape = shape, percent = percent, xbreaks = as.numeric(input$xbreaks),
         label_adjust = shift_label, xaxis = append_unit(input$xaxis, units),
@@ -582,7 +582,12 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         palette = input$selectPalette, legend_colour = input$legendColour,
         legend_shape = input$legendShape, trans = trans, text_size = input$size3,
         label_size = input$sizeLabel3, conc_value = thresh_rv$conc, big.mark = big.mark
-      ))
+      )))
+      if(!is.null(x)){
+        return(x)
+      } else(
+        NULL
+      )
     })
     
     # --- render predict results ----
@@ -606,8 +611,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     
     output$has_cl <- has_cl
     outputOptions(output, "has_cl", suspendWhenHidden = FALSE)
-    
-    
     
     # Dynamic text outputs for HC/PC values
     output$hcPercent <- renderText({
