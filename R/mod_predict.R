@@ -283,7 +283,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         "Concentration",
         tr("ui_3thresh", trans)
       )
-      print(choices)
       updateRadioButtons(session, "threshType", 
                         choices = choices,
                         selected = input$threshType %||% "Concentration")
@@ -405,36 +404,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     outputOptions(output, "uiSelectLabel", suspendWhenHidden = FALSE)
     outputOptions(output, "uiSelectColour", suspendWhenHidden = FALSE)
     outputOptions(output, "uiSelectShape", suspendWhenHidden = FALSE)
-    
-    # output$uiThresh <- renderUI({
-    #   req(input$threshType)
-    #   if (input$threshType != "Concentration") {
-    #     return(
-    #       layout_column_wrap(
-    #         width = 1/2,
-    #         numericInput(ns("conc"),
-    #                      label = span(`data-translate` = "ui_3byconc", "by concentration"),
-    #                      value = 1, min = 0,
-    #                      max = 100, step = 0.1
-    #         )
-    #       ))
-    #   }
-    #   layout_column_wrap(
-    #     width = 1/2,
-    #     selectizeInput(ns("thresh"),
-    #                    label = span(`data-translate` = "ui_3affecting", "% affecting"),
-    #                    choices = c(1, 5, 10, 20),
-    #                    options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
-    #                    selected = 5
-    #     ),
-    #     selectizeInput(ns("threshPc"),
-    #                    label = span(`data-translate` = "ui_3protecting", "% protecting"),
-    #                    choices = c(99, 95, 90, 80),
-    #                    options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
-    #                    selected = 95
-    #     )
-    #   )
-    # })
   
     # Threshold logic observers
     observe({
@@ -540,6 +509,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       conc <- thresh_rv$conc
       perc <- thresh_rv$percent
       units <- fit_mod$units()
+      trans <- translations()
       
       req(input$thresh)
       req(input$selectColour)
@@ -578,11 +548,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         dat[[shape]]
       }
 
-      trans <- translations()
-      
-      validate(need(is.null(shape_data) | is.character(shape_data) | is.factor(shape_data),
-                   message = tr("ui_hintsym", trans)))
-
       shift_label <- input$adjustLabel
       if (shift_label < 1) {
         shift_label <- 1
@@ -604,6 +569,11 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         big.mark <- " "
       }
 
+      print(dat)
+      print(conc_col)
+      print(label)
+      print(names(dat))
+      
       silent_plot(plot_predictions(dat, pred,
         conc = conc_col, label = label, colour = colour,
         shape = shape, percent = percent, xbreaks = as.numeric(input$xbreaks),
