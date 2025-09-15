@@ -52,7 +52,8 @@ mod_predict_ui <- function(id) {
                 span(`data-translate` = "ui_3clbutton", "Get CL")
               ),
               class = "btn-primary w-100",
-            )
+            ),
+            shiny::helpText( htmlOutput(ns("describeTime")))
           ),
           # section_break("Get confidence limits"),
             bslib::accordion_panel(
@@ -153,30 +154,28 @@ mod_predict_ui <- function(id) {
                   )
                 )
             ),
-            card(
-              full_screen = TRUE,
-              card_header(
-                class = "d-flex justify-content-between align-items-center",
-                div(
-                  span(`data-translate` = "ui_3cl", "Confidence Limits"),
-                  bslib::tooltip(
-                    bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                    uiOutput(ns("ui_3help")),
-                    placement = "right"
+            conditionalPanel(
+              condition = paste_js("has_cl", ns = ns),
+              card(
+                full_screen = TRUE,
+                card_header(
+                  class = "d-flex justify-content-between align-items-center",
+                  div(
+                    span(`data-translate` = "ui_3cl", "Confidence Limits"),
+                    bslib::tooltip(
+                      bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                      uiOutput(ns("ui_3help")),
+                      placement = "right"
+                    )
                   )
+                ),
+                card_body(padding = 25,
+                  div(class = "table-responsive",
+                      
+                      DT::dataTableOutput(ns("clTable")))
                 )
-              ),
-              card_body(
-                div(class = "d-flex gap-4 align-items-start", 
-                div(class = "mb-3", htmlOutput(ns("describeCl"))),
-                conditionalPanel(condition = paste_js("has_cl", ns = ns), 
-                                 div(
-                                   ui_download_popover_table(tab = "pred", ns = ns),
-                                   DT::dataTableOutput(ns("clTable"))
-                                 ))
               )
             )
-          )
         )))
     ),
     conditionalPanel(
@@ -594,6 +593,22 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         paste0("<b>", time, "</b>"),
         tr("ui_3cldesc4", trans)
       )
+    })
+    
+    describe_time <- reactive({
+      trans <- translations()
+      nboot <- clean_nboot(input$bootSamp)
+      time <- estimate_time(nboot, lang())
+     
+      HTML(
+        tr("ui_3cldesc3", trans),
+        time,
+        tr("ui_3cldesc4", trans)
+      )
+    })
+    
+    output$describeTime <- renderText({
+      describe_time()
     })
     
     output$describeCl <- renderText({
