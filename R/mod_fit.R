@@ -3,17 +3,15 @@
 # Fit Module UI
 mod_fit_ui <- function(id) {
   ns <- NS(id)
-  
-  
   tagList(
     conditionalPanel(
       condition = paste_js('has_data', ns = ns),
       layout_sidebar(
         padding = "1rem",
         gap = "1rem",
-        
         sidebar = sidebar(
           width = 375,
+          style = "height: calc(100vh - 150px); overflow-y: auto; overflow-x: hidden;",
           tagList(
             tags$label(
               `for` = ns("selectConc"),
@@ -366,9 +364,9 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         ggplot2::ggsave(file,
                         plot = plot_dist(), 
                         device = "png",
-                        width = input$width2, 
-                        height = input$height2, 
-                        dpi = input$dpi2
+                        width = input$width, 
+                        height = input$height, 
+                        dpi = input$dpi
         )
       }
     )

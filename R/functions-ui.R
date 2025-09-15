@@ -125,21 +125,21 @@ ui_download_popover <- function(tab = "fit", ns){
             style = "display: flex; gap: 5px; justify-content: space-between;",
             div(
               style = "flex: 1; min-width: 0;",
-              numericInput(ns("width2"), 
+              numericInput(ns("width"), 
                            label = span(`data-translate` = "ui_2width", "Width"), 
                            value = 6, min = 1, max = 50, step = 1
               )
             ),
             div(
               style = "flex: 1; min-width: 0;",
-              numericInput(ns("height2"), 
+              numericInput(ns("height"), 
                            label = span(`data-translate` = "ui_2height", "Height"),
                            value = 4, min = 1, max = 50, step = 1
               )
             ),
             div(
               style = "flex: 1; min-width: 0;",
-              numericInput(ns("dpi2"), 
+              numericInput(ns("dpi"), 
                            label = span(`data-translate` = "ui_2dpi", "DPI"),
                            value = 300, min = 50, max = 2000, step = 50
               )

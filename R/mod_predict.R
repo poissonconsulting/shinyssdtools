@@ -22,6 +22,8 @@ mod_predict_ui <- function(id) {
         gap = "1rem",
         sidebar = sidebar(
           width = 375,
+          style = "height: calc(100vh - 150px); overflow-y: auto; overflow-x: hidden;",
+          
           bslib::accordion(
             open = c("hc_pred", "cl_pred"),
 # ui thresh ---------------------------------------------------------------
@@ -574,7 +576,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         big.mark <- " "
       }
       
-      x <- safe_try(silent_plot(plot_predictions(dat, pred,
+      x <- safe_try(plot_predictions(dat, pred,
         conc = conc_col, label = label, colour = colour,
         shape = shape, percent = percent, xbreaks = as.numeric(input$xbreaks),
         label_adjust = shift_label, xaxis = append_unit(input$xaxis, units),
@@ -582,7 +584,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         palette = input$selectPalette, legend_colour = input$legendColour,
         legend_shape = input$legendShape, trans = trans, text_size = input$size3,
         label_size = input$sizeLabel3, conc_value = thresh_rv$conc, big.mark = big.mark
-      )))
+      ))
       if(!is.null(x)){
         return(x)
       } else(
@@ -593,7 +595,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     # --- render predict results ----
     output$plotPred <- renderPlot({
       gp <- plot_model_average()
-      gp
+      silent_plot(gp)
     })
 
     has_predict <- reactive({
@@ -684,9 +686,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       describe_cl()
     })
     
-    
-    
-    # 
+# downloaders -------------------------------------------------------------
     # output$predDlPlot <- downloadHandler(
     #   filename = function() {
     #     "ssdtools_modelAveragePlot.png"
@@ -721,16 +721,50 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     #   }
     # )
     # 
-    # # Update shared values when predictions change
-    # observe({
-    #   shared_values$predictions <- predict_hc()
-    #   shared_values$threshold_values <- list(
-    #     percent = thresh_rv$percent,
-    #     conc = thresh_rv$conc
-    #   )
-    #   shared_values$model_average_plot <- plot_model_average()
-    # })
-    # 
+    
+    output$predDlPlot <- downloadHandler(
+      filename = function() {
+        "ssdtools_model_average_plot.png"
+      },
+      content = function(file) {
+        ggplot2::ggsave(file,
+                        plot = plot_model_average(), 
+                        device = "png",
+                        width = input$width, 
+                        height = input$height, 
+                        dpi = input$dpi
+        )
+      }
+    )
+    
+    output$predDlRds <- downloadHandler(
+      filename = function() {
+        "ssdtools_model_average_plot.rds"
+      },
+      content = function(file) {
+        saveRDS(plot_model_average(), file = file)
+      }
+    )
+    
+    output$predDlCsv <- downloadHandler(
+      filename = function() {
+        "ssdtools_cl_table.csv"
+      },
+      content = function(file) {
+        readr::write_csv(dplyr::as_tibble(table_cl()), file)
+      }
+    )
+    
+    output$predDlXlsx <- downloadHandler(
+      filename = function() {
+        "ssdtools_cl_table.xlsx"
+      },
+      content = function(file) {
+        print(str(table_cl()))
+        writexl::write_xlsx(dplyr::as_tibble(table_cl()), file)
+      }
+    )
+
     waiting_screen_cl <- reactive({
       trans <- translations()
       tagList(
