@@ -1,3 +1,15 @@
+# Helper function for static label + dynamic input pattern
+static_label_input <- function(ns_id, translate_key, default_text, ui_output_id) {
+  tagList(
+    tags$label(
+      `for` = ns_id,
+      class = "control-label",
+      span(`data-translate` = translate_key, default_text)
+    ),
+    uiOutput(ui_output_id)
+  )
+}
+
 # Predict Module UI
 mod_predict_ui <- function(id) {
   ns <- NS(id)
@@ -9,22 +21,59 @@ mod_predict_ui <- function(id) {
         padding = "1rem",
         gap = "1rem",
         sidebar = sidebar(
-          width = 350,
+          width = 375,
           bslib::accordion(
             open = c("hc_pred", "cl_pred"),
+# ui thresh ---------------------------------------------------------------
             accordion_panel(
               title = span(`data-translate` = "ui_3est", "Estimate hazard concentration"),
               value = "hc_pred",
-              radioButtons(ns("thresh_type"), 
+              radioButtons(ns("threshType"), 
                            label = span(`data-translate` = "ui_3threshlabel", "Threshold type"),
                            choices = c("Concentration" = "Concentration", "Fraction affected" = "Fraction"),
                            selected = "Concentration", inline = TRUE
               ),
-              uiOutput(ns("ui_3thresh"))
+              conditionalPanel(
+                condition = glue::glue("input['{ns(\"threshType\")}'] != 'Concentration'"),
+                layout_column_wrap(
+                  width = 1/2,
+                  numericInput(ns("conc"),
+                               label = span(`data-translate` = "ui_3byconc", "by concentration"),
+                               value = 1, min = 0,
+                               max = 100, step = 0.1
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = glue::glue("input['{ns(\"threshType\")}'] == 'Concentration'"),
+                layout_column_wrap(
+                  width = 1/2,
+                  selectizeInput(ns("thresh"),
+                                 label = span(`data-translate` = "ui_3affecting", "affecting % species"),
+                                 choices = c(1, 5, 10, 20),
+                                 options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
+                                 selected = 5
+                  ),
+                  selectizeInput(ns("threshPc"),
+                                 label = span(`data-translate` = "ui_3protecting", "protecting % species"),
+                                 choices = c(99, 95, 90, 80),
+                                 options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
+                                 selected = 95
+                  )
+                )
+              )
+              # uiOutput(ns("uiThresh"))
             ),
-          # section_break("Estimate hazard concentration"),
+# ui cl -------------------------------------------------------------------
           accordion_panel(
-            title = span(`data-translate` = "ui_3cl", "Get confidence limits"),
+            title = div(
+              span(`data-translate` = "ui_3cl", "Get confidence limits"),
+              bslib::tooltip(
+                bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
+                span(`data-translate` = "ui_3help", "Click 'Get CL' to calculate the upper and lower confidence limits (CL) for the estimate."),
+                placement = "right"
+              )
+            ),
             value = "cl_pred",
             selectInput(
               ns("bootSamp"),
@@ -53,16 +102,16 @@ mod_predict_ui <- function(id) {
               ),
               class = "btn-primary w-100",
             ),
-            shiny::helpText( htmlOutput(ns("describeTime")))
+            shiny::helpText( htmlOutput(ns("describeTime"))),
           ),
-          # section_break("Get confidence limits"),
+# ui plot formatting -------------------------------------------------------
             bslib::accordion_panel(
               title = span(`data-translate` = "ui_3plotopts", "Plot formatting options"),
               value = "plot_format_pred",
               selected = FALSE, 
-              uiOutput(ns("selectLabel")),
-              uiOutput(ns("selectColour")),
-              uiOutput(ns("selectShape")),
+              static_label_input(ns("selectLabel"), "ui_3label", "Label by:", ns("uiSelectLabel")),
+              static_label_input(ns("selectColour"), "ui_3colour", "Colour by:", ns("uiSelectColour")),
+              static_label_input(ns("selectShape"), "ui_3symbol", "Symbol by:", ns("uiSelectShape")),
               selectInput(ns("selectPalette"), 
                           label = span(`data-translate` = "ui_3pal", "Palette"), 
                           choices = pals, selected = pals[2]),
@@ -75,8 +124,8 @@ mod_predict_ui <- function(id) {
               textInput(ns("title"), 
                         value = "", 
                         label = span(`data-translate` = "ui_3title", "Title")),
-              uiOutput(ns("uiLegendColour")),
-              uiOutput(ns("uiLegendShape")),
+              static_label_input(ns("legendColour"), "ui_3legend", "Legend colour", ns("uiLegendColour")),
+              static_label_input(ns("legendShape"), "ui_3shape", "Legend shape", ns("uiLegendShape")),
               layout_column_wrap(width = 1 / 2, 
                                  numericInput(ns("size3"), 
                                               label = span(`data-translate` = "ui_size", "Text size"), 
@@ -104,10 +153,11 @@ mod_predict_ui <- function(id) {
               checkboxInput(ns("xlog"), 
                             label = span(`data-translate` = "ui_xlog", "Log scale"), 
                             value = TRUE),
-              uiOutput(ns("uiXbreaks"))
+              static_label_input(ns("xbreaks"), "ui_xbreaks", "X breaks", ns("uiXbreaks"))
             )
             ),
         ),
+# ui outputs --------------------------------------------------------------
         div(
           class = "p-3",
           conditionalPanel(
@@ -124,14 +174,14 @@ mod_predict_ui <- function(id) {
                     plotOutput(ns("plotPred")),
                     div(
                       conditionalPanel(
-                        condition = glue::glue("input['{ns(\"thresh_type\")}'] == 'Concentration'"),
+                        condition = glue::glue("input['{ns(\"threshType\")}'] == 'Concentration'"),
                         div(
                           span("HC"), 
-                          textOutput(ns("hc_percent"), inline = TRUE),
+                          textOutput(ns("hcPercent"), inline = TRUE),
                           span("/ PC"), 
-                          textOutput(ns("pc_percent"), inline = TRUE),
+                          textOutput(ns("pcPercent"), inline = TRUE),
                           span(": "), 
-                          tags$b(textOutput(ns("hc_conc"), inline = TRUE))
+                          tags$b(textOutput(ns("hcConc"), inline = TRUE))
                         ),
                         div(
                           span(`data-translate` = "ui_3hc", "The model averaged estimate of the concentration that affects "),
@@ -141,7 +191,7 @@ mod_predict_ui <- function(id) {
                         )
                       ),
                       conditionalPanel(
-                        condition = glue::glue("input['{ns(\"thresh_type\")}'] != 'Concentration'"),
+                        condition = glue::glue("input['{ns(\"threshType\")}'] != 'Concentration'"),
                         div(
                           span(`data-translate` = "ui_3perc", "The model averaged estimate of the fraction affected by a concentration of "),
                           tags$b(textOutput(ns("estConc2"), inline = TRUE)),
@@ -161,17 +211,12 @@ mod_predict_ui <- function(id) {
                 card_header(
                   class = "d-flex justify-content-between align-items-center",
                   div(
-                    span(`data-translate` = "ui_3cl", "Confidence Limits"),
-                    bslib::tooltip(
-                      bsicons::bs_icon("question-circle", style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"),
-                      uiOutput(ns("ui_3help")),
-                      placement = "right"
-                    )
+                    span(`data-translate` = "ui_3cl2", "Confidence Limits")
                   )
                 ),
                 card_body(padding = 25,
                   div(class = "table-responsive",
-                      
+                      ui_download_popover_table(tab = "pred", ns = ns),
                       DT::dataTableOutput(ns("clTable")))
                 )
               )
@@ -238,9 +283,10 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         "Concentration",
         tr("ui_3thresh", trans)
       )
-      updateRadioButtons(session, "thresh_type", 
+      print(choices)
+      updateRadioButtons(session, "threshType", 
                         choices = choices,
-                        selected = input$thresh_type %||% "Concentration")
+                        selected = input$threshType %||% "Concentration")
     }) %>%
       bindEvent(translations())
     
@@ -252,28 +298,78 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     column_names <- reactive({
       names(data_mod$clean_data())
     })
+    
+# validation --------------------------------------------------------------
+    iv <- InputValidator$new()
+    
+    iv$add_rule("conc", function(value) {
+      trans <- translations()
+      
+      if(is.null(value)){
+        return(NULL)
+      }
+      if(is.na(value)){
+        return(as.character(tr("ui_hintconcmiss", trans)[1]))
+      }
+      if(value == 0){
+        return(as.character(tr("ui_hintconc0", trans)[1]))
+      }
+      NULL  
+    })
+    
+    iv$add_rule("selectColour", function(value) {
+      if(is.null(value)){
+        return(NULL)
+      }
+      trans <- translations()
+      dat <- data_mod$data()
+      
+      colour_data <- dat[[value]]
+      
+      if (is.numeric(colour_data)) {
+        return(as.character(tr("ui_hintcolour", trans)[1]))
+      }
+      NULL  
+    })
+    
+    iv$add_rule("selectShape", function(value) {
+      if(is.null(value)){
+        return(NULL)
+      }
+      trans <- translations()
+      dat <- data_mod$data()
+      
+      sym_data <- dat[[value]]
+      
+      if (is.numeric(sym_data)) {
+        return(as.character(tr("ui_hintsym", trans)[1]))
+      }
+      NULL  
+    })
+    
+    iv$enable()
      
 # output renders ----------------------------------------------------------
-    output$selectLabel <- renderUI({
+    output$uiSelectLabel <- renderUI({
       cols <- column_names()
       selectInput(ns("selectLabel"),
-        label = span(`data-translate` = "ui_3label", "Label"),
+        label = NULL,
         choices = c("-none-", cols),
         selected = guess_sp(cols)
       )
     })
     
-    output$selectColour <- renderUI({
+    output$uiSelectColour <- renderUI({
       selectInput(ns("selectColour"),
-        label = span(`data-translate` = "ui_3colour", "Colour"),
+        label = NULL,
         choices = c("-none-", column_names()),
         selected = "-none-"
       )
     })
     
-    output$selectShape <- renderUI({
+    output$uiSelectShape <- renderUI({
       selectInput(ns("selectShape"),
-        label = span(`data-translate` = "ui_3symbol", "Symbol"),
+        label = NULL,
         choices = c("-none-", column_names()),
         selected = "-none-"
       )
@@ -281,13 +377,13 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     
     output$uiLegendColour <- renderUI({
       textInput(ns("legendColour"), 
-                label = span(`data-translate` = "ui_3legend", "Legend colour"), 
+                label = NULL, 
                 value = input$selectColour)
     })
     
     output$uiLegendShape <- renderUI({
       textInput(ns("legendShape"), 
-                label = span(`data-translate` = "ui_3shape", "Legend shape"), 
+                label = NULL, 
                 value = input$selectShape)
     })
     
@@ -295,7 +391,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     output$uiXbreaks <- renderUI({
       xbreaks <- plot_model_average_xbreaks()
       selectizeInput(ns("xbreaks"),
-                     label = span(`data-translate` = "ui_xbreaks", "X breaks"),
+                     label = NULL,
                      options = list(create = TRUE, plugins = list("remove_button")),
                      choices = xbreaks,
                      selected = xbreaks,
@@ -306,39 +402,39 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     outputOptions(output, "uiXbreaks", suspendWhenHidden = FALSE)
     outputOptions(output, "uiLegendColour", suspendWhenHidden = FALSE)
     outputOptions(output, "uiLegendShape", suspendWhenHidden = FALSE)
-    outputOptions(output, "selectLabel", suspendWhenHidden = FALSE)
-    outputOptions(output, "selectColour", suspendWhenHidden = FALSE)
-    outputOptions(output, "selectShape", suspendWhenHidden = FALSE)
+    outputOptions(output, "uiSelectLabel", suspendWhenHidden = FALSE)
+    outputOptions(output, "uiSelectColour", suspendWhenHidden = FALSE)
+    outputOptions(output, "uiSelectShape", suspendWhenHidden = FALSE)
     
-    output$ui_3thresh <- renderUI({
-      req(input$thresh_type)
-      if (input$thresh_type != "Concentration") {
-        return(
-          layout_column_wrap(
-            width = 1/2,
-            numericInput(ns("conc"),
-                         label = span(`data-translate` = "ui_3byconc", "by concentration"),
-                         value = 1, min = 0,
-                         max = 100, step = 0.1
-            )
-          ))
-      }
-      layout_column_wrap(
-        width = 1/2,
-        selectizeInput(ns("thresh"),
-                       label = span(`data-translate` = "ui_3affecting", "% affecting"),
-                       choices = c(1, 5, 10, 20),
-                       options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
-                       selected = 5
-        ),
-        selectizeInput(ns("thresh_pc"),
-                       label = span(`data-translate` = "ui_3protecting", "% protecting"),
-                       choices = c(99, 95, 90, 80),
-                       options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
-                       selected = 95
-        )
-      )
-    })
+    # output$uiThresh <- renderUI({
+    #   req(input$threshType)
+    #   if (input$threshType != "Concentration") {
+    #     return(
+    #       layout_column_wrap(
+    #         width = 1/2,
+    #         numericInput(ns("conc"),
+    #                      label = span(`data-translate` = "ui_3byconc", "by concentration"),
+    #                      value = 1, min = 0,
+    #                      max = 100, step = 0.1
+    #         )
+    #       ))
+    #   }
+    #   layout_column_wrap(
+    #     width = 1/2,
+    #     selectizeInput(ns("thresh"),
+    #                    label = span(`data-translate` = "ui_3affecting", "% affecting"),
+    #                    choices = c(1, 5, 10, 20),
+    #                    options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
+    #                    selected = 5
+    #     ),
+    #     selectizeInput(ns("threshPc"),
+    #                    label = span(`data-translate` = "ui_3protecting", "% protecting"),
+    #                    choices = c(99, 95, 90, 80),
+    #                    options = list(create = TRUE, createFilter = "^[1-9][0-9]?$|^99$"),
+    #                    selected = 95
+    #     )
+    #   )
+    # })
   
     # Threshold logic observers
     observe({
@@ -349,16 +445,16 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       bindEvent(input$thresh)
     
     observe({
-      thresh <- 100 - as.numeric(input$thresh_pc)
+      thresh <- 100 - as.numeric(input$threshPc)
       choices <- c(1, 5, 10, 20, thresh)
       updateSelectizeInput(session, "thresh", choices = choices, selected = isolate(thresh))
     }) %>% 
-      bindEvent(input$thresh_pc)
+      bindEvent(input$threshPc)
 
     # Update threshold reactive values
     observe({
       fit <- fit_mod$fit_dist()
-      thresh_type <- input$thresh_type
+      thresh_type <- input$threshType
       req(fit)
       req(thresh_type)
 
@@ -440,7 +536,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       dat <- data_mod$data()
       pred <- predict_hc()
       conc_col <- fit_mod$conc_column()
-      thresh_type <- input$thresh_type
+      thresh_type <- input$threshType
       conc <- thresh_rv$conc
       perc <- thresh_rv$percent
       units <- fit_mod$units()
@@ -544,15 +640,15 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     
     
     # Dynamic text outputs for HC/PC values
-    output$hc_percent <- renderText({
+    output$hcPercent <- renderText({
       thresh_rv$percent
     })
     
-    output$pc_percent <- renderText({
+    output$pcPercent <- renderText({
       100 - as.numeric(thresh_rv$percent %||% 0)
     })
     
-    output$hc_conc <- renderText({
+    output$hcConc <- renderText({
       thresh_rv$conc
     })
     
@@ -564,7 +660,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       dist <- fit_mod$fit_dist()
       waiter::waiter_show(html = waiting_screen_cl(), color = "#759dbe")
       nboot <- clean_nboot(input$bootSamp)
-      if (input$thresh_type != "Concentration") {
+      if (input$threshType != "Concentration") {
         y <- ssd_hp_ave(dist, conc = thresh_rv$conc, nboot = nboot)
       } else {
         y <- ssd_hc_ave(dist, percent = thresh_rv$percent, nboot = nboot)
@@ -580,7 +676,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
                      paste0("<b>", thresh_rv$percent, "</b>"))
       nboot <- clean_nboot(input$bootSamp)
       time <- estimate_time(nboot, lang())
-      if (input$thresh_type != "Concentration") {
+      if (input$threshType != "Concentration") {
         desc1 <- paste(tr("ui_3cldesc11", trans),
                        paste0("<b>", thresh_rv$conc, "</b>"))
       }
