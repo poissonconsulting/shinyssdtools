@@ -6,7 +6,7 @@ mod_data_ui <- function(id) {
       padding = "1rem",
       gap = "1rem",
       sidebar = sidebar(
-        width = 350,
+        width = 375,
         span(`data-translate` = "ui_1choose", "Choose one of the following options:"),
         p(
           bslib::popover(

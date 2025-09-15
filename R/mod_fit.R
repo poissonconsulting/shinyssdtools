@@ -13,7 +13,7 @@ mod_fit_ui <- function(id) {
         gap = "1rem",
         
         sidebar = sidebar(
-          width = 350,
+          width = 375,
           tagList(
             tags$label(
               `for` = ns("selectConc"),
