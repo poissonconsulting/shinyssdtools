@@ -2,6 +2,18 @@ ui_waiter <- function(id, ns){
   waiter::Waiter$new(id = ns(id), html = waiter::spin_2(), color = "white")
 }
 
+# Helper function for static label + dynamic input pattern
+static_label_input <- function(ns_id, translate_key, default_text, ui_output_id) {
+  tagList(
+    tags$label(
+      `for` = ns_id,
+      class = "control-label",
+      span(`data-translate` = translate_key, default_text)
+    ),
+    uiOutput(ui_output_id)
+  )
+}
+
 dt_options <- function(lang = "english"){
   # Language-specific translations
   lang_options <- if (lang == "french") {
@@ -87,6 +99,34 @@ ui_download_popover_table <- function(tab = "fit", ns){
           ),
           downloadButton(ns(paste0(tab, "DlCsv")),
                          label = span(`data-translate` = "ui_2dlcsv", "CSV File"),
+                         style = "width: 100%; padding: 6px; font-size: 12px;",
+                         class = "btn-primary btn-sm"
+          )
+        )
+      )
+    ),
+    placement = "bottom"
+  )
+}
+
+ui_download_report <- function(tab = "report", ns){
+  bslib::popover(
+    actionButton(ns(paste0(tab, "DownloadBtnReport")), 
+                 label = tagList(bsicons::bs_icon("download"), span(`data-translate` = "ui_2download", "Download")),
+                 style = "padding:4px; font-size:80%; width: 100px"
+    ),
+    card(
+      style = "width: 250px; margin-top: 10px;",
+      card_body(
+        div(
+          style = "display: grid; gap: 8px;",
+          downloadButton(ns(paste0(tab, "DlPdf")),
+                         label = span(`data-translate` = "ui_2dlpdf", "PDF file"),
+                         style = "width: 100%; padding: 6px; font-size: 12px;",
+                         class = "btn-primary btn-sm"
+          ),
+          downloadButton(ns(paste0(tab, "DlHtml")),
+                         label = span(`data-translate` = "ui_2dlhtml", "HTML File"),
                          style = "width: 100%; padding: 6px; font-size: 12px;",
                          class = "btn-primary btn-sm"
           )
