@@ -394,6 +394,10 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         conc_column = reactive({input$selectConc}),
         units = reactive({input$selectUnit}),
         dists = reactive({input$selectDist}),
+        rescale = reactive({input$rescale}),
+        yaxis_label = reactive({input$yaxis2}),
+        xaxis_label = reactive({input$xaxis2}),
+        text_size = reactive({input$size2}),
         has_fit = has_fit
       )
     )

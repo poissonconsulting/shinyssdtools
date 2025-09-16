@@ -33,13 +33,13 @@ mod_rcode_ui <- function(id) {
 }
 
 # R Code Module Server
-mod_rcode_server <- function(id, shared_values, translations) {
+mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     # Helper functions for code generation
     code_label <- reactive({
-      label_val <- shared_values$predict_label
+      label_val <- predict_mod$select_label()
       if (is.null(label_val) || label_val == "-none-") {
         return("NULL")
       }
@@ -47,7 +47,7 @@ mod_rcode_server <- function(id, shared_values, translations) {
     })
     
     code_colour <- reactive({
-      colour_val <- shared_values$predict_colour
+      colour_val <- predict_mod$select_colour()
       if (is.null(colour_val) || colour_val == "-none-") {
         return("NULL")
       }
@@ -55,7 +55,7 @@ mod_rcode_server <- function(id, shared_values, translations) {
     })
     
     code_shape <- reactive({
-      shape_val <- shared_values$predict_shape
+      shape_val <- predict_mod$select_shape()
       if (is.null(shape_val) || shape_val == "-none-") {
         return("NULL")
       }
@@ -63,49 +63,37 @@ mod_rcode_server <- function(id, shared_values, translations) {
     })
     
     code_hc <- reactive({
-      threshold_vals <- shared_values$threshold_values
-      show_hc <- shared_values$show_hc
+      threshold_vals <- predict_mod$threshold_values()
+      show_hc <- predict_mod$check_hc()
       if (is.null(show_hc) || !show_hc || is.null(threshold_vals)) {
         return("NULL")
       }
       threshold_vals$percent / 100
     })
     
-    # Get plot dimensions
+    # Get plot dimensions - using default values since download dimensions not in UI
     get_width <- reactive({
-      width_val <- shared_values$plot_width
-      ifelse(is.null(width_val) || width_val == 0, 6, width_val)
+      6  # Default width for predict plots
     })
     
     get_width2 <- reactive({
-      width_val <- shared_values$fit_plot_width
-      ifelse(is.null(width_val) || width_val == 0, 6, width_val)
+      6  # Default width for fit plots
     })
     
     get_height <- reactive({
-      height_val <- shared_values$plot_height
-      ifelse(is.null(height_val) || height_val == 0, 4, height_val)
+      4  # Default height for predict plots
     })
     
     get_height2 <- reactive({
-      height_val <- shared_values$fit_plot_height
-      ifelse(is.null(height_val) || height_val == 0, 4, height_val)
+      4  # Default height for fit plots
     })
     
     get_dpi <- reactive({
-      dpi_val <- shared_values$plot_dpi
-      if (is.null(dpi_val)) dpi_val <- 300
-      if (dpi_val > 3000) return(3000)
-      if (dpi_val == 0) return(300)
-      dpi_val
+      300  # Default DPI for predict plots
     })
     
     get_dpi2 <- reactive({
-      dpi_val <- shared_values$fit_plot_dpi
-      if (is.null(dpi_val)) dpi_val <- 300
-      if (dpi_val > 2000) return(2000)
-      if (dpi_val < 50) return(50)
-      dpi_val
+      300  # Default DPI for fit plots
     })
     
     # Code section outputs
@@ -116,49 +104,40 @@ mod_rcode_server <- function(id, shared_values, translations) {
     
     # render code 
     output$codeHead <- renderUI({
-      if (upload.values$upload_state == "hot" && is.na(read_data()$Concentration[1])) {
+      req(data_mod$has_data())
+      data <- data_mod$data()
+      if (is.null(data) || nrow(data) == 0) {
         return()
       }
       l1 <- "install.packages('ssdtools')"
       l2 <- "library(ssdtools)"
       l3 <- "library(ggplot2)"
       l4 <- "library(dplyr)"
-      if (upload.values$upload_state == "upload") {
-        l5 <- "library(readr)"
-      } else {
-        l5 <- NULL
-      }
+      l5 <- "library(readr)"  # Always include readr for consistency
       HTML(paste(l1, l2, l3, l4, l5, sep = "<br/>"))
     })
     
     output$codeData <- renderUI({
-      hot <- paste0("data <- ", utils::capture.output(dput(clean_data())) %>% glue::glue_collapse())
-      upload <- paste0("data <- read_csv(file = '", input$uploadData$name, "')")
-      demo <- "data <- ssddata::ccme_boron"
+      req(data_mod$has_data())
+      # For simplicity, always use dput format since we can't determine upload source
+      clean_data <- data_mod$clean_data()
+      hot <- paste0("data <- ", utils::capture.output(dput(clean_data)) %>% glue::glue_collapse())
       name <- "colnames(data) <- make.names(colnames(data))"
-      if (upload.values$upload_state == "hot") {
-        return(HTML(paste(hot, name, sep = "<br/>")))
-      }
-      if (upload.values$upload_state == "upload") {
-        return(HTML(paste(upload, name, sep = "<br/>")))
-      }
-      if (upload.values$upload_state == "demo") {
-        return(HTML(paste(demo, name, sep = "<br/>")))
-      }
+      HTML(paste(hot, name, sep = "<br/>"))
     })
     
     output$codeFit <- renderUI({
-      req(check_fit() == "")
-      ylab <- input$yaxis2
-      xlab <- input$xaxis2
-      text_size <- input$size2
+      req(fit_mod$has_fit())
+      ylab <- fit_mod$yaxis_label()
+      xlab <- fit_mod$xaxis_label()
+      text_size <- fit_mod$text_size()
       fit <- paste0(
         "dist <- ssd_fit_dists(data, left = '",
-        input$selectConc %>% make.names(),
+        fit_mod$conc_column() %>% make.names(),
         "', dists = c(",
-        paste0("'", input$selectDist, "'", collapse = ", "), ")",
+        paste0("'", fit_mod$dists(), "'", collapse = ", "), ")",
         ", silent = TRUE, reweight = FALSE",
-        ", rescale = ", input$rescale, ")"
+        ", rescale = ", fit_mod$rescale(), ")"
       )
       plot <- paste0(
         "ssd_plot_cdf(dist, ylab = '", ylab, "', xlab = '", xlab,
@@ -171,32 +150,34 @@ mod_rcode_server <- function(id, shared_values, translations) {
     })
     
     output$codePredPlot <- renderUI({
-      req(check_fit() == "")
-      req(check_pred() == "")
-      req(input$selectLabel)
-      xmax <- input$xMax
-      xmin <- input$xMin
+      req(fit_mod$has_fit())
+      req(predict_mod$has_predict())
+      req(predict_mod$select_label())
+      
+      threshold_vals <- predict_mod$threshold_values()
+      xmax <- predict_mod$x_max()
+      xmin <- predict_mod$x_min()
       xlimits <- ifelse(is.na(xmin) & is.na(xmax), "NULL", paste0("c(", xmin, ", ", xmax, ")"))
-      legend.colour <- ifelse(is.null(input$legendColour) || input$legendColour == "-none-", "NULL", paste0("'", input$legendColour, "'"))
-      legend.shape <- ifelse(is.null(input$legendShape) || input$legendShape == "-none-", "NULL", paste0("'", input$legendShape, "'"))
-      text_size <- input$size3
-      xlab <- input$xaxis
-      ylab <- input$yaxis
-      title <- input$title
-      big.mark <- ifelse(translation.value$lang == "French", " ", ",")
-      trans <- transformation()
-      xbreaks <- input$xbreaks
+      legend.colour <- ifelse(is.null(predict_mod$legend_colour()) || predict_mod$legend_colour() == "-none-", "NULL", paste0("'", predict_mod$legend_colour(), "'"))
+      legend.shape <- ifelse(is.null(predict_mod$legend_shape()) || predict_mod$legend_shape() == "-none-", "NULL", paste0("'", predict_mod$legend_shape(), "'"))
+      text_size <- predict_mod$text_size()
+      xlab <- predict_mod$xaxis_label()
+      ylab <- predict_mod$yaxis_label()
+      title <- predict_mod$title()
+      big.mark <- ","  # Default to English format
+      trans <- ifelse(predict_mod$x_log(), "log10", "identity")
+      xbreaks <- predict_mod$xbreaks()
       xbreaks <- paste0("c(", paste(xbreaks, collapse = ", "), ")")
-      pred <- paste0("pred <- predict(dist, proportion = unique(c(1:99, ", thresh_rv$percent, ")/100))")
+      pred <- paste0("pred <- predict(dist, proportion = unique(c(1:99, ", threshold_vals$percent, ")/100))")
       plot <- paste0(
-        "ssd_plot(data, pred, left = '", make.names(input$selectConc),
+        "ssd_plot(data, pred, left = '", make.names(fit_mod$conc_column()),
         "', label = ", code_label(),
         ", shape = ", code_shape(),
         ", color = ", code_colour(),
-        ",  <br/>label_size = ", input$sizeLabel3,
+        ",  <br/>label_size = ", predict_mod$label_size(),
         ", ylab = '", ylab,
         "', xlab = '", xlab,
-        "', ci = FALSE, shift_x = ", input$adjustLabel,
+        "', ci = FALSE, shift_x = ", predict_mod$adjust_label(),
         ", hc = ", code_hc(),
         ", <br/>big.mark = '", big.mark,
         "', trans = '", trans,
@@ -205,39 +186,43 @@ mod_rcode_server <- function(id, shared_values, translations) {
         ", text_size = ", text_size,
         ", theme_classic = TRUE",
         ") + <br/> ggtitle('", title,
-        "') + <br/>scale_color_brewer(palette = '", input$selectPalette, "', name = ", legend.colour, ") +<br/>
+        "') + <br/>scale_color_brewer(palette = '", predict_mod$palette(), "', name = ", legend.colour, ") +<br/>
                      scale_shape(name = ", legend.shape, ")"
       )
       HTML(paste(pred, plot, sep = "<br/>"))
     })
     
     output$codePredCl <- renderUI({
-      req(input$getCl)
-      req(check_fit() == "")
-      req(check_pred() == "")
+      req(predict_mod$has_cl())
+      req(fit_mod$has_fit())
+      req(predict_mod$has_predict())
+      
+      threshold_vals <- predict_mod$threshold_values()
       form <- "ssd_hc"
       arg <- "proportion"
-      thresh <- thresh_rv$percent / 100
-      if (input$thresh_type != "Concentration") {
+      thresh <- threshold_vals$percent / 100
+      if (predict_mod$threshold_type() != "Concentration") {
         form <- "ssd_hp"
         arg <- "conc"
-        thresh <- thresh_rv$conc
+        thresh <- threshold_vals$conc
       }
+      
+      nboot_clean <- predict_mod$nboot() %>% gsub(",", "", .) %>% gsub("\\s", "", .) %>% as.integer()
       
       conf <- paste0(
         paste0(form, "(dist, ", arg, " = "), thresh, ", ci = TRUE",
-        ", nboot = ", input$bootSamp %>% gsub(",", "", .) %>% as.integer(), "L, min_pboot = 0.8)"
+        ", nboot = ", nboot_clean, "L, min_pboot = 0.8)"
       )
       conf2 <- paste0(
         paste0(form, "(dist, ", arg, " = "), thresh, ", ci = TRUE, average = FALSE",
-        ", nboot = ", input$bootSamp %>% gsub(",", "", .) %>% as.integer(), "L, min_pboot = 0.8)"
+        ", nboot = ", nboot_clean, "L, min_pboot = 0.8)"
       )
       bind <- paste0("dplyr::bind_rows(", conf, ", ", conf2, ")")
       HTML(paste(bind, sep = "<br/>"))
     })
     
     output$codeSaveFit <- renderUI({
-      req(check_fit() == "")
+      req(fit_mod$has_fit())
       save <- paste0(
         "ggsave('fit_dist_plot.png',
                     width = ", get_width2(),
@@ -249,9 +234,9 @@ mod_rcode_server <- function(id, shared_values, translations) {
     })
     
     output$codeSavePred <- renderUI({
-      req(check_fit() == "")
-      req(check_pred() == "")
-      req(input$selectLabel)
+      req(fit_mod$has_fit())
+      req(predict_mod$has_predict())
+      req(predict_mod$select_label())
       save <- paste0(
         "ggsave('model_average_plot.png',
                     width = ", get_width(),
@@ -266,7 +251,7 @@ mod_rcode_server <- function(id, shared_values, translations) {
     return(
       list(
         has_code = reactive({ 
-          !is.null(shared_values$fitted_dist) && !is.null(shared_values$data)
+          fit_mod$has_fit() && data_mod$has_data()
         })
       )
     )

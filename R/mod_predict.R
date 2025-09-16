@@ -746,6 +746,24 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         threshold_values = reactive({
           list(percent = thresh_rv$percent, conc = thresh_rv$conc)
         }),
+        threshold_type = reactive({input$threshType}),
+        select_label = reactive({input$selectLabel}),
+        select_colour = reactive({input$selectColour}),
+        select_shape = reactive({input$selectShape}),
+        legend_colour = reactive({input$legendColour}),
+        legend_shape = reactive({input$legendShape}),
+        x_min = reactive({input$xMin}),
+        x_max = reactive({input$xMax}),
+        text_size = reactive({input$size3}),
+        label_size = reactive({input$sizeLabel3}),
+        xaxis_label = reactive({input$xaxis}),
+        yaxis_label = reactive({input$yaxis}),
+        title = reactive({input$title}),
+        palette = reactive({input$selectPalette}),
+        adjust_label = reactive({input$adjustLabel}),
+        xbreaks = reactive({input$xbreaks}),
+        check_hc = reactive({input$checkHc}),
+        x_log = reactive({input$xlog}),
         has_cl = has_cl,
         has_predict = has_predict
       )

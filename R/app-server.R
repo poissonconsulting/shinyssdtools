@@ -49,7 +49,7 @@ app_server <- function(input, output, session) {
   fit_mod <- mod_fit_server("fit_mod", trans, data_mod, main_nav = reactive({input$main_nav}))
   predict_mod <- mod_predict_server("predict_mod", trans, current_lang, data_mod, fit_mod, main_nav = reactive({input$main_nav}))
   report_mod <- mod_report_server("report_mod", trans, current_lang, data_mod, fit_mod, predict_mod)
-  # rcode_mod <- mod_rcode_server("rcode_mod", shared_values, trans)
+  rcode_mod <- mod_rcode_server("rcode_mod", trans, data_mod, fit_mod, predict_mod)
 
   
   output$ui_5format <- renderUI({
