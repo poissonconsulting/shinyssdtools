@@ -36,9 +36,9 @@ mod_report_ui <- function(id) {
           card_body(padding = 25,
             ui_download_report(ns = ns),
             tags$iframe(
-              src = "",
-              id = ns("pdfPreview"),
-              style = "width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px;"
+              srcdoc = "",
+              id = ns("htmlPreview"),
+              style = "width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px; background: white;"
             )
           )
         )
@@ -128,8 +128,8 @@ mod_report_server <- function(id, translations, lang, data_mod, fit_mod, predict
       params
     })
     
-    # Generate PDF report for preview
-    report_preview_pdf <- reactive({
+    # Generate HTML report for preview
+    report_preview_html <- reactive({
       waiter::waiter_show(html = waiting_screen_report(), color = "#759dbe")
       
       trans <- translations()
@@ -139,69 +139,52 @@ mod_report_server <- function(id, translations, lang, data_mod, fit_mod, predict
         temp_report
       )
       
-      temp_pdf <- tempfile(fileext = ".pdf")
+      temp_html <- tempfile(fileext = ".html")
       params <- params_list()
-      print(params)
       
       rmarkdown::render(temp_report,
-        output_format = "pdf_document",
-        output_file = temp_pdf,
+        output_format = "html_document",
+        output_file = temp_html,
         params = params,
         envir = new.env(parent = globalenv()),
         encoding = "utf-8"
       )
       
+      html_content <- readLines(temp_html, warn = FALSE)
       waiter::waiter_hide()
-      temp_pdf
+      
+      paste(html_content, collapse = "\n")
     }) %>%
       bindEvent(input$generateReport)
     
     has_preview <- reactive({
-      !is.null(report_preview_pdf()) && file.exists(report_preview_pdf())
+      !is.null(report_preview_html())
     }) %>%
-      bindEvent(report_preview_pdf())
+      bindEvent(report_preview_html())
     
     output$has_preview <- has_preview
     outputOptions(output, "has_preview", suspendWhenHidden = FALSE)
     
+    # Update iframe content with HTML
     observe({
-      pdf_path <- report_preview_pdf()
-      if (!is.null(pdf_path) && file.exists(pdf_path)) {
-        www_dir <- file.path("inst", "app", "www")
-        if (!dir.exists(www_dir)) {
-          www_dir <- file.path("www")
-        }
-        if (!dir.exists(www_dir)) {
-          dir.create(www_dir, recursive = TRUE)
-        }
-        
-        preview_file <- file.path(www_dir, "report_preview.pdf")
-        file.copy(pdf_path, preview_file, overwrite = TRUE)
-        
-        # Update iframe src
+      html_content <- report_preview_html()
+      if (!is.null(html_content)) {
+        # Use JavaScript to safely update iframe srcdoc
         shinyjs::runjs(paste0("
-          document.getElementById('", ns("pdfPreview"), "').src = 'report_preview.pdf';
+          var iframe = document.getElementById('", ns("htmlPreview"), "');
+          if (iframe) {
+            iframe.srcdoc = ", jsonlite::toJSON(html_content), ";
+          }
         "))
       }
     }) %>%
-      bindEvent(report_preview_pdf())
+      bindEvent(report_preview_html())
     
-    # reuse generated pdf
+    # Generate fresh PDF for download
     output$reportDlPdf <- downloadHandler(
       filename = function() {
         trans <- translations()
         paste0(tr("ui_bcanz_filename", trans), ".pdf")
-      },
-      content = function(file) {
-        file.copy(report_preview_pdf(), file)
-      }
-    )
-    
-    # always generate HTML file 
-    output$reportDlHtml <- downloadHandler(
-      filename = function() {
-        trans <- translations()
-        paste0(tr("ui_bcanz_filename", trans), ".html")
       },
       content = function(file) {
         trans <- translations()
@@ -212,12 +195,23 @@ mod_report_server <- function(id, translations, lang, data_mod, fit_mod, predict
         )
         params <- params_list()
         rmarkdown::render(temp_report,
-          output_format = "html_document",
+          output_format = "pdf_document",
           output_file = file,
           params = params,
           envir = new.env(parent = globalenv()),
           encoding = "utf-8"
         )
+      }
+    )
+    
+    # Reuse HTML preview for download
+    output$reportDlHtml <- downloadHandler(
+      filename = function() {
+        trans <- translations()
+        paste0(tr("ui_bcanz_filename", trans), ".html")
+      },
+      content = function(file) {
+        writeLines(report_preview_html(), file)
       }
     )
   })

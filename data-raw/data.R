@@ -132,8 +132,8 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_4genbody",
-    english = "This may take a minute, depending on the number of bootstrap samples selected in the Predict tab.",
-    french = "Cela peut prendre une minute, en fonction du nombre d'échantillons bootstrap sélectionné dans l'onglet « Predict »."
+    english = "This may take a minute, depending on the number of bootstrap samples selected.",
+    french = "Cela peut prendre une minute, en fonction du nombre d'échantillons bootstrap sélectionné."
   ),
   dplyr::tibble(
     id = "ui_1htconc",
