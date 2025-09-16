@@ -727,7 +727,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         "ssdtools_cl_table.xlsx"
       },
       content = function(file) {
-        print(str(table_cl()))
         writexl::write_xlsx(dplyr::as_tibble(table_cl()), file)
       }
     )
