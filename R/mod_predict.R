@@ -242,10 +242,9 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     output$has_fit <- fit_mod$has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
     
-    # Predict trigger - similar to fit_trigger pattern
+    # trigger for updating predictions - only occur when on predict tab
     predict_trigger <- reactiveVal(0)
     
-    # Trigger when navigate to predict tab
     observe({
       if(main_nav() == "predict") {
         current_val <- isolate(predict_trigger())
@@ -253,23 +252,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       }
     }) %>%
       bindEvent(main_nav())
-    
-    
-    output$estConc <- renderText({
-      thresh_rv$conc
-    })
-    
-    output$estPerc <- renderText({
-      thresh_rv$percent
-    })
-    
-    output$estConc2 <- renderText({
-      thresh_rv$conc
-    })
-    
-    output$estPerc2 <- renderText({
-      thresh_rv$percent
-    })
     
     # Also trigger when threshold values change
     observe({
@@ -352,7 +334,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     
     iv$enable()
      
-# output renders ----------------------------------------------------------
+# ui renders ----------------------------------------------------------
     output$uiSelectLabel <- renderUI({
       cols <- column_names()
       selectInput(ns("selectLabel"),
@@ -390,7 +372,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
                 value = input$selectShape)
     })
     
-    # X-breaks UI
     output$uiXbreaks <- renderUI({
       xbreaks <- plot_model_average_xbreaks()
       selectizeInput(ns("xbreaks"),
@@ -408,8 +389,56 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     outputOptions(output, "uiSelectLabel", suspendWhenHidden = FALSE)
     outputOptions(output, "uiSelectColour", suspendWhenHidden = FALSE)
     outputOptions(output, "uiSelectShape", suspendWhenHidden = FALSE)
+    
+
+# output renders ----------------------------------------------------------
+    output$estConc <- renderText({
+      thresh_rv$conc
+    })
+    
+    output$estPerc <- renderText({
+      thresh_rv$percent
+    })
+    
+    output$estConc2 <- renderText({
+      thresh_rv$conc
+    })
+    
+    output$estPerc2 <- renderText({
+      thresh_rv$percent
+    })
+    
+    output$describeTime <- renderText({
+      describe_time()
+    })
+    
+    output$describeCl <- renderText({
+      describe_cl()
+    })
+    
+    output$plotPred <- renderPlot({
+      gp <- plot_model_average()
+      silent_plot(gp)
+    })
+    
+    # Dynamic text outputs for HC/PC values
+    output$hcPercent <- renderText({
+      thresh_rv$percent
+    })
+    
+    output$pcPercent <- renderText({
+      100 - as.numeric(thresh_rv$percent %||% 0)
+    })
+    
+    output$hcConc <- renderText({
+      thresh_rv$conc
+    })
+    
+    output$clTable <- DT::renderDataTable({
+      DT::datatable(table_cl(), options = list(dom = "t"))
+    })
   
-    # Threshold logic observers
+# update thresh RVs --------------------------------------------------------
     observe({
       thresh_pc <- 100 - as.numeric(input$thresh)
       choices <- unique(c(99, 95, 90, 80, thresh_pc))
@@ -451,7 +480,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       }
     })
 
-    # Predict hazard concentration
+# reactives ---------------------------------------------------------------
     predict_hc <- reactive({
       req(predict_trigger() > 0)
       req(main_nav() == "predict")
@@ -467,7 +496,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       ) %>%
       bindEvent(predict_trigger())
     
-    # Transformation
     transformation <- reactive({
       trans <- "log10"
       if (!input$xlog) {
@@ -476,7 +504,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       trans
     })
 
-    # Plot model average with xbreaks
     plot_model_average_xbreaks <- reactive({
       pred <- predict_hc()
       dat <- data_mod$data()
@@ -505,7 +532,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       NULL
     })
 
-    # Main model average plot
     plot_model_average <- reactive({
       dat <- data_mod$data()
       pred <- predict_hc()
@@ -590,45 +616,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       )
     })
     
-    # --- render predict results ----
-    output$plotPred <- renderPlot({
-      gp <- plot_model_average()
-      silent_plot(gp)
-    })
-
-    has_predict <- reactive({
-      !is.null(predict_hc())
-    }) %>%
-      bindEvent(predict_hc())
-    
-    output$has_predict <- has_predict
-    outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
-    
-    has_cl <- reactive({
-      !is.null(table_cl())
-    }) %>%
-      bindEvent(table_cl())
-    
-    output$has_cl <- has_cl
-    outputOptions(output, "has_cl", suspendWhenHidden = FALSE)
-    
-    # Dynamic text outputs for HC/PC values
-    output$hcPercent <- renderText({
-      thresh_rv$percent
-    })
-    
-    output$pcPercent <- renderText({
-      100 - as.numeric(thresh_rv$percent %||% 0)
-    })
-    
-    output$hcConc <- renderText({
-      thresh_rv$conc
-    })
-    
-    output$clTable <- DT::renderDataTable({
-      DT::datatable(table_cl(), options = list(dom = "t"))
-    })
-    
     table_cl <- reactive({
       dist <- fit_mod$fit_dist()
       waiter::waiter_show(html = waiting_screen_cl(), color = "#759dbe")
@@ -671,7 +658,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       trans <- translations()
       nboot <- clean_nboot(input$bootSamp)
       time <- estimate_time(nboot, lang())
-     
+      
       HTML(
         tr("ui_3cldesc3", trans),
         time,
@@ -679,16 +666,23 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       )
     })
     
-    output$describeTime <- renderText({
-      describe_time()
-    })
+    has_predict <- reactive({
+      !is.null(predict_hc())
+    }) %>%
+      bindEvent(predict_hc())
     
-    output$describeCl <- renderText({
-      describe_cl()
-    })
+    output$has_predict <- has_predict
+    outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
+    
+    has_cl <- reactive({
+      !is.null(table_cl())
+    }) %>%
+      bindEvent(table_cl())
+    
+    output$has_cl <- has_cl
+    outputOptions(output, "has_cl", suspendWhenHidden = FALSE)
     
 # downloaders -------------------------------------------------------------
-    
     output$predDlPlot <- downloadHandler(
       filename = function() {
         "ssdtools_model_average_plot.png"
@@ -743,7 +737,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       )
     })
    
-    # Return reactive values for use by other modules
     return(
       list(
         predictions = predict_hc,
