@@ -638,6 +638,8 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       } else {
         y <- ssd_hc_ave(dist, percent = thresh_rv$percent, nboot = nboot)
       }
+      y$dists <- NULL
+      y$samples <- NULL
       waiter::waiter_hide()
       y
     }) %>% 
@@ -686,40 +688,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     })
     
 # downloaders -------------------------------------------------------------
-    # output$predDlPlot <- downloadHandler(
-    #   filename = function() {
-    #     "ssdtools_modelAveragePlot.png"
-    #   },
-    #   content = function(file) {
-    #     ggplot2::ggsave(file,
-    #                     plot = plot_model_average(), device = "png",
-    #                     width = get_width(), height = get_height(), dpi = get_dpi()
-    #     )
-    #   }
-    # )
-    # 
-    # output$predDlRds <- downloadHandler(
-    #   filename = function() {
-    #     "ssdtools_modelAveragePlot.rds"
-    #   },
-    #   content = function(file) {
-    #     saveRDS(plot_model_average(), file = file)
-    #   }
-    # )
-    # 
-    # output$predDlTable <- downloadHandler(
-    #   filename = function() {
-    #     "ssdtools_predictTable.csv"
-    #   },
-    #   content <- function(file) {
-    #     if (!is.null(table_cl())) {
-    #       return(readr::write_csv(table_cl() %>% dplyr::as_tibble(), file))
-    #     } else {
-    #       return()
-    #     }
-    #   }
-    # )
-    # 
     
     output$predDlPlot <- downloadHandler(
       filename = function() {
