@@ -467,8 +467,6 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       ) %>%
       bindEvent(predict_trigger())
     
-    # observe({print(predict_hc())})
-
     # Transformation
     transformation <- reactive({
       trans <- "log10"
@@ -643,6 +641,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       waiter::waiter_hide()
       y
     }) %>% 
+      bindCache(thresh_rv$percent, thresh_rv$conc, input$bootSamp) %>% 
       bindEvent(input$getCl)
     
     describe_cl <- reactive({
@@ -776,34 +775,18 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
         )
       )
     })
-    # 
-    # output$checkpred <- reactive({
-    #   check_pred() != ""
-    # })
-    # outputOptions(output, "checkpred", suspendWhenHidden = FALSE)
-    # 
-    # output$showPredictResults <- reactive({
-    #   return(show_predict_results())
-    # })
-    # outputOptions(output, "showPredictResults", suspendWhenHidden = FALSE)
-    # 
-    # 
-    # output$hintPr <- renderText(hint(check_pred()))
-    # 
-    # 
-    # # Return reactive values for use by other modules
-    # return(
-    #   list(
-    #     predictions = reactive({ predict_hc() }),
-    #     plot_model_average = reactive({ plot_model_average() }),
-    #     check_pred = reactive({ check_pred() }),
-    #     threshold_values = reactive({ 
-    #       list(percent = thresh_rv$percent, conc = thresh_rv$conc)
-    #     }),
-    #     show_predict_results = reactive({ 
-    #       !is.null(predict_hc()) && !inherits(predict_hc(), "try-error")
-    #     })
-    #   )
-    # )
+   
+    # Return reactive values for use by other modules
+    return(
+      list(
+        predictions = predict_hc,
+        plot_model_average = plot_model_average,
+        threshold_values = reactive({
+          list(percent = thresh_rv$percent, conc = thresh_rv$conc)
+        }),
+        has_cl = has_cl,
+        has_predict = has_predict
+      )
+    )
   })
 }
