@@ -34,7 +34,8 @@ plot_predictions <- function(x, pred, conc, label, colour, shape, percent,
     xbreaks = xbreaks, text_size = text_size, theme_classic = TRUE
   ) +
     ggplot2::scale_color_brewer(palette = palette, name = legend_colour) +
-    ggplot2::scale_shape(name = legend_shape)
+    ggplot2::scale_shape(name = legend_shape) +
+    ggplot2::ggtitle(title)
 
   gp
 }
