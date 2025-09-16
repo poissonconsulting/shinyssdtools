@@ -25,6 +25,7 @@ Le progiciel est construite à partir du progiciel R [ssdtools](https://cran.r-p
 **Date de création du rapport:** `r format(Sys.Date(), "%d/%m/%Y")`  
 **Les distributions:** `r params$dists`  
 **Version de progiciel de «ssdtools»:** `r utils::packageVersion("ssdtools")`  
+**Version de progiciel de «shinyssdtools»:** `r utils::packageVersion("shinyssdtools")`  
 **Version de progiciel de «R»:** `r gsub("R version ", "", R.version$version.string)`   
 
 \newpage

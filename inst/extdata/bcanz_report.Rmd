@@ -26,6 +26,7 @@ The app is built from the R package [ssdtools](https://cran.r-project.org/web/pa
 **Report created:** `r format(Sys.Date(), "%d/%m/%Y")`  
 **Input distributions:** `r params$dists`  
 **ssdtools version:** `r utils::packageVersion("ssdtools")`  
+**shinyssdtools version:** `r utils::packageVersion("shinyssdtools")`  
 **R version:** `r gsub("R version ", "", R.version$version.string)`   
 
 \newpage
