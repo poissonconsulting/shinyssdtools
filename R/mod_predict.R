@@ -217,8 +217,8 @@ mod_predict_ui <- function(id) {
                   )
                 ),
                 card_body(padding = 25,
+                  ui_download_popover_table(tab = "pred", ns = ns),
                   div(class = "table-responsive",
-                      ui_download_popover_table(tab = "pred", ns = ns),
                       DT::dataTableOutput(ns("clTable")))
                 )
               )
@@ -274,6 +274,18 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
                          selected = input$threshType)
     }) %>%
       bindEvent(translations())
+    
+    observe({
+      current <- lang()
+      choices <- c("500", "1,000", "5,000", "10,000")
+      if(current == "french"){
+        choices <- c("500", "1 000", "5 000", "10 000")
+      }
+      updateSelectInput(session, "bootSamp", 
+                        choices = choices, 
+                        selected = choices[2])
+    }) %>%
+      bindEvent(lang())
     
     thresh_rv <- reactiveValues(
       percent = NULL,

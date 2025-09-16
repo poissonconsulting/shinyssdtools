@@ -94,8 +94,8 @@ mod_fit_ui <- function(id) {
                        span(`data-translate` = "ui_2table", "Goodness of Fit")
                      ),
                      card_body(padding = 25,
+                      ui_download_popover_table(ns = ns),
                        div(class = "table-responsive",
-                           ui_download_popover_table(ns = ns),
                            DT::dataTableOutput(ns("tableGof")))
                      )
                 )
