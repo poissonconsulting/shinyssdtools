@@ -10,20 +10,38 @@ mod_rcode_ui <- function(id) {
         tagList(
           uiOutput(ns("ui_4help")),
           div(
-            id = "codes",
-            style = "background-color: #f8f9fa; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px;",
+            class = "r-code-container",
+            style = "
+              background-color: #f8f9fa; 
+              color: #212529; 
+              padding: 1.5rem; 
+              border-radius: 8px; 
+              border: 1px solid #dee2e6;
+              font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace; 
+              font-size: 14px; 
+              line-height: 1.5;
+              max-height: 70vh;
+              overflow-y: auto;
+            ",
+            tags$style(HTML("
+              .r-code-container pre {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0.5rem 0 !important;
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+                font-family: inherit !important;
+                font-size: inherit !important;
+                color: inherit !important;
+              }
+            ")),
             uiOutput(ns("codeHead")),
-            br(),
             uiOutput(ns("codeData")),
-            br(),
             uiOutput(ns("codeFit")),
-            br(),
             uiOutput(ns("codeSaveFit")),
-            br(),
             uiOutput(ns("codePredPlot")),
-            br(),
             uiOutput(ns("codeSavePred")),
-            br(),
             uiOutput(ns("codePredCl"))
           )
         )
@@ -33,6 +51,41 @@ mod_rcode_ui <- function(id) {
 }
 
 # R Code Module Server
+# Helper function to format R code with proper indentation
+format_r_code <- function(code_lines) {
+  # Join lines and format
+  code_text <- paste(code_lines, collapse = "\n")
+  
+  # Basic indentation rules
+  formatted_lines <- strsplit(code_text, "\n")[[1]]
+  indent_level <- 0
+  formatted_code <- c()
+  
+  for (line in formatted_lines) {
+    trimmed <- trimws(line)
+    if (nchar(trimmed) == 0) {
+      formatted_code <- c(formatted_code, "")
+      next
+    }
+    
+    # Decrease indent for closing brackets
+    if (grepl("^[\\)\\}]", trimmed)) {
+      indent_level <- max(0, indent_level - 1)
+    }
+    
+    # Add indentation
+    indented_line <- paste0(strrep("  ", indent_level), trimmed)
+    formatted_code <- c(formatted_code, indented_line)
+    
+    # Increase indent for opening brackets and function calls with (
+    if (grepl("[\\(\\{]\\s*$", trimmed) || grepl("\\($", trimmed)) {
+      indent_level <- indent_level + 1
+    }
+  }
+  
+  paste(formatted_code, collapse = "\n")
+}
+
 mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -102,53 +155,84 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       HTML(tr("ui_4help", trans_obj))
     })
     
-    # render code 
+    # Individual code outputs with clean formatting
     output$codeHead <- renderUI({
       req(data_mod$has_data())
       data <- data_mod$data()
       if (is.null(data) || nrow(data) == 0) {
         return()
       }
-      l1 <- "install.packages('ssdtools')"
-      l2 <- "library(ssdtools)"
-      l3 <- "library(ggplot2)"
-      l4 <- "library(dplyr)"
-      l5 <- "library(readr)"  # Always include readr for consistency
-      HTML(paste(l1, l2, l3, l4, l5, sep = "<br/>"))
+      code_lines <- c(
+        "install.packages('ssdtools')",
+        "library(ssdtools)",
+        "library(ggplot2)", 
+        "library(dplyr)",
+        "library(readr)"
+      )
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
-    
+
     output$codeData <- renderUI({
       req(data_mod$has_data())
-      # For simplicity, always use dput format since we can't determine upload source
       clean_data <- data_mod$clean_data()
-      hot <- paste0("data <- ", utils::capture.output(dput(clean_data)) %>% glue::glue_collapse())
-      name <- "colnames(data) <- make.names(colnames(data))"
-      HTML(paste(hot, name, sep = "<br/>"))
+      data_str <- utils::capture.output(dput(clean_data)) %>% glue::glue_collapse()
+      code_lines <- c(
+        paste0("data <- ", data_str),
+        "colnames(data) <- make.names(colnames(data))"
+      )
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
-    
+
     output$codeFit <- renderUI({
       req(fit_mod$has_fit())
       ylab <- fit_mod$yaxis_label()
       xlab <- fit_mod$xaxis_label()
       text_size <- fit_mod$text_size()
-      fit <- paste0(
-        "dist <- ssd_fit_dists(data, left = '",
-        fit_mod$conc_column() %>% make.names(),
-        "', dists = c(",
-        paste0("'", fit_mod$dists(), "'", collapse = ", "), ")",
-        ", silent = TRUE, reweight = FALSE",
-        ", rescale = ", fit_mod$rescale(), ")"
-      )
-      plot <- paste0(
-        "ssd_plot_cdf(dist, ylab = '", ylab, "', xlab = '", xlab,
-        "', delta = Inf, <br/>average = NA, theme_classic = TRUE, text_size = ",
-        text_size, ") <br/>"
-      )
+      dists_str <- paste0("c(", paste0("'", fit_mod$dists(), "'", collapse = ", "), ")")
       
-      table <- "ssd_gof(dist) %>% dplyr::mutate_if(is.numeric, ~ signif(., 3))"
-      HTML(paste(fit, plot, table, sep = "<br/>"))
+      code_lines <- c(
+        paste0("dist <- ssd_fit_dists("),
+        paste0("  data,"),
+        paste0("  left = '", fit_mod$conc_column() %>% make.names(), "',"),
+        paste0("  dists = ", dists_str, ","),
+        paste0("  silent = TRUE,"),
+        paste0("  reweight = FALSE,"),
+        paste0("  rescale = ", fit_mod$rescale()),
+        ")",
+        "",
+        paste0("ssd_plot_cdf("),
+        paste0("  dist,"),
+        paste0("  ylab = '", ylab, "',"),
+        paste0("  xlab = '", xlab, "',"),
+        paste0("  delta = Inf,"),
+        paste0("  average = NA,"),
+        paste0("  theme_classic = TRUE,"),
+        paste0("  text_size = ", text_size),
+        ")",
+        "",
+        "ssd_gof(dist) %>%",
+        "  dplyr::mutate_if(is.numeric, ~ signif(., 3))"
+      )
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
-    
+
+    output$codeSaveFit <- renderUI({
+      req(fit_mod$has_fit())
+      code_lines <- c(
+        paste0("ggsave("),
+        paste0("  'fit_dist_plot.png',"),
+        paste0("  width = ", get_width2(), ","),
+        paste0("  height = ", get_height2(), ","),
+        paste0("  dpi = ", get_dpi2()),
+        ")"
+      )
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
+    })
+
     output$codePredPlot <- renderUI({
       req(fit_mod$has_fit())
       req(predict_mod$has_predict())
@@ -164,34 +248,59 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       xlab <- predict_mod$xaxis_label()
       ylab <- predict_mod$yaxis_label()
       title <- predict_mod$title()
-      big.mark <- ","  # Default to English format
       trans <- ifelse(predict_mod$x_log(), "log10", "identity")
-      xbreaks <- predict_mod$xbreaks()
-      xbreaks <- paste0("c(", paste(xbreaks, collapse = ", "), ")")
-      pred <- paste0("pred <- predict(dist, proportion = unique(c(1:99, ", threshold_vals$percent, ")/100))")
-      plot <- paste0(
-        "ssd_plot(data, pred, left = '", make.names(fit_mod$conc_column()),
-        "', label = ", code_label(),
-        ", shape = ", code_shape(),
-        ", color = ", code_colour(),
-        ",  <br/>label_size = ", predict_mod$label_size(),
-        ", ylab = '", ylab,
-        "', xlab = '", xlab,
-        "', ci = FALSE, shift_x = ", predict_mod$adjust_label(),
-        ", hc = ", code_hc(),
-        ", <br/>big.mark = '", big.mark,
-        "', trans = '", trans,
-        "', xlimits = ", xlimits,
-        ", xbreaks = ", xbreaks,
-        ", text_size = ", text_size,
-        ", theme_classic = TRUE",
-        ") + <br/> ggtitle('", title,
-        "') + <br/>scale_color_brewer(palette = '", predict_mod$palette(), "', name = ", legend.colour, ") +<br/>
-                     scale_shape(name = ", legend.shape, ")"
+      xbreaks <- paste0("c(", paste(predict_mod$xbreaks(), collapse = ", "), ")")
+      
+      code_lines <- c(
+        paste0("pred <- predict("),
+        paste0("  dist,"),
+        paste0("  proportion = unique(c(1:99, ", threshold_vals$percent, ") / 100)"),
+        ")",
+        "",
+        paste0("ssd_plot("),
+        paste0("  data,"),
+        paste0("  pred,"),
+        paste0("  left = '", make.names(fit_mod$conc_column()), "',"),
+        paste0("  label = ", code_label(), ","),
+        paste0("  shape = ", code_shape(), ","),
+        paste0("  color = ", code_colour(), ","),
+        paste0("  label_size = ", predict_mod$label_size(), ","),
+        paste0("  ylab = '", ylab, "',"),
+        paste0("  xlab = '", xlab, "',"),
+        paste0("  ci = FALSE,"),
+        paste0("  shift_x = ", predict_mod$adjust_label(), ","),
+        paste0("  hc = ", code_hc(), ","),
+        paste0("  big.mark = ',',"),
+        paste0("  trans = '", trans, "',"),
+        paste0("  xlimits = ", xlimits, ","),
+        paste0("  xbreaks = ", xbreaks, ","),
+        paste0("  text_size = ", text_size, ","),
+        paste0("  theme_classic = TRUE"),
+        ") +",
+        paste0("  ggtitle('", title, "') +"),
+        paste0("  scale_color_brewer(palette = '", predict_mod$palette(), "', name = ", legend.colour, ") +"),
+        paste0("  scale_shape(name = ", legend.shape, ")")
       )
-      HTML(paste(pred, plot, sep = "<br/>"))
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
-    
+
+    output$codeSavePred <- renderUI({
+      req(fit_mod$has_fit())
+      req(predict_mod$has_predict())
+      req(predict_mod$select_label())
+      code_lines <- c(
+        paste0("ggsave("),
+        paste0("  'model_average_plot.png',"),
+        paste0("  width = ", get_width(), ","),
+        paste0("  height = ", get_height(), ","),
+        paste0("  dpi = ", get_dpi()),
+        ")"
+      )
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
+    })
+
     output$codePredCl <- renderUI({
       req(predict_mod$has_cl())
       req(fit_mod$has_fit())
@@ -206,46 +315,32 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         arg <- "conc"
         thresh <- threshold_vals$conc
       }
-      
       nboot_clean <- predict_mod$nboot() %>% gsub(",", "", .) %>% gsub("\\s", "", .) %>% as.integer()
       
-      conf <- paste0(
-        paste0(form, "(dist, ", arg, " = "), thresh, ", ci = TRUE",
-        ", nboot = ", nboot_clean, "L, min_pboot = 0.8)"
+      code_lines <- c(
+        paste0("cl_average <- ", form, "("),
+        paste0("  dist,"),
+        paste0("  ", arg, " = ", thresh, ","),
+        paste0("  ci = TRUE,"),
+        paste0("  nboot = ", nboot_clean, "L,"),
+        paste0("  min_pboot = 0.8"),
+        ")",
+        "",
+        paste0("cl_individual <- ", form, "("),
+        paste0("  dist,"),
+        paste0("  ", arg, " = ", thresh, ","),
+        paste0("  ci = TRUE,"),
+        paste0("  average = FALSE,"),
+        paste0("  nboot = ", nboot_clean, "L,"),
+        paste0("  min_pboot = 0.8"),
+        ")",
+        "",
+        "dplyr::bind_rows(cl_average, cl_individual)"
       )
-      conf2 <- paste0(
-        paste0(form, "(dist, ", arg, " = "), thresh, ", ci = TRUE, average = FALSE",
-        ", nboot = ", nboot_clean, "L, min_pboot = 0.8)"
-      )
-      bind <- paste0("dplyr::bind_rows(", conf, ", ", conf2, ")")
-      HTML(paste(bind, sep = "<br/>"))
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
     
-    output$codeSaveFit <- renderUI({
-      req(fit_mod$has_fit())
-      save <- paste0(
-        "ggsave('fit_dist_plot.png',
-                    width = ", get_width2(),
-        " , height = ", get_height2(),
-        " , dpi = ", get_dpi2(),
-        ")"
-      )
-      HTML(paste(save, sep = "<br/>"))
-    })
-    
-    output$codeSavePred <- renderUI({
-      req(fit_mod$has_fit())
-      req(predict_mod$has_predict())
-      req(predict_mod$select_label())
-      save <- paste0(
-        "ggsave('model_average_plot.png',
-                    width = ", get_width(),
-        " , height = ", get_height(),
-        " , dpi = ", get_dpi(),
-        ")"
-      )
-      HTML(paste(save, sep = "<br/>"))
-    })
     
     # Return reactive indicator
     return(
