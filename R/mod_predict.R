@@ -1,15 +1,3 @@
-# Helper function for static label + dynamic input pattern
-static_label_input <- function(ns_id, translate_key, default_text, ui_output_id) {
-  tagList(
-    tags$label(
-      `for` = ns_id,
-      class = "control-label",
-      span(`data-translate` = translate_key, default_text)
-    ),
-    uiOutput(ui_output_id)
-  )
-}
-
 # Predict Module UI
 mod_predict_ui <- function(id) {
   ns <- NS(id)
