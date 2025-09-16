@@ -740,7 +740,9 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     return(
       list(
         predictions = predict_hc,
-        plot_model_average = plot_model_average,
+        model_average_plot = plot_model_average,
+        predict_cl = table_cl,
+        nboot = reactive({input$bootSamp}),
         threshold_values = reactive({
           list(percent = thresh_rv$percent, conc = thresh_rv$conc)
         }),

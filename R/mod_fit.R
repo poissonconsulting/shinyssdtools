@@ -103,7 +103,6 @@ mod_fit_ui <- function(id) {
         )
       )
     ),
-    
     conditionalPanel(
       condition =  paste0("!output['", ns("has_data"), "']"),
       ui_dashbox(span(`data-translate` = "ui_hintdata", "You have not added a dataset."))
@@ -252,32 +251,6 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
     
 
 # fit reactives and outputs -----------------------------------------------
-    # fit_dist <- reactive({
-    #   req(update_trigger() > 0)
-    # 
-    #   waiter_gof$show()
-    #   waiter_distplot$show()
-    #   
-    #   data <- data_mod$data()
-    #   conc <- make.names(input$selectConc) 
-    #   dists <- input$selectDist
-    #   rescale <- input$rescale
-    #   
-    #   safe_try(ssdtools::ssd_fit_dists(data,
-    #                                      left = conc,
-    #                                      dists = dists,
-    #                                      silent = TRUE,
-    #                                      rescale = rescale
-    #   ))
-    # }) %>%
-    #   bindCache(
-    #     input$selectConc,
-    #     input$selectDist,
-    #     input$rescale,
-    #     data_mod$data()
-    #   ) %>% 
-    #   bindEvent(update_trigger())
-    
     plot_dist <- reactive({
       dist <- fit_dist()
       req(dist)
@@ -416,8 +389,11 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
     return(
       list(
         fit_dist = fit_dist,
+        fit_plot = plot_dist,
+        gof_table = table_gof,
         conc_column = reactive({input$selectConc}),
         units = reactive({input$selectUnit}),
+        dists = reactive({input$selectDist}),
         has_fit = has_fit
       )
     )

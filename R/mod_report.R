@@ -20,69 +20,59 @@ mod_report_ui <- function(id) {
 }
 
 # Report Module Server
-mod_report_server <- function(id, shared_values, translations) {
+mod_report_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     # Waiting screen for report generation
     waiting_screen_report <- reactive({
-      trans_obj <- translations()
+      trans <- translations()
       tagList(
         waiter::spin_flower(),
         tagList(
-          h3(tr("ui_4gentitle", trans_obj)),
+          h3(tr("ui_4gentitle", trans)),
           br(),
-          h4(tr("ui_4genbody", trans_obj))
+          h4(tr("ui_4genbody", trans))
         )
       )
     })
     
     # Parameters list for report
     params_list <- reactive({
-      req(shared_values$model_average_plot)
+      req(predict_mod$has_predict())
+      req(fit_mod$has_fit())
       req(input$toxicant)
       
       toxicant <- input$toxicant
-      data <- shared_values$data
-      dists <- shared_values$selected_dists
-      fit_plot <- shared_values$fit_plot
-      fit_dist <- shared_values$fitted_dist
-      gof_table <- shared_values$gof_table
-      model_average_plot <- shared_values$model_average_plot
-      
-      # Get bootstrap samples if available from predict module
-      nboot <- if (!is.null(shared_values$bootstrap_samples)) {
-        as.integer(gsub("(,|\\s)", "", shared_values$bootstrap_samples))
-      } else {
-        1000L
-      }
+      data <- data_mod$data()
+      dists <- fit_mod$dists()
+      fit_plot <- fit_mod$fit_plot()
+      fit_dist <- fit_mod$fit_dist()
+      gof_table <- fit_mod$gof_table()
+      model_average_plot <- predict_mod$model_average_plot()
+      nboot <- as.integer(gsub("(,|\\s)", "", predict_mod$nboot()))
       
       params <- list(
-        toxicant = toxicant, 
-        data = data, 
-        dists = dists,
-        fit_plot = fit_plot, 
-        fit_dist = fit_dist, 
-        gof_table = gof_table,
-        model_average_plot = model_average_plot, 
-        nboot = nboot
+        toxicant = toxicant, data = data, dists = dists,
+        fit_plot = fit_plot, fit_dist = fit_dist, gof_table = gof_table,
+        model_average_plot = model_average_plot, nboot = nboot
       )
       params
     })
     
     # PDF download handler
-    output$dl_pdf <- downloadHandler(
+    output$reportDlPdf <- downloadHandler(
       filename = function() {
-        trans_obj <- translations()
-        paste0(tr("ui_bcanz_filename", trans_obj), ".pdf")
+        trans <- translations()
+        paste0(tr("ui_bcanz_filename", trans), ".pdf")
       },
       content = function(file) {
-        waiter::waiter_show(html = waiting_screen_report(), color = "rgba(44,62,80, 1)")
+        waiter::waiter_show(html = waiting_screen_report(), color = "#759dbe")
         
-        trans_obj <- translations()
-        temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans_obj))
+        trans <- translations()
+        temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans))
         file.copy(
-          system.file(package = "shinyssdtools", file.path("extdata", tr("ui_bcanz_file", trans_obj))),
+          system.file(package = "shinyssdtools", file.path("extdata", tr("ui_bcanz_file", trans))),
           temp_report
         )
         params <- params_list()
@@ -98,18 +88,18 @@ mod_report_server <- function(id, shared_values, translations) {
     )
     
     # HTML download handler
-    output$dl_html <- downloadHandler(
+    output$reportDlHtml <- downloadHandler(
       filename = function() {
-        trans_obj <- translations()
-        paste0(tr("ui_bcanz_filename", trans_obj), ".html")
+        trans <- translations()
+        paste0(tr("ui_bcanz_filename", trans), ".html")
       },
       content = function(file) {
-        waiter::waiter_show(html = waiting_screen_report(), color = "rgba(44,62,80, 1)")
+        waiter::waiter_show(html = waiting_screen_report(), color = "#759dbe")
         
-        trans_obj <- translations()
-        temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans_obj))
+        trans <- translations()
+        temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans))
         file.copy(
-          system.file(package = "shinyssdtools", file.path("extdata", tr("ui_bcanz_file", trans_obj))),
+          system.file(package = "shinyssdtools", file.path("extdata", tr("ui_bcanz_file", trans))),
           temp_report
         )
         params <- params_list()
@@ -123,17 +113,6 @@ mod_report_server <- function(id, shared_values, translations) {
         waiter::waiter_hide()
       }
     )
-    
-    waiting_screen_report <- reactive({
-      tagList(
-        waiter::spin_flower(),
-        tagList(
-          h3(tr("ui_4gentitle", trans())),
-          br(),
-          h4(tr("ui_4genbody", trans()))
-        )
-      )
-    })
     
     # Return reactive indicators
     return(
