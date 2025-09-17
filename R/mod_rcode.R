@@ -392,14 +392,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       )
     })
     
-    observe({
-      showNotification(
-        HTML("<i class='fas fa-check-circle'></i> Code copied to clipboard!"),
-        duration = 2
-      )
-    }) %>% 
-      bindEvent(input$copyCode)
-    
     # for copy button
     has_code <- reactive({ 
       all_code() != ""
