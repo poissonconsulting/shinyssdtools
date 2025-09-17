@@ -9,7 +9,15 @@ mod_rcode_ui <- function(id) {
       card_body(
         tagList(
           uiOutput(ns("ui_4help")),
+          conditionalPanel(
+            condition = paste_js("has_code", ns),
+            div(
+              class = "d-flex justify-content-start mb-3",
+              uiOutput(ns("copyButton"))
+            )
+          ),
           div(
+            id = ns("code-container"),
             class = "r-code-container",
             style = "
               background-color: #f8f9fa; 
@@ -157,42 +165,94 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
     
     # Individual code outputs with clean formatting
     output$codeHead <- renderUI({
-      req(data_mod$has_data())
-      data <- data_mod$data()
-      if (is.null(data) || nrow(data) == 0) {
-        return()
-      }
-      code_lines <- c(
-        "install.packages('ssdtools')",
-        "library(ssdtools)",
-        "library(ggplot2)", 
-        "library(dplyr)",
-        "library(readr)"
-      )
+      code_lines <- try(generate_head_code(), silent = TRUE)
+      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeData <- renderUI({
-      req(data_mod$has_data())
-      clean_data <- data_mod$clean_data()
-      data_str <- utils::capture.output(dput(clean_data)) %>% glue::glue_collapse()
-      code_lines <- c(
-        paste0("data <- ", data_str),
-        "colnames(data) <- make.names(colnames(data))"
-      )
+      code_lines <- try(generate_data_code(), silent = TRUE)
+      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeFit <- renderUI({
+      code_lines <- try(generate_fit_code(), silent = TRUE)
+      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
+    })
+
+    output$codeSaveFit <- renderUI({
+      code_lines <- try(generate_save_fit_code(), silent = TRUE)
+      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
+    })
+
+    output$codePredPlot <- renderUI({
+      code_lines <- try(generate_pred_plot_code(), silent = TRUE)
+      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
+    })
+
+    output$codeSavePred <- renderUI({
+      code_lines <- try(generate_save_pred_code(), silent = TRUE)
+      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
+    })
+
+    output$codePredCl <- renderUI({
+      code_lines <- try(generate_pred_cl_code(), silent = TRUE)
+      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      
+      formatted_code <- format_r_code(code_lines)
+      HTML(paste0("<pre>", formatted_code, "</pre>"))
+    })
+    
+    # Helper functions to generate code sections (DRY principle)
+    generate_head_code <- function() {
+      req(data_mod$has_data())
+      data <- data_mod$data()
+      if (is.null(data) || nrow(data) == 0) return(NULL)
+      
+      c(
+        "# install.packages('ssdtools')",
+        "library(ssdtools)",
+        "library(ggplot2)", 
+        "library(dplyr)"
+      )
+    }
+    
+    generate_data_code <- function() {
+      req(data_mod$has_data())
+      clean_data <- data_mod$clean_data()
+      data_str <- utils::capture.output(dput(clean_data)) %>% glue::glue_collapse()
+      
+      c(
+        paste0("data <- ", data_str),
+        "colnames(data) <- make.names(colnames(data))"
+      )
+    }
+    
+    generate_fit_code <- function() {
       req(fit_mod$has_fit())
       ylab <- fit_mod$yaxis_label()
       xlab <- fit_mod$xaxis_label()
       text_size <- fit_mod$text_size()
       dists_str <- paste0("c(", paste0("'", fit_mod$dists(), "'", collapse = ", "), ")")
       
-      code_lines <- c(
+      c(
         paste0("dist <- ssd_fit_dists("),
         paste0("  data,"),
         paste0("  left = '", fit_mod$conc_column() %>% make.names(), "',"),
@@ -215,13 +275,12 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         "ssd_gof(dist) %>%",
         "  dplyr::mutate_if(is.numeric, ~ signif(., 3))"
       )
-      formatted_code <- format_r_code(code_lines)
-      HTML(paste0("<pre>", formatted_code, "</pre>"))
-    })
-
-    output$codeSaveFit <- renderUI({
+    }
+    
+    generate_save_fit_code <- function() {
       req(fit_mod$has_fit())
-      code_lines <- c(
+      
+      c(
         paste0("ggsave("),
         paste0("  'fit_dist_plot.png',"),
         paste0("  width = ", get_width2(), ","),
@@ -229,11 +288,9 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  dpi = ", get_dpi2()),
         ")"
       )
-      formatted_code <- format_r_code(code_lines)
-      HTML(paste0("<pre>", formatted_code, "</pre>"))
-    })
-
-    output$codePredPlot <- renderUI({
+    }
+    
+    generate_pred_plot_code <- function() {
       req(fit_mod$has_fit())
       req(predict_mod$has_predict())
       req(predict_mod$select_label())
@@ -251,7 +308,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       trans <- ifelse(predict_mod$x_log(), "log10", "identity")
       xbreaks <- paste0("c(", paste(predict_mod$xbreaks(), collapse = ", "), ")")
       
-      code_lines <- c(
+      c(
         paste0("pred <- predict("),
         paste0("  dist,"),
         paste0("  proportion = unique(c(1:99, ", threshold_vals$percent, ") / 100)"),
@@ -281,15 +338,14 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  scale_color_brewer(palette = '", predict_mod$palette(), "', name = ", legend.colour, ") +"),
         paste0("  scale_shape(name = ", legend.shape, ")")
       )
-      formatted_code <- format_r_code(code_lines)
-      HTML(paste0("<pre>", formatted_code, "</pre>"))
-    })
-
-    output$codeSavePred <- renderUI({
+    }
+    
+    generate_save_pred_code <- function() {
       req(fit_mod$has_fit())
       req(predict_mod$has_predict())
       req(predict_mod$select_label())
-      code_lines <- c(
+      
+      c(
         paste0("ggsave("),
         paste0("  'model_average_plot.png',"),
         paste0("  width = ", get_width(), ","),
@@ -297,11 +353,9 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  dpi = ", get_dpi()),
         ")"
       )
-      formatted_code <- format_r_code(code_lines)
-      HTML(paste0("<pre>", formatted_code, "</pre>"))
-    })
-
-    output$codePredCl <- renderUI({
+    }
+    
+    generate_pred_cl_code <- function() {
       req(predict_mod$has_cl())
       req(fit_mod$has_fit())
       req(predict_mod$has_predict())
@@ -317,7 +371,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       }
       nboot_clean <- predict_mod$nboot() %>% gsub(",", "", .) %>% gsub("\\s", "", .) %>% as.integer()
       
-      code_lines <- c(
+      c(
         paste0("cl_average <- ", form, "("),
         paste0("  dist,"),
         paste0("  ", arg, " = ", thresh, ","),
@@ -337,17 +391,74 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         "",
         "dplyr::bind_rows(cl_average, cl_individual)"
       )
-      formatted_code <- format_r_code(code_lines)
-      HTML(paste0("<pre>", formatted_code, "</pre>"))
+    }
+    
+    # Combine all code sections for copying
+    all_code <- reactive({
+      code_sections <- list()
+      
+      # Get each section using the helper functions
+      code_sections$head <- try(generate_head_code(), silent = TRUE)
+      code_sections$data <- try(generate_data_code(), silent = TRUE)
+      code_sections$fit <- try(generate_fit_code(), silent = TRUE)
+      code_sections$save_fit <- try(generate_save_fit_code(), silent = TRUE)
+      code_sections$pred_plot <- try(generate_pred_plot_code(), silent = TRUE)
+      code_sections$save_pred <- try(generate_save_pred_code(), silent = TRUE)
+      code_sections$pred_cl <- try(generate_pred_cl_code(), silent = TRUE)
+      
+      # Filter out errors and empty sections
+      valid_sections <- Filter(function(x) {
+        !inherits(x, "try-error") && !is.null(x) && length(x) > 0
+      }, code_sections)
+      
+      if (length(valid_sections) == 0) return("")
+      
+      # Combine all sections with spacing
+      all_lines <- c()
+      for (section in valid_sections) {
+        if (length(all_lines) > 0) {
+          all_lines <- c(all_lines, "", section)
+        } else {
+          all_lines <- section
+        }
+      }
+      
+      format_r_code(all_lines)
     })
     
+    # Render copy button with rclipboard
+    output$copyButton <- renderUI({
+      code_text <- all_code()
+      rclipboard::rclipButton(
+        inputId = ns("copyCode"),
+        label = tagList(
+          bsicons::bs_icon("clipboard"), 
+          span("Copy Code")
+        ),
+        clipText = code_text,
+        class = "btn-primary"
+      )
+    })
+    
+    observe({
+      showNotification(
+        HTML("<i class='fas fa-check-circle'></i> Code copied to clipboard!"),
+        duration = 2
+      )
+    }) %>% 
+      bindEvent(input$copyCode)
     
     # Return reactive indicator
+    has_code <- reactive({ 
+      all_code() != ""
+    })
+    
+    output$has_code <- has_code
+    outputOptions(output, "has_code", suspendWhenHidden = FALSE)
+    
     return(
       list(
-        has_code = reactive({ 
-          fit_mod$has_fit() && data_mod$has_data()
-        })
+        has_code = has_code
       )
     )
   })

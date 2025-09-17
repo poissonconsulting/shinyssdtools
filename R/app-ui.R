@@ -16,9 +16,21 @@ app_ui <- function() {
     # Dependencies
     shinyjs::useShinyjs(),
     waiter::useWaiter(),
+    rclipboard::rclipboardSetup(),
     
     # Include custom JavaScript for translations
     tags$script(src = "translation.js"),
+    
+    # Add custom CSS handler for notifications
+    tags$script(HTML("
+      Shiny.addCustomMessageHandler('addCustomCSS', function(message) {
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = message.css;
+        document.getElementsByTagName('head')[0].appendChild(style);
+      });
+    ")),
+    
     
     # Hide shiny errors
     tags$style(
