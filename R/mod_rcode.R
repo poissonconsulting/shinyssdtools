@@ -58,47 +58,10 @@ mod_rcode_ui <- function(id) {
   )
 }
 
-# R Code Module Server
-# Helper function to format R code with proper indentation
-format_r_code <- function(code_lines) {
-  # Join lines and format
-  code_text <- paste(code_lines, collapse = "\n")
-  
-  # Basic indentation rules
-  formatted_lines <- strsplit(code_text, "\n")[[1]]
-  indent_level <- 0
-  formatted_code <- c()
-  
-  for (line in formatted_lines) {
-    trimmed <- trimws(line)
-    if (nchar(trimmed) == 0) {
-      formatted_code <- c(formatted_code, "")
-      next
-    }
-    
-    # Decrease indent for closing brackets
-    if (grepl("^[\\)\\}]", trimmed)) {
-      indent_level <- max(0, indent_level - 1)
-    }
-    
-    # Add indentation
-    indented_line <- paste0(strrep("  ", indent_level), trimmed)
-    formatted_code <- c(formatted_code, indented_line)
-    
-    # Increase indent for opening brackets and function calls with (
-    if (grepl("[\\(\\{]\\s*$", trimmed) || grepl("\\($", trimmed)) {
-      indent_level <- indent_level + 1
-    }
-  }
-  
-  paste(formatted_code, collapse = "\n")
-}
-
 mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Helper functions for code generation
     code_label <- reactive({
       label_val <- predict_mod$select_label()
       if (is.null(label_val) || label_val == "-none-") {
@@ -159,62 +122,55 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
     
     # Code section outputs
     output$ui_4help <- renderUI({
-      trans_obj <- translations()
-      HTML(tr("ui_4help", trans_obj))
+      trans <- translations()
+      HTML(tr("ui_4help", trans))
     })
     
     # Individual code outputs with clean formatting
     output$codeHead <- renderUI({
-      code_lines <- try(generate_head_code(), silent = TRUE)
-      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      code_lines <-generate_head_code()
       
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeData <- renderUI({
-      code_lines <- try(generate_data_code(), silent = TRUE)
-      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      code_lines <- generate_data_code()
       
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeFit <- renderUI({
-      code_lines <- try(generate_fit_code(), silent = TRUE)
-      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      code_lines <- generate_fit_code()
       
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeSaveFit <- renderUI({
-      code_lines <- try(generate_save_fit_code(), silent = TRUE)
-      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      code_lines <- generate_save_fit_code()
       
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codePredPlot <- renderUI({
-      code_lines <- try(generate_pred_plot_code(), silent = TRUE)
-      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      code_lines <- generate_pred_plot_code()
       
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeSavePred <- renderUI({
-      code_lines <- try(generate_save_pred_code(), silent = TRUE)
-      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      code_lines <- generate_save_pred_code()
       
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codePredCl <- renderUI({
-      code_lines <- try(generate_pred_cl_code(), silent = TRUE)
-      if (inherits(code_lines, "try-error") || is.null(code_lines)) return()
+      code_lines <- generate_pred_cl_code()
       
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
@@ -224,7 +180,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
     generate_head_code <- function() {
       req(data_mod$has_data())
       data <- data_mod$data()
-      if (is.null(data) || nrow(data) == 0) return(NULL)
       
       c(
         "# install.packages('ssdtools')",
@@ -293,7 +248,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
     generate_pred_plot_code <- function() {
       req(fit_mod$has_fit())
       req(predict_mod$has_predict())
-      req(predict_mod$select_label())
       
       threshold_vals <- predict_mod$threshold_values()
       xmax <- predict_mod$x_max()
@@ -369,7 +323,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         arg <- "conc"
         thresh <- threshold_vals$conc
       }
-      nboot_clean <- predict_mod$nboot() %>% gsub(",", "", .) %>% gsub("\\s", "", .) %>% as.integer()
+      nboot_clean <- clean_nboot(predict_mod$nboot()) %>% as.integer()
       
       c(
         paste0("cl_average <- ", form, "("),
@@ -393,11 +347,9 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       )
     }
     
-    # Combine all code sections for copying
     all_code <- reactive({
       code_sections <- list()
       
-      # Get each section using the helper functions
       code_sections$head <- try(generate_head_code(), silent = TRUE)
       code_sections$data <- try(generate_data_code(), silent = TRUE)
       code_sections$fit <- try(generate_fit_code(), silent = TRUE)
@@ -413,7 +365,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       
       if (length(valid_sections) == 0) return("")
       
-      # Combine all sections with spacing
       all_lines <- c()
       for (section in valid_sections) {
         if (length(all_lines) > 0) {
@@ -426,7 +377,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       format_r_code(all_lines)
     })
     
-    # Render copy button with rclipboard
     output$copyButton <- renderUI({
       code_text <- all_code()
       rclipboard::rclipButton(
@@ -448,7 +398,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
     }) %>% 
       bindEvent(input$copyCode)
     
-    # Return reactive indicator
+    # for copy button
     has_code <- reactive({ 
       all_code() != ""
     })
@@ -456,13 +406,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
     output$has_code <- has_code
     outputOptions(output, "has_code", suspendWhenHidden = FALSE)
     
-    return(
-      list(
-        has_code = has_code
-      )
-    )
+
   })
 }
-
-# Helper function for null coalescing
-`%||%` <- function(x, y) if (is.null(x)) y else x

@@ -134,3 +134,38 @@ ssd_hp_ave <- function(x, conc, nboot) {
   dplyr::bind_rows(ave, dist) %>%
     dplyr::mutate_at(c("est", "se", "ucl", "lcl", "wt"), ~ signif(., 3))
 }
+
+# Helper function to format R code with proper indentation
+format_r_code <- function(code_lines) {
+  # Join lines and format
+  code_text <- paste(code_lines, collapse = "\n")
+  
+  # Basic indentation rules
+  formatted_lines <- strsplit(code_text, "\n")[[1]]
+  indent_level <- 0
+  formatted_code <- c()
+  
+  for (line in formatted_lines) {
+    trimmed <- trimws(line)
+    if (nchar(trimmed) == 0) {
+      formatted_code <- c(formatted_code, "")
+      next
+    }
+    
+    # Decrease indent for closing brackets
+    if (grepl("^[\\)\\}]", trimmed)) {
+      indent_level <- max(0, indent_level - 1)
+    }
+    
+    # Add indentation
+    indented_line <- paste0(strrep("  ", indent_level), trimmed)
+    formatted_code <- c(formatted_code, indented_line)
+    
+    # Increase indent for opening brackets and function calls with (
+    if (grepl("[\\(\\{]\\s*$", trimmed) || grepl("\\($", trimmed)) {
+      indent_level <- indent_level + 1
+    }
+  }
+  
+  paste(formatted_code, collapse = "\n")
+}
