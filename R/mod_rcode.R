@@ -378,12 +378,14 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
     })
     
     output$copyButton <- renderUI({
+      trans <- translations()
+      label <- tr("ui_copy", trans)
       code_text <- all_code()
       rclipboard::rclipButton(
         inputId = ns("copyCode"),
         label = tagList(
           bsicons::bs_icon("clipboard"), 
-          span("Copy Code")
+          label
         ),
         clipText = code_text,
         class = "btn-primary"
