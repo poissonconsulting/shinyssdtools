@@ -442,7 +442,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     observe({
       thresh_pc <- 100 - as.numeric(input$thresh)
       choices <- unique(c(99, 95, 90, 80, thresh_pc))
-      updateSelectizeInput(session, "thresh_pc", choices = choices, selected = isolate(thresh_pc))
+      updateSelectizeInput(session, "threshPc", choices = choices, selected = isolate(thresh_pc))
     }) %>% 
       bindEvent(input$thresh)
     
