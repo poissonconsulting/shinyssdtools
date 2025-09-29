@@ -75,7 +75,6 @@ mod_report_server <- function(id, translations, lang, data_mod, fit_mod, predict
       fit <- fit_mod$fit_dist()
       req(fit)
       nboot <- clean_nboot(predict_mod$nboot())
-      print(nboot)
       avehc <- ssd_hc(fit, proportion = c(0.01, 0.05, 0.1, 0.2), ci = TRUE, 
                       nboot = nboot, min_pboot = 0.8)
       avehc |>
