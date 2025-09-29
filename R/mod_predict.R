@@ -281,7 +281,11 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     )
     
     column_names <- reactive({
-      names(data_mod$clean_data())
+      req(fit_mod$conc_column())
+      cols <- names(data_mod$clean_data())
+      # exclude conc col for label, shape, colour
+      conc_col <- fit_mod$conc_column()
+      setdiff(cols, conc_col)
     })
     
 # validation --------------------------------------------------------------
@@ -521,11 +525,12 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       label_col <- ifelse(input$selectLabel == "-none-", NULL, make.names(input$selectLabel))
 
       if(label_col %in% names(dat) & conc_col %in% names(dat)){
+
         gp <- safe_try(ssdtools::ssd_plot(dat,
                                           pred = pred,
                                           left = conc_col, label = label_col,
                                           hc = percent / 100
-        )) 
+        ))
         xbreaks <- gp_xbreaks(gp)
         return(xbreaks[xbreaks != conc])
       } 
