@@ -25,14 +25,36 @@ clean_nboot <- function(x){
 }
 
 estimate_time <- function(nboot, lang){
-  df <- 
-    data.frame(
-      n = c(500, 1000, 5000, 10000),
-      english = c("10 seconds", "20 seconds", "2 minutes", "5 minutes"),
-      french = c("10 secondes", "20 secondes", "2 minutes", "5 minutes")
-    )
-  
-  df[df$n == nboot,][[lang]]
+  preset_df <- data.frame(
+    n = c(500, 1000, 5000, 10000),
+    english = c("10 seconds", "20 seconds", "2 minutes", "5 minutes"),
+    french = c("10 secondes", "20 secondes", "2 minutes", "5 minutes")
+  )
+
+  if (nboot %in% preset_df$n) {
+    return(preset_df[preset_df$n == nboot, ][[lang]])
+  }
+
+  # use linear model if not in preset:
+  time_sec <- max(1, -12.89 + 0.0304 * nboot)
+
+  if (time_sec < 60) {
+    time_num <- round(time_sec)
+    time_str <- if (lang == "french") {
+      paste(time_num, ifelse(time_num <= 1, "seconde", "secondes"))
+    } else {
+      paste(time_num, ifelse(time_num <= 1, "second", "seconds"))
+    }
+  } else {
+    time_num <- round(time_sec / 60, 1)
+    time_str <- if (lang == "french") {
+      paste(time_num, ifelse(time_num <= 1, "minute", "minutes"))
+    } else {
+      paste(time_num, ifelse(time_num <= 1, "minute", "minutes"))
+    }
+  }
+
+  time_str
 }
 
 tr <- function(id, trans) {

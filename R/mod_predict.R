@@ -65,8 +65,9 @@ mod_predict_ui <- function(id) {
               )
             ),
             value = "cl_pred",
-            selectInput(
+            selectizeInput(
               ns("bootSamp"),
+              options = list(create = TRUE, createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"),
               label = div(
                 span(`data-translate` = "ui_3samples", "Bootstrap samples"),
                 bslib::tooltip(
@@ -269,7 +270,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
       if(current == "french"){
         choices <- c("500", "1 000", "5 000", "10 000")
       }
-      updateSelectInput(session, "bootSamp", 
+      updateSelectizeInput(session, "bootSamp", 
                         choices = choices, 
                         selected = choices[2])
     }) %>%
@@ -601,7 +602,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
 
       trans <- transformation()
       big.mark <- ","
-      if (lang() == "French") {
+      if (lang() == "french") {
         big.mark <- " "
       }
       
@@ -640,6 +641,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     
     describe_cl <- reactive({
       trans <- translations()
+      req(input$bootSamp)
       desc1 <- paste(tr("ui_3cldesc1", trans),
                      paste0("<b>", thresh_rv$percent, "</b>"))
       nboot <- clean_nboot(input$bootSamp)
@@ -661,6 +663,7 @@ mod_predict_server <- function(id, translations, lang, data_mod, fit_mod, main_n
     
     describe_time <- reactive({
       trans <- translations()
+      req(input$bootSamp)
       nboot <- clean_nboot(input$bootSamp)
       time <- estimate_time(nboot, lang())
       
