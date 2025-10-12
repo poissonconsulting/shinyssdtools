@@ -74,7 +74,7 @@ mod_report_server <- function(id, translations, lang, data_mod, fit_mod, predict
     pred_cl <- reactive({
       fit <- fit_mod$fit_dist()
       req(fit)
-      nboot <- clean_nboot(predict_mod$nboot())
+      nboot <- clean_nboot(input$bootSamp)
       avehc <- ssd_hc(fit, proportion = c(0.01, 0.05, 0.1, 0.2), ci = TRUE, 
                       nboot = nboot, min_pboot = 0.8)
       avehc |>
@@ -85,12 +85,14 @@ mod_report_server <- function(id, translations, lang, data_mod, fit_mod, predict
     
     output$uiBootSamp <- renderUI({
       current <- lang()
+      print(predict_mod$nboot())
       choices <- c("500", "1,000", "5,000", "10,000")
       if(current == "french"){
         choices <- c("500", "1 000", "5 000", "10 000")
       }
-      selectInput(
+      selectizeInput(
         ns("bootSamp"),
+        options = list(create = TRUE, createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"),
         label = div(
           span(`data-translate` = "ui_3samples", "Bootstrap samples"),
           bslib::tooltip(
@@ -99,7 +101,7 @@ mod_report_server <- function(id, translations, lang, data_mod, fit_mod, predict
             placement = "right"
           )
         ),
-        
+
         choices = choices,
         selected = predict_mod$nboot()
       )
