@@ -1,11 +1,11 @@
 # R Code Module UI
 mod_rcode_ui <- function(id) {
   ns <- NS(id)
-  
+
   div(
     style = "padding: 1rem;",
     card(
-      card_header(uiOutput("ui_nav4")), 
+      card_header(uiOutput("ui_nav4")),
       card_body(
         tagList(
           uiOutput(ns("ui_4help")),
@@ -31,7 +31,8 @@ mod_rcode_ui <- function(id) {
               max-height: 70vh;
               overflow-y: auto;
             ",
-            tags$style(HTML("
+            tags$style(HTML(
+              "
               .r-code-container pre {
                 background: transparent !important;
                 border: none !important;
@@ -43,7 +44,8 @@ mod_rcode_ui <- function(id) {
                 font-size: inherit !important;
                 color: inherit !important;
               }
-            ")),
+            "
+            )),
             uiOutput(ns("codeHead")),
             uiOutput(ns("codeData")),
             uiOutput(ns("codeFit")),
@@ -61,7 +63,7 @@ mod_rcode_ui <- function(id) {
 mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     code_label <- reactive({
       label_val <- predict_mod$select_label()
       if (is.null(label_val) || label_val == "-none-") {
@@ -69,7 +71,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       }
       paste0("'", label_val %>% make.names(), "'")
     })
-    
+
     code_colour <- reactive({
       colour_val <- predict_mod$select_colour()
       if (is.null(colour_val) || colour_val == "-none-") {
@@ -77,7 +79,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       }
       paste0("'", colour_val %>% make.names(), "'")
     })
-    
+
     code_shape <- reactive({
       shape_val <- predict_mod$select_shape()
       if (is.null(shape_val) || shape_val == "-none-") {
@@ -85,7 +87,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       }
       paste0("'", shape_val %>% make.names(), "'")
     })
-    
+
     code_hc <- reactive({
       threshold_vals <- predict_mod$threshold_values()
       show_hc <- predict_mod$check_hc()
@@ -94,119 +96,124 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       }
       threshold_vals$percent / 100
     })
-    
+
     # Get plot dimensions - using default values since download dimensions not in UI
     get_width <- reactive({
-      6  # Default width for predict plots
+      6 # Default width for predict plots
     })
-    
+
     get_width2 <- reactive({
-      6  # Default width for fit plots
+      6 # Default width for fit plots
     })
-    
+
     get_height <- reactive({
-      4  # Default height for predict plots
+      4 # Default height for predict plots
     })
-    
+
     get_height2 <- reactive({
-      4  # Default height for fit plots
+      4 # Default height for fit plots
     })
-    
+
     get_dpi <- reactive({
-      300  # Default DPI for predict plots
+      300 # Default DPI for predict plots
     })
-    
+
     get_dpi2 <- reactive({
-      300  # Default DPI for fit plots
+      300 # Default DPI for fit plots
     })
-    
+
     # Code section outputs
     output$ui_4help <- renderUI({
       trans <- translations()
       HTML(tr("ui_4help", trans))
     })
-    
+
     # Individual code outputs with clean formatting
     output$codeHead <- renderUI({
-      code_lines <-generate_head_code()
-      
+      code_lines <- generate_head_code()
+
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeData <- renderUI({
       code_lines <- generate_data_code()
-      
+
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeFit <- renderUI({
       code_lines <- generate_fit_code()
-      
+
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeSaveFit <- renderUI({
       code_lines <- generate_save_fit_code()
-      
+
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codePredPlot <- renderUI({
       code_lines <- generate_pred_plot_code()
-      
+
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codeSavePred <- renderUI({
       code_lines <- generate_save_pred_code()
-      
+
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
 
     output$codePredCl <- renderUI({
       code_lines <- generate_pred_cl_code()
-      
+
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
     })
-    
+
     # Helper functions to generate code sections (DRY principle)
     generate_head_code <- function() {
       req(data_mod$has_data())
       data <- data_mod$data()
-      
+
       c(
         "# install.packages('ssdtools')",
         "library(ssdtools)",
-        "library(ggplot2)", 
+        "library(ggplot2)",
         "library(dplyr)"
       )
     }
-    
+
     generate_data_code <- function() {
       req(data_mod$has_data())
       clean_data <- data_mod$clean_data()
-      data_str <- utils::capture.output(dput(clean_data)) %>% glue::glue_collapse()
-      
+      data_str <- utils::capture.output(dput(clean_data)) %>%
+        glue::glue_collapse()
+
       c(
         paste0("data <- ", data_str),
         "colnames(data) <- make.names(colnames(data))"
       )
     }
-    
+
     generate_fit_code <- function() {
       req(fit_mod$has_fit())
       ylab <- fit_mod$yaxis_label()
       xlab <- fit_mod$xaxis_label()
       text_size <- fit_mod$text_size()
-      dists_str <- paste0("c(", paste0("'", fit_mod$dists(), "'", collapse = ", "), ")")
-      
+      dists_str <- paste0(
+        "c(",
+        paste0("'", fit_mod$dists(), "'", collapse = ", "),
+        ")"
+      )
+
       c(
         paste0("dist <- ssd_fit_dists("),
         paste0("  data,"),
@@ -231,10 +238,10 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         "  dplyr::mutate_if(is.numeric, ~ signif(., 3))"
       )
     }
-    
+
     generate_save_fit_code <- function() {
       req(fit_mod$has_fit())
-      
+
       c(
         paste0("ggsave("),
         paste0("  'fit_dist_plot.png',"),
@@ -244,28 +251,52 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         ")"
       )
     }
-    
+
     generate_pred_plot_code <- function() {
       req(fit_mod$has_fit())
       req(predict_mod$has_predict())
-      
+
       threshold_vals <- predict_mod$threshold_values()
       xmax <- predict_mod$x_max()
       xmin <- predict_mod$x_min()
-      xlimits <- ifelse(is.na(xmin) & is.na(xmax), "NULL", paste0("c(", xmin, ", ", xmax, ")"))
-      legend.colour <- ifelse(is.null(predict_mod$legend_colour()) || predict_mod$legend_colour() == "-none-", "NULL", paste0("'", predict_mod$legend_colour(), "'"))
-      legend.shape <- ifelse(is.null(predict_mod$legend_shape()) || predict_mod$legend_shape() == "-none-", "NULL", paste0("'", predict_mod$legend_shape(), "'"))
+      xlimits <- ifelse(
+        is.na(xmin) & is.na(xmax),
+        "NULL",
+        paste0("c(", xmin, ", ", xmax, ")")
+      )
+      legend.colour <- ifelse(
+        is.null(predict_mod$legend_colour()) ||
+          predict_mod$legend_colour() == "-none-",
+        "NULL",
+        paste0("'", predict_mod$legend_colour(), "'")
+      )
+      legend.shape <- ifelse(
+        is.null(predict_mod$legend_shape()) ||
+          predict_mod$legend_shape() == "-none-",
+        "NULL",
+        paste0("'", predict_mod$legend_shape(), "'")
+      )
       text_size <- predict_mod$text_size()
       xlab <- predict_mod$xaxis_label()
       ylab <- predict_mod$yaxis_label()
       title <- predict_mod$title()
       trans <- ifelse(predict_mod$x_log(), "log10", "identity")
-      xbreaks <- paste0("c(", paste(predict_mod$xbreaks(), collapse = ", "), ")")
-      
+      xbreaks <- paste0(
+        "c(",
+        paste(predict_mod$xbreaks(), collapse = ", "),
+        ")"
+      )
+      big.mark <- predict_mod$big_mark()
+      decimal.mark <- predict_mod$decimal_mark()
+
       c(
         paste0("pred <- predict("),
         paste0("  dist,"),
-        paste0("  proportion = unique(c(1:99, ", threshold_vals$percent, ") / 100)"),
+        paste0(
+          "  proportion = unique(c(1:99, ",
+          threshold_vals$percent,
+          ") / 100)"
+        ),
         ")",
         "",
         paste0("ssd_plot("),
@@ -281,7 +312,8 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  ci = FALSE,"),
         paste0("  shift_x = ", predict_mod$adjust_label(), ","),
         paste0("  hc = ", code_hc(), ","),
-        paste0("  big.mark = ',',"),
+        paste0("  big.mark = '", predict_mod$big_mark(), "',"),
+        paste0("  decimal.mark = '", predict_mod$decimal_mark(), "',"),
         paste0("  trans = '", trans, "',"),
         paste0("  xlimits = ", xlimits, ","),
         paste0("  xbreaks = ", xbreaks, ","),
@@ -289,16 +321,22 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  theme_classic = TRUE"),
         ") +",
         paste0("  ggtitle('", title, "') +"),
-        paste0("  scale_color_brewer(palette = '", predict_mod$palette(), "', name = ", legend.colour, ") +"),
+        paste0(
+          "  scale_color_brewer(palette = '",
+          predict_mod$palette(),
+          "', name = ",
+          legend.colour,
+          ") +"
+        ),
         paste0("  scale_shape(name = ", legend.shape, ")")
       )
     }
-    
+
     generate_save_pred_code <- function() {
       req(fit_mod$has_fit())
       req(predict_mod$has_predict())
       req(predict_mod$select_label())
-      
+
       c(
         paste0("ggsave("),
         paste0("  'model_average_plot.png',"),
@@ -308,12 +346,12 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         ")"
       )
     }
-    
+
     generate_pred_cl_code <- function() {
       req(predict_mod$has_cl())
       req(fit_mod$has_fit())
       req(predict_mod$has_predict())
-      
+
       threshold_vals <- predict_mod$threshold_values()
       form <- "ssd_hc"
       arg <- "proportion"
@@ -324,7 +362,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         thresh <- threshold_vals$conc
       }
       nboot_clean <- clean_nboot(predict_mod$nboot()) %>% as.integer()
-      
+
       c(
         paste0("cl_average <- ", form, "("),
         paste0("  dist,"),
@@ -346,10 +384,10 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         "dplyr::bind_rows(cl_average, cl_individual)"
       )
     }
-    
+
     all_code <- reactive({
       code_sections <- list()
-      
+
       code_sections$head <- try(generate_head_code(), silent = TRUE)
       code_sections$data <- try(generate_data_code(), silent = TRUE)
       code_sections$fit <- try(generate_fit_code(), silent = TRUE)
@@ -357,14 +395,19 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       code_sections$pred_plot <- try(generate_pred_plot_code(), silent = TRUE)
       code_sections$save_pred <- try(generate_save_pred_code(), silent = TRUE)
       code_sections$pred_cl <- try(generate_pred_cl_code(), silent = TRUE)
-      
+
       # Filter out errors and empty sections
-      valid_sections <- Filter(function(x) {
-        !inherits(x, "try-error") && !is.null(x) && length(x) > 0
-      }, code_sections)
-      
-      if (length(valid_sections) == 0) return("")
-      
+      valid_sections <- Filter(
+        function(x) {
+          !inherits(x, "try-error") && !is.null(x) && length(x) > 0
+        },
+        code_sections
+      )
+
+      if (length(valid_sections) == 0) {
+        return("")
+      }
+
       all_lines <- c()
       for (section in valid_sections) {
         if (length(all_lines) > 0) {
@@ -373,10 +416,10 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
           all_lines <- section
         }
       }
-      
+
       format_r_code(all_lines)
     })
-    
+
     output$copyButton <- renderUI({
       trans <- translations()
       label <- tr("ui_copy", trans)
@@ -384,22 +427,20 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       rclipboard::rclipButton(
         inputId = ns("copyCode"),
         label = tagList(
-          bsicons::bs_icon("clipboard"), 
+          bsicons::bs_icon("clipboard"),
           label
         ),
         clipText = code_text,
         class = "btn-primary"
       )
     })
-    
+
     # for copy button
-    has_code <- reactive({ 
+    has_code <- reactive({
       all_code() != ""
     })
-    
+
     output$has_code <- has_code
     outputOptions(output, "has_code", suspendWhenHidden = FALSE)
-    
-
   })
 }
