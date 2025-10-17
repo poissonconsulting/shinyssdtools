@@ -18,94 +18,120 @@ mod_fit_ui <- function(id) {
               class = "control-label",
               span(`data-translate` = "ui_2conc", "Concentration")
             ),
-            selectInput(ns("selectConc"),
-                        label = NULL,
-                        choices = NULL,
-                        selected = NULL
+            selectInput(
+              ns("selectConc"),
+              label = NULL,
+              choices = NULL,
+              selected = NULL
             ),
-            selectizeInput(ns("selectDist"),
-                           label = span(`data-translate` = "ui_2dist", "Select distributions to fit"),
-                           multiple = TRUE,
-                           choices = c(default.dists, extra.dists),
-                           selected = default.dists,
-                           options = list(
-                             "plugins" = list("remove_button"),
-                             "create" = TRUE,
-                             "persist" = FALSE
-                           )
+            selectizeInput(
+              ns("selectDist"),
+              label = span(
+                `data-translate` = "ui_2dist",
+                "Select distributions to fit"
+              ),
+              multiple = TRUE,
+              choices = c(default.dists, extra.dists),
+              selected = default.dists,
+              options = list(
+                "plugins" = list("remove_button"),
+                "create" = TRUE,
+                "persist" = FALSE
+              )
             ),
-            checkboxInput(ns("rescale"),
-                          label = span(`data-translate` = "ui_2rescale", "Rescale"),
-                          value = FALSE
+            checkboxInput(
+              ns("rescale"),
+              label = span(`data-translate` = "ui_2rescale", "Rescale"),
+              value = FALSE
             ),
-            div(class = "mt-3",
-                actionButton(ns("updateFit"), 
-                             label = tagList(
-                               uiOutput(ns("update_icon")), 
-                               span(`data-translate` = "ui_update_fit", "Update Fit")
-                             ),
-                             class = "btn-primary w-100")
+            div(
+              class = "mt-3",
+              actionButton(
+                ns("updateFit"),
+                label = tagList(
+                  uiOutput(ns("update_icon")),
+                  span(`data-translate` = "ui_update_fit", "Update Fit")
+                ),
+                class = "btn-primary w-100"
+              )
             ),
             bslib::accordion(
               open = FALSE,
               bslib::accordion_panel(
-                title = span(`data-translate` = "ui_3plotopts", "Plot formatting options"),
+                title = span(
+                  `data-translate` = "ui_3plotopts",
+                  "Plot formatting options"
+                ),
                 value = "plot_format_fit",
-                selected = FALSE, 
-            selectInput(ns("selectUnit"),
-                        label = span(`data-translate` = "ui_2unit", "Select units"),
-                        choices = units(),
-                        selected = units()[1]
-            ),
-            textInput(ns("xaxis2"),
-                      label = span(`data-translate` = "ui_3xlab", "X-axis label"),
-                      value = "Concentration"
-            ),
-            textInput(ns("yaxis2"),
-                      label = span(`data-translate` = "ui_3ylab", "Y-axis label"),
-                      value = "Percent"
-            ),
-            numericInput(ns("size2"),
-                         label = span(`data-translate` = "ui_size", "Text size"),
-                         value = 12, min = 1, max = 100
+                selected = FALSE,
+                selectInput(
+                  ns("selectUnit"),
+                  label = span(`data-translate` = "ui_2unit", "Select units"),
+                  choices = units(),
+                  selected = units()[1]
+                ),
+                textInput(
+                  ns("xaxis2"),
+                  label = span(`data-translate` = "ui_3xlab", "X-axis label"),
+                  value = "Concentration"
+                ),
+                textInput(
+                  ns("yaxis2"),
+                  label = span(`data-translate` = "ui_3ylab", "Y-axis label"),
+                  value = "Percent"
+                ),
+                numericInput(
+                  ns("size2"),
+                  label = span(`data-translate` = "ui_size", "Text size"),
+                  value = 12,
+                  min = 1,
+                  max = 100
+                )
+              )
             )
           )
-        ))),
+        ),
         div(
           class = "p-3",
           conditionalPanel(
-            condition = paste_js('has_fit', ns), 
-                card(
-                     full_screen = TRUE,
-                     card_header(
-                       class = "d-flex justify-content-between align-items-center",
-                       span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")
-                     ),
-                     card_body(
-                       ui_download_popover(ns = ns),
-                       htmlOutput(ns("fitFail")),
-                       plotOutput(ns("plotDist"))
-                     )
-                ),
-                card(
-                     full_screen = TRUE,
-                     card_header(
-                       class = "d-flex justify-content-between align-items-center",
-                       span(`data-translate` = "ui_2table", "Goodness of Fit")
-                     ),
-                     card_body(padding = 25,
-                      ui_download_popover_table(ns = ns),
-                       div(class = "table-responsive",
-                           DT::dataTableOutput(ns("tableGof")))
-                     )
+            condition = paste_js('has_fit', ns),
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")
+              ),
+              card_body(
+                ui_download_popover(ns = ns),
+                htmlOutput(ns("fitFail")),
+                plotOutput(ns("plotDist"))
+              )
+            ),
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                span(`data-translate` = "ui_2table", "Goodness of Fit")
+              ),
+              card_body(
+                padding = 25,
+                ui_download_popover_table(ns = ns),
+                div(
+                  class = "table-responsive",
+                  DT::dataTableOutput(ns("tableGof"))
                 )
+              )
             )
+          )
         )
       )
     ),
     conditionalPanel(
-      condition =  paste0("!output['", ns("has_data"), "']"),
-      ui_dashbox(span(`data-translate` = "ui_hintdata", "You have not added a dataset."))
+      condition = paste0("!output['", ns("has_data"), "']"),
+      ui_dashbox(span(
+        `data-translate` = "ui_hintdata",
+        "You have not added a dataset."
+      ))
     )
   )
 }
@@ -113,26 +139,26 @@ mod_fit_ui <- function(id) {
 mod_fit_server <- function(id, translations, data_mod, main_nav) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     output$has_data <- data_mod$has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
-    
+
     waiter_gof <- ui_waiter(id = "tableGof", ns = ns)
     waiter_distplot <- ui_waiter(id = "plotDist", ns = ns)
-    
+
     needs_update <- reactiveVal(FALSE)
-    
+
     fit_trigger <- reactiveVal(0)
-    
+
     # trigger if navigate to fit tab
     observe({
-      if(main_nav() == "fit") {
+      if (main_nav() == "fit") {
         current_val <- isolate(fit_trigger())
         fit_trigger(current_val + 1)
       }
     }) %>%
       bindEvent(main_nav())
-    
+
     # Also increment when manual update is needed
     observe({
       needs_update(FALSE)
@@ -140,43 +166,44 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       fit_trigger(current_val + 1)
     }) %>%
       bindEvent(input$updateFit)
-    
+
     # Auto-update for critical changes
     observe({
       needs_update(FALSE)
-      if(isolate(main_nav()) == "fit") {  
+      if (isolate(main_nav()) == "fit") {
         current_val <- isolate(fit_trigger())
         fit_trigger(current_val + 1)
       }
     }) %>%
       bindEvent(input$selectConc, data_mod$data(), ignoreInit = TRUE)
-    
+
     # monitor if out of date
     observe({
       needs_update(TRUE)
-    }) %>% 
+    }) %>%
       bindEvent(input$selectDist, input$rescale)
-    
+
     fit_dist <- reactive({
       req(fit_trigger() > 0)
-      req(main_nav() == "fit")  
+      req(main_nav() == "fit")
       req(data_mod$data())
       req(input$selectConc)
       req(input$selectDist)
-      
+
       waiter_gof$show()
       waiter_distplot$show()
-      
+
       data <- data_mod$data()
-      conc <- make.names(input$selectConc) 
+      conc <- make.names(input$selectConc)
       dists <- input$selectDist
       rescale <- input$rescale
-      
-      safe_try(ssdtools::ssd_fit_dists(data,
-                                       left = conc,
-                                       dists = dists,
-                                       silent = TRUE,
-                                       rescale = rescale
+
+      safe_try(ssdtools::ssd_fit_dists(
+        data,
+        left = conc,
+        dists = dists,
+        silent = TRUE,
+        rescale = rescale
       ))
     }) %>%
       bindCache(
@@ -184,9 +211,9 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         input$selectDist,
         input$rescale,
         data_mod$data()
-      ) %>% 
-      bindEvent(fit_trigger())  # Only bind to our explicit trigger
-    
+      ) %>%
+      bindEvent(fit_trigger()) # Only bind to our explicit trigger
+
     # Dynamic icon for update button
     output$update_icon <- renderUI({
       if (needs_update()) {
@@ -196,27 +223,31 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       }
     }) %>%
       bindEvent(needs_update())
-    
+
     observe({
       choices <- names(data_mod$clean_data())
       selected <- guess_conc(choices)
-      if(is.na(selected))
+      if (is.na(selected)) {
         selected <- choices[1]
-      updateSelectInput(session, "selectConc",
-                        choices = choices,
-                        selected = selected)
+      }
+      updateSelectInput(
+        session,
+        "selectConc",
+        choices = choices,
+        selected = selected
+      )
     }) %>%
       bindEvent(data_mod$clean_data())
-    
-# validation --------------------------------------------------------------
+
+    # validation --------------------------------------------------------------
     iv <- InputValidator$new()
-    
+
     iv$add_rule("selectConc", function(value) {
       trans <- translations()
       dat <- data_mod$data()
-      
+
       conc_data <- dat[[value]]
-      
+
       if (!is.numeric(conc_data)) {
         return(as.character(tr("ui_hintnum", trans)[1]))
       }
@@ -235,37 +266,37 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       if (zero_range(conc_data)) {
         return(as.character(tr("ui_hintident", trans)[1]))
       }
-     
-      NULL  
+
+      NULL
     })
-    
+
     iv$add_rule("selectDist", function(value) {
       trans <- translations()
       if (is.null(value) || length(value) == 0) {
         return(as.character(tr("ui_hintdist", trans)[1]))
       }
-      NULL  
+      NULL
     })
-    
-    iv$enable()
-    
 
-# fit reactives and outputs -----------------------------------------------
+    iv$enable()
+
+    # fit reactives and outputs -----------------------------------------------
     plot_dist <- reactive({
       dist <- fit_dist()
       req(dist)
-      
-      plot_distributions(dist,
-                               ylab = input$yaxis2,
-                               xlab = append_unit(input$xaxis2, input$selectUnit),
-                               text_size = input$size2
+
+      plot_distributions(
+        dist,
+        ylab = input$yaxis2,
+        xlab = append_unit(input$xaxis2, input$selectUnit),
+        text_size = input$size2
       )
-    }) 
-      
+    })
+
     table_gof <- reactive({
       dist <- fit_dist()
       req(dist)
-      
+
       trans <- translations()
       gof <-
         ssdtools::ssd_gof(dist) %>%
@@ -273,23 +304,23 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         dplyr::arrange(dplyr::desc(.data$weight))
       names(gof) <- gsub("weight", tr("ui_2weight", trans), names(gof))
       gof
-    }) 
-    
+    })
+
     # render plot and table - waiter stops when plot and table ready
     render_status <- reactiveValues(plot_ready = FALSE, table_ready = FALSE)
-    
+
     observe({
       render_status$plot_ready <- FALSE
       render_status$table_ready <- FALSE
     }) %>%
       bindEvent(fit_dist())
-    
+
     output$plotDist <- renderPlot({
       result <- plot_dist()
       render_status$plot_ready <- TRUE
       result
-    }) 
-    
+    })
+
     output$tableGof <- DT::renderDataTable({
       result <- DT::datatable(
         table_gof(),
@@ -302,8 +333,8 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       )
       render_status$table_ready <- TRUE
       result
-    }) 
-    
+    })
+
     observe({
       if (render_status$plot_ready && render_status$table_ready) {
         waiter_distplot$hide()
@@ -311,39 +342,45 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       }
     }) %>%
       bindEvent(render_status$plot_ready, render_status$table_ready)
-    
+
     # Notify when failed fits
     fit_fail <- reactive({
       dist <- fit_dist()
       paste0(setdiff(input$selectDist, names(dist)), collapse = ", ")
     }) %>%
       bindEvent(fit_dist())
-    
+
     output$fitFail <- renderText({
       failed <- fit_fail()
       req(failed != "")
-      HTML(paste0("<font color='grey'>", paste(
-        failed, tr("ui_hintfail", translations())
-      ), "</font>"))
+      HTML(paste0(
+        "<font color='grey'>",
+        paste(
+          failed,
+          tr("ui_hintfail", translations())
+        ),
+        "</font>"
+      ))
     }) %>%
       bindEvent(fit_fail())
-    
-# download handlers -------------------------------------------------------
+
+    # download handlers -------------------------------------------------------
     output$fitDlPlot <- downloadHandler(
       filename = function() {
         "ssdtools_distFitPlot.png"
       },
       content = function(file) {
-        ggplot2::ggsave(file,
-                        plot = plot_dist(), 
-                        device = "png",
-                        width = input$width, 
-                        height = input$height, 
-                        dpi = input$dpi
+        ggplot2::ggsave(
+          file,
+          plot = plot_dist(),
+          device = "png",
+          width = input$width,
+          height = input$height,
+          dpi = input$dpi
         )
       }
     )
-    
+
     output$fitDlRds <- downloadHandler(
       filename = function() {
         "ssdtools_fit_plot.rds"
@@ -352,7 +389,7 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         saveRDS(plot_dist(), file = file)
       }
     )
-    
+
     output$fitDlCsv <- downloadHandler(
       filename = function() {
         "ssdtools_gof_table.csv"
@@ -361,7 +398,7 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         readr::write_csv(dplyr::as_tibble(table_gof()), file)
       }
     )
-    
+
     output$fitDlXlsx <- downloadHandler(
       filename = function() {
         "ssdtools_gof_table.xlsx"
@@ -370,34 +407,47 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         writexl::write_xlsx(dplyr::as_tibble(table_gof()), file)
       }
     )
-    
+
     # observe({
     #   shinyjs::click("fitDlTableHidden")
     # }) %>%
     #   bindEvent(input$dlFitTable)
-    
 
-# return values ------------------------------------------------------------
+    # return values ------------------------------------------------------------
     has_fit <- reactive({
       !is.null(fit_dist()) && !inherits(fit_dist(), "try-error")
     }) %>%
       bindEvent(fit_dist())
-    
+
     output$has_fit <- has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
-    
+
     return(
       list(
         fit_dist = fit_dist,
         fit_plot = plot_dist,
         gof_table = table_gof,
-        conc_column = reactive({input$selectConc}),
-        units = reactive({input$selectUnit}),
-        dists = reactive({input$selectDist}),
-        rescale = reactive({input$rescale}),
-        yaxis_label = reactive({input$yaxis2}),
-        xaxis_label = reactive({input$xaxis2}),
-        text_size = reactive({input$size2}),
+        conc_column = reactive({
+          input$selectConc
+        }),
+        units = reactive({
+          input$selectUnit
+        }),
+        dists = reactive({
+          input$selectDist
+        }),
+        rescale = reactive({
+          input$rescale
+        }),
+        yaxis_label = reactive({
+          input$yaxis2
+        }),
+        xaxis_label = reactive({
+          input$xaxis2
+        }),
+        text_size = reactive({
+          input$size2
+        }),
         has_fit = has_fit
       )
     )

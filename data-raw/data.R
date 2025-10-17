@@ -1,7 +1,10 @@
 library(dplyr)
 library(readxl)
 
-translations <- readxl::read_xlsx(system.file(package = "shinyssdtools", "extdata/translations.xlsx"), sheet = 1)
+translations <- readxl::read_xlsx(
+  system.file(package = "shinyssdtools", "extdata/translations.xlsx"),
+  sheet = 1
+)
 translations$id <- paste0("ui_", translations$id)
 
 # ad translation for hc
@@ -192,4 +195,12 @@ pals <- pal[which(pal$category == "qual"), ] %>% row.names()
 default.dists <- ssdtools::ssd_dists_bcanz()
 extra.dists <- setdiff(ssdtools::ssd_dists_all(), default.dists)
 
-usethis::use_data(boron.data, translations, pals, default.dists, extra.dists, internal = TRUE, overwrite = TRUE)
+usethis::use_data(
+  boron.data,
+  translations,
+  pals,
+  default.dists,
+  extra.dists,
+  internal = TRUE,
+  overwrite = TRUE
+)

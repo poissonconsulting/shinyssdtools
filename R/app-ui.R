@@ -11,27 +11,27 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 app_ui <- function() {
-  
   tagList(
     # Dependencies
     shinyjs::useShinyjs(),
     waiter::useWaiter(),
     rclipboard::rclipboardSetup(),
-    
+
     # Include custom JavaScript for translations
     tags$script(src = "translation.js"),
-    
+
     # Add custom CSS handler for notifications
-    tags$script(HTML("
+    tags$script(HTML(
+      "
       Shiny.addCustomMessageHandler('addCustomCSS', function(message) {
         var style = document.createElement('style');
         style.type = 'text/css';
         style.innerHTML = message.css;
         document.getElementsByTagName('head')[0].appendChild(style);
       });
-    ")),
-    
-    
+    "
+    )),
+
     # Hide shiny errors
     tags$style(
       type = "text/css",
@@ -44,12 +44,14 @@ app_ui <- function() {
         display: none;
       }"
     ),
-    tags$script(HTML("
+    tags$script(HTML(
+      "
       $(document).on('shiny:connected', function() {
         $('.initially-hidden').removeClass('initially-hidden');
       });
-    ")),
-    
+    "
+    )),
+
     page_navbar(
       title = "shinyssdtools",
       navbar_options = navbar_options(bg = "#759dbe", underline = TRUE),
@@ -59,7 +61,7 @@ app_ui <- function() {
           layout_sidebar(
             padding = 0,
             gap = 0,
-            
+
             # nav ---------------------------------------------------------------------
             sidebar = sidebar(
               width = 180,
@@ -69,55 +71,95 @@ app_ui <- function() {
                 nav_panel(
                   title = span(
                     bsicons::bs_icon("table"),
-                    span(`data-translate` = "ui_nav1", style = "margin-left: 0.5rem;", "1. Data")
+                    span(
+                      `data-translate` = "ui_nav1",
+                      style = "margin-left: 0.5rem;",
+                      "1. Data"
+                    )
                   ),
                   value = "data"
                 ),
                 nav_panel(
                   title = span(
                     bsicons::bs_icon("graph-up"),
-                    span(`data-translate` = "ui_nav2", style = "margin-left: 0.5rem;", "2. Fit")
+                    span(
+                      `data-translate` = "ui_nav2",
+                      style = "margin-left: 0.5rem;",
+                      "2. Fit"
+                    )
                   ),
                   value = "fit"
                 ),
                 nav_panel(
                   title = span(
                     bsicons::bs_icon("calculator"),
-                    span(`data-translate` = "ui_nav3", style = "margin-left: 0.5rem;", "3. Predict")
+                    span(
+                      `data-translate` = "ui_nav3",
+                      style = "margin-left: 0.5rem;",
+                      "3. Predict"
+                    )
                   ),
                   value = "predict"
                 ),
                 nav_panel(
                   title = span(
                     bsicons::bs_icon("file-bar-graph"),
-                    span(`data-translate` = "ui_nav4", style = "margin-left: 0.5rem;", "4. Report")
+                    span(
+                      `data-translate` = "ui_nav4",
+                      style = "margin-left: 0.5rem;",
+                      "4. Report"
+                    )
                   ),
                   value = "report"
                 ),
                 nav_panel(
                   title = span(
                     bsicons::bs_icon("code-slash"),
-                    span(`data-translate` = "ui_nav5", style = "margin-left: 0.5rem;", "R Code")
+                    span(
+                      `data-translate` = "ui_nav5",
+                      style = "margin-left: 0.5rem;",
+                      "R Code"
+                    )
                   ),
                   value = "rcode"
                 )
               )
             ),
-            div(class = "initially-hidden",
-                conditionalPanel(condition = "input.main_nav == 'data'",
-                                 mod_data_ui("data_mod"))),
-            div(class = "initially-hidden",
-                conditionalPanel(condition = "input.main_nav == 'fit'", 
-                                 mod_fit_ui("fit_mod"))),
-            div(class = "initially-hidden",
-                conditionalPanel(condition = "input.main_nav == 'predict'", 
-                                 mod_predict_ui("predict_mod"))),
-            div(class = "initially-hidden",
-                conditionalPanel(condition = "input.main_nav == 'report'", 
-                                 mod_report_ui("report_mod"))),
-            div(class = "initially-hidden",
-                conditionalPanel(condition = "input.main_nav == 'rcode'", 
-                                 mod_rcode_ui("rcode_mod")))
+            div(
+              class = "initially-hidden",
+              conditionalPanel(
+                condition = "input.main_nav == 'data'",
+                mod_data_ui("data_mod")
+              )
+            ),
+            div(
+              class = "initially-hidden",
+              conditionalPanel(
+                condition = "input.main_nav == 'fit'",
+                mod_fit_ui("fit_mod")
+              )
+            ),
+            div(
+              class = "initially-hidden",
+              conditionalPanel(
+                condition = "input.main_nav == 'predict'",
+                mod_predict_ui("predict_mod")
+              )
+            ),
+            div(
+              class = "initially-hidden",
+              conditionalPanel(
+                condition = "input.main_nav == 'report'",
+                mod_report_ui("report_mod")
+              )
+            ),
+            div(
+              class = "initially-hidden",
+              conditionalPanel(
+                condition = "input.main_nav == 'rcode'",
+                mod_rcode_ui("rcode_mod")
+              )
+            )
           )
         )
       ),
@@ -130,11 +172,15 @@ app_ui <- function() {
         card(uiOutput("ui_userguide"))
       ),
       nav_spacer(),
-      nav_menu(title = "Language", nav_item(
-        actionLink(inputId = "english", label = "English")
-      ), nav_item(
-        actionLink(inputId = "french", label = "Français")
-      ))
+      nav_menu(
+        title = "Language",
+        nav_item(
+          actionLink(inputId = "english", label = "English")
+        ),
+        nav_item(
+          actionLink(inputId = "french", label = "Français")
+        )
+      )
     )
   )
 }

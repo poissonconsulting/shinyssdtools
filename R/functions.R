@@ -20,11 +20,11 @@ safe_try <- function(expr, silent = TRUE) {
   result
 }
 
-clean_nboot <- function(x){
+clean_nboot <- function(x) {
   as.integer(gsub("(,|\\s)", "", x))
 }
 
-estimate_time <- function(nboot, lang){
+estimate_time <- function(nboot, lang) {
   preset_df <- data.frame(
     n = c(500, 1000, 5000, 10000),
     english = c("10 seconds", "20 seconds", "2 minutes", "5 minutes"),
@@ -61,15 +61,15 @@ tr <- function(id, trans) {
   trans$trans[trans$id == id]
 }
 
-paste_js <- function(x, ns){
+paste_js <- function(x, ns) {
   paste0("output['", ns(x), "']")
 }
 
-guess_sp <- function(name){
+guess_sp <- function(name) {
   name[grepl("sp", tolower(name))][1]
 }
 
-guess_conc <- function(name){
+guess_conc <- function(name) {
   name[grepl("conc", tolower(name))][1]
 }
 
@@ -82,8 +82,9 @@ inline <- function(x) {
   tags$div(style = "display:inline-block;", x)
 }
 
-hint <- function(x)
+hint <- function(x) {
   HTML(paste0("<font color='grey'>", x, "</font>"))
+}
 
 zero_range <- function(x, tol = .Machine$double.eps^0.5) {
   if (length(x) == 1) {
@@ -161,33 +162,33 @@ ssd_hp_ave <- function(x, conc, nboot) {
 format_r_code <- function(code_lines) {
   # Join lines and format
   code_text <- paste(code_lines, collapse = "\n")
-  
+
   # Basic indentation rules
   formatted_lines <- strsplit(code_text, "\n")[[1]]
   indent_level <- 0
   formatted_code <- c()
-  
+
   for (line in formatted_lines) {
     trimmed <- trimws(line)
     if (nchar(trimmed) == 0) {
       formatted_code <- c(formatted_code, "")
       next
     }
-    
+
     # Decrease indent for closing brackets
     if (grepl("^[\\)\\}]", trimmed)) {
       indent_level <- max(0, indent_level - 1)
     }
-    
+
     # Add indentation
     indented_line <- paste0(strrep("  ", indent_level), trimmed)
     formatted_code <- c(formatted_code, indented_line)
-    
+
     # Increase indent for opening brackets and function calls with (
     if (grepl("[\\(\\{]\\s*$", trimmed) || grepl("\\($", trimmed)) {
       indent_level <- indent_level + 1
     }
   }
-  
+
   paste(formatted_code, collapse = "\n")
 }
