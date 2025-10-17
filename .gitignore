@@ -16,3 +16,4 @@ inst/docs/
 
 .vscode/
 
+.claude/settings.local.json
