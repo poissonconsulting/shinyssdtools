@@ -136,7 +136,15 @@ mod_fit_ui <- function(id) {
   )
 }
 
-mod_fit_server <- function(id, translations, lang, data_mod, big_mark, decimal_mark, main_nav) {
+mod_fit_server <- function(
+  id,
+  translations,
+  lang,
+  data_mod,
+  big_mark,
+  decimal_mark,
+  main_nav
+) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -301,7 +309,7 @@ mod_fit_server <- function(id, translations, lang, data_mod, big_mark, decimal_m
 
       trans <- translations()
       gof <-
-        ssdtools::ssd_gof(dist) %>%
+        ssdtools::ssd_gof(dist, wt = TRUE) %>%
         dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
         dplyr::arrange(dplyr::desc(.data$weight))
       names(gof) <- gsub("weight", tr("ui_2weight", trans), names(gof))

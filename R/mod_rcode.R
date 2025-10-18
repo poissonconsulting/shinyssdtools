@@ -236,7 +236,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  decimal.mark = '", fit_mod$decimal_mark(), "'"),
         ")",
         "",
-        "ssd_gof(dist) %>%",
+        "ssd_gof(dist, wt = TRUE) %>%",
         "  dplyr::mutate_if(is.numeric, ~ signif(., 3))"
       )
     }
