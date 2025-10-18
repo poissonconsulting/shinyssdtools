@@ -158,37 +158,22 @@ ssd_hp_ave <- function(x, conc, nboot) {
     dplyr::mutate_at(c("est", "se", "ucl", "lcl", "wt"), ~ signif(., 3))
 }
 
-# Helper function to format R code with proper indentation
+# Helper function to format R code with proper indentation using styler
 format_r_code <- function(code_lines) {
-  # Join lines and format
+  # Join lines into a single string
   code_text <- paste(code_lines, collapse = "\n")
 
-  # Basic indentation rules
-  formatted_lines <- strsplit(code_text, "\n")[[1]]
-  indent_level <- 0
-  formatted_code <- c()
+  # Use styler to format the code
+  # scope = "tokens" provides lighter-weight formatting focused on spacing/indentation
+  formatted <- styler::style_text(code_text, scope = "tokens")
 
-  for (line in formatted_lines) {
-    trimmed <- trimws(line)
-    if (nchar(trimmed) == 0) {
-      formatted_code <- c(formatted_code, "")
-      next
-    }
+  # Convert formatted text back to a single string
+  formatted_text <- paste(formatted, collapse = "\n")
 
-    # Decrease indent for closing brackets
-    if (grepl("^[\\)\\}]", trimmed)) {
-      indent_level <- max(0, indent_level - 1)
-    }
+  # Replace double quotes with single quotes
+  # This is done after styling to maintain R syntax validity during formatting
+  # Important for structure() output from dput() which uses double quotes
+  formatted_text <- gsub('"', "'", formatted_text)
 
-    # Add indentation
-    indented_line <- paste0(strrep("  ", indent_level), trimmed)
-    formatted_code <- c(formatted_code, indented_line)
-
-    # Increase indent for opening brackets and function calls with (
-    if (grepl("[\\(\\{]\\s*$", trimmed) || grepl("\\($", trimmed)) {
-      indent_level <- indent_level + 1
-    }
-  }
-
-  paste(formatted_code, collapse = "\n")
+  formatted_text
 }
