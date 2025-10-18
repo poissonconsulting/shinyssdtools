@@ -45,6 +45,17 @@ app_server <- function(input, output, session) {
   }) %>%
     bindEvent(client_translations())
 
+  # --- Number formatting
+  big_mark <- reactive({
+    ifelse(current_lang() == "french", " ", ",")
+  }) %>%
+    bindEvent(current_lang())
+
+  decimal_mark <- reactive({
+    ifelse(current_lang() == "french", ",", ".")
+  }) %>%
+    bindEvent(current_lang())
+
   # Module Server Calls -----------------------------------------------------
 
   # Call module servers with shared values
@@ -52,7 +63,10 @@ app_server <- function(input, output, session) {
   fit_mod <- mod_fit_server(
     "fit_mod",
     trans,
+    current_lang,
     data_mod,
+    big_mark,
+    decimal_mark,
     main_nav = reactive({
       input$main_nav
     })
@@ -63,6 +77,8 @@ app_server <- function(input, output, session) {
     current_lang,
     data_mod,
     fit_mod,
+    big_mark,
+    decimal_mark,
     main_nav = reactive({
       input$main_nav
     })

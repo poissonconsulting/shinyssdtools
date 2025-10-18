@@ -1,4 +1,11 @@
-plot_distributions <- function(x, ylab, xlab, text_size) {
+plot_distributions <- function(
+  x,
+  ylab,
+  xlab,
+  text_size,
+  big.mark,
+  decimal.mark
+) {
   gp <- ssdtools::ssd_plot_cdf(
     x,
     ylab = ylab,
@@ -6,7 +13,9 @@ plot_distributions <- function(x, ylab, xlab, text_size) {
     delta = Inf,
     average = NA,
     theme_classic = TRUE,
-    text_size = text_size
+    text_size = text_size,
+    big.mark = big.mark,
+    decimal.mark = decimal.mark
   )
   gp
 }

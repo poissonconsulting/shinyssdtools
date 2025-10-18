@@ -231,7 +231,9 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  delta = Inf,"),
         paste0("  average = NA,"),
         paste0("  theme_classic = TRUE,"),
-        paste0("  text_size = ", text_size),
+        paste0("  text_size = ", text_size, ","),
+        paste0("  big.mark = '", fit_mod$big_mark(), "',"),
+        paste0("  decimal.mark = '", fit_mod$decimal_mark(), "'"),
         ")",
         "",
         "ssd_gof(dist) %>%",
@@ -286,8 +288,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste(predict_mod$xbreaks(), collapse = ", "),
         ")"
       )
-      big.mark <- predict_mod$big_mark()
-      decimal.mark <- predict_mod$decimal_mark()
 
       c(
         paste0("pred <- predict("),

@@ -136,7 +136,7 @@ mod_fit_ui <- function(id) {
   )
 }
 
-mod_fit_server <- function(id, translations, data_mod, main_nav) {
+mod_fit_server <- function(id, translations, lang, data_mod, big_mark, decimal_mark, main_nav) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -289,7 +289,9 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         dist,
         ylab = input$yaxis2,
         xlab = append_unit(input$xaxis2, input$selectUnit),
-        text_size = input$size2
+        text_size = input$size2,
+        big.mark = big_mark(),
+        decimal.mark = decimal_mark()
       )
     })
 
@@ -408,11 +410,6 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
       }
     )
 
-    # observe({
-    #   shinyjs::click("fitDlTableHidden")
-    # }) %>%
-    #   bindEvent(input$dlFitTable)
-
     # return values ------------------------------------------------------------
     has_fit <- reactive({
       !is.null(fit_dist()) && !inherits(fit_dist(), "try-error")
@@ -427,6 +424,8 @@ mod_fit_server <- function(id, translations, data_mod, main_nav) {
         fit_dist = fit_dist,
         fit_plot = plot_dist,
         gof_table = table_gof,
+        big_mark = big_mark,
+        decimal_mark = decimal_mark,
         conc_column = reactive({
           input$selectConc
         }),

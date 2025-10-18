@@ -368,6 +368,8 @@ mod_predict_server <- function(
   lang,
   data_mod,
   fit_mod,
+  big_mark,
+  decimal_mark,
   main_nav = reactive("predict")
 ) {
   moduleServer(id, function(input, output, session) {
@@ -436,22 +438,6 @@ mod_predict_server <- function(
       percent = NULL,
       conc = NULL
     )
-
-    mark_rv <- reactiveValues(
-      big.mark = ",",
-      decimal.mark = "."
-    )
-
-    observe({
-      if (lang() == "french") {
-        mark_rv$big.mark <- " "
-        mark_rv$decimal.mark <- ","
-      } else {
-        mark_rv$big.mark <- ","
-        mark_rv$decimal.mark <- "."
-      }
-    }) %>%
-      bindEvent(lang())
 
     column_names <- reactive({
       req(fit_mod$conc_column())
@@ -786,13 +772,6 @@ mod_predict_server <- function(
         xmin <- input$xMin
       }
 
-      big.mark <- mark_rv$big.mark
-      decimal.mark <- mark_rv$decimal.mark
-
-      print(big.mark)
-      print(decimal.mark)
-      print("hi")
-
       x <- safe_try(plot_predictions(
         dat,
         pred,
@@ -815,10 +794,9 @@ mod_predict_server <- function(
         text_size = input$size3,
         label_size = input$sizeLabel3,
         conc_value = thresh_rv$conc,
-        big.mark = big.mark,
-        decimal.mark = decimal.mark
+        big.mark = big_mark(),
+        decimal.mark = decimal_mark()
       ))
-      print(x)
 
       if (!is.null(x)) {
         return(x)
@@ -966,8 +944,8 @@ mod_predict_server <- function(
         threshold_values = reactive({
           list(percent = thresh_rv$percent, conc = thresh_rv$conc)
         }),
-        big_mark = reactive(mark_rv$big.mark),
-        decimal_mark = reactive(mark_rv$decimal.mark),
+        big_mark = big_mark,
+        decimal_mark = decimal_mark,
         threshold_type = reactive({
           input$threshType
         }),
