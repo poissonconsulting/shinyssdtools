@@ -237,7 +237,8 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         ")",
         "",
         "ssd_gof(dist, wt = TRUE) %>%",
-        "  dplyr::mutate_if(is.numeric, ~ signif(., 3))"
+        "    dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
+             dplyr::arrange(dplyr::desc(wt))"
       )
     }
 

@@ -40,6 +40,7 @@ mod_fit_ui <- function(id) {
               )
             ),
             checkboxInput(
+              # FIXME rescale options should be "no", "geomean" "odds"
               ns("rescale"),
               label = span(`data-translate` = "ui_2rescale", "Rescale"),
               value = FALSE
@@ -311,7 +312,7 @@ mod_fit_server <- function(
       gof <-
         ssdtools::ssd_gof(dist, wt = TRUE) %>%
         dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
-        dplyr::arrange(dplyr::desc(.data$weight))
+        dplyr::arrange(dplyr::desc(.data$wt))
       names(gof) <- gsub("weight", tr("ui_2weight", trans), names(gof))
       gof
     })
