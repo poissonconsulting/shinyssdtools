@@ -578,10 +578,19 @@ mod_predict_server <- function(
       describe_cl()
     })
 
-    output$plotPred <- renderPlot({
-      gp <- plot_model_average()
-      silent_plot(gp)
-    })
+    output$plotPred <- renderPlot(
+      {
+        gp <- plot_model_average()
+        silent_plot(gp)
+      },
+      alt = reactive({
+        if (lang() == "french") {
+          "Graphique de distribution de sensibilité des espèces moyennée par modèle avec concentration dangereuse prédite ou pourcentage d'espèces affectées. Montre la courbe SSD ajustée avec les points de données observés et les intervalles de confiance optionnels."
+        } else {
+          "Model-averaged Species Sensitivity Distribution plot with predicted hazard concentration or percent of species affected. Shows the fitted SSD curve with observed data points and optional confidence intervals."
+        }
+      })
+    )
 
     # Dynamic text outputs for HC/PC values
     output$hcPercent <- renderText({

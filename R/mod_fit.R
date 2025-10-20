@@ -327,11 +327,20 @@ mod_fit_server <- function(
     }) %>%
       bindEvent(fit_dist())
 
-    output$plotDist <- renderPlot({
-      result <- plot_dist()
-      render_status$plot_ready <- TRUE
-      result
-    })
+    output$plotDist <- renderPlot(
+      {
+        result <- plot_dist()
+        render_status$plot_ready <- TRUE
+        result
+      },
+      alt = reactive({
+        if (lang() == "french") {
+          "Graphique de distribution de sensibilité des espèces montrant les courbes de distribution ajustées superposées aux données de concentration observées pour chaque espèce. L'axe des x indique les valeurs de concentration et l'axe des y indique la proportion des espèces affectées."
+        } else {
+          "Species Sensitivity Distribution plot showing fitted distribution curves overlaid on observed species concentration data. The x-axis shows concentration values and the y-axis shows the proportion of species affected."
+        }
+      })
+    )
 
     output$tableGof <- DT::renderDataTable({
       result <- DT::datatable(
