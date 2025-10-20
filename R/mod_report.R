@@ -16,7 +16,29 @@ mod_report_ui <- function(id) {
               label = span(`data-translate` = "ui_4toxname", "Toxicant name"),
               value = ""
             ),
-            uiOutput(ns("uiBootSamp")),
+            selectizeInput(
+              ns("bootSamp"),
+              options = list(
+                create = TRUE,
+                createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
+              ),
+              label = div(
+                span(`data-translate` = "ui_3samples", "Bootstrap samples"),
+                bslib::tooltip(
+                  bsicons::bs_icon(
+                    "question-circle",
+                    style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"
+                  ),
+                  span(
+                    `data-translate` = "ui_3bshint",
+                    "10,000 bootstrap samples recommended"
+                  ),
+                  placement = "right"
+                )
+              ),
+              choices = c("500", "1,000", "5,000", "10,000"),
+              selected = "10,000"
+            ),
             actionButton(
               ns("generateReport"),
               label = tagList(
@@ -104,43 +126,37 @@ mod_report_server <- function(
         dplyr::select(HCx, PCx, est, se, lcl, ucl, nboot, pboot)
     })
 
-    output$uiBootSamp <- renderUI({
+    observe({
       current <- lang()
-      choices <- c("500", "1,000", "5,000", "10,000")
+      nboot_value <- predict_mod$nboot()
+
+      # Default choices based on language
       if (current == "french") {
         choices <- c("500", "1 000", "5 000", "10 000")
+        standard_values <- c("500", "1000", "5000", "10000")
+      } else {
+        choices <- c("500", "1,000", "5,000", "10,000")
+        standard_values <- c("500", "1000", "5000", "10000")
       }
-      selectizeInput(
-        ns("bootSamp"),
-        options = list(
-          create = TRUE,
-          createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
-        ),
-        label = div(
-          span(`data-translate` = "ui_3samples", "Bootstrap samples"),
-          bslib::tooltip(
-            bsicons::bs_icon(
-              "question-circle",
-              style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"
-            ),
-            span(
-              `data-translate` = "ui_3bshint",
-              "10,000 bootstrap samples recommended"
-            ),
-            placement = "right"
-          )
-        ),
 
+      # Check if nboot_value is a custom value (not in standard list)
+      nboot_clean <- clean_nboot(nboot_value)
+      if (!is.null(nboot_value) && !nboot_clean %in% standard_values) {
+        choices <- c(choices, nboot_value)
+      }
+
+      updateSelectizeInput(
+        session,
+        "bootSamp",
         choices = choices,
-        selected = predict_mod$nboot()
+        selected = nboot_value
       )
-    })
+    }) %>%
+      bindEvent(lang(), predict_mod$nboot())
 
-    # Parameters list for report
     params_list <- reactive({
       req(predict_mod$has_predict())
       req(fit_mod$has_fit())
-      req(input$toxicant)
 
       toxicant <- input$toxicant
       data <- data_mod$data()
