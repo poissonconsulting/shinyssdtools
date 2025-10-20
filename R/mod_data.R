@@ -145,12 +145,49 @@ mod_data_server <- function(id, translations, lang) {
     upload_data <- reactive({
       data <- input$uploadData
       if (!grepl(".csv", data$name, fixed = TRUE)) {
-        Sys.sleep(1)
-        return(p(
-          "We're not sure what to do with that file type. Please upload a csv."
-        ))
+        showNotification(
+          "We're not sure what to do with that file type. Please upload a CSV file.",
+          type = "error",
+          duration = 10
+        )
+        return(NULL)
       }
-      readr::read_csv(data$datapath)
+
+      # Try to read CSV with graceful error handling
+      result <- tryCatch(
+        {
+          suppressMessages(readr::read_csv(data$datapath, show_col_types = FALSE))
+        },
+        error = function(e) {
+          # Show notification with error details
+          showNotification(
+            ui = div(
+              strong("Could not read CSV file"),
+              br(),
+              "Error: ", as.character(e$message)
+            ),
+            type = "error",
+            duration = NULL  # Keep visible until user dismisses
+          )
+          return(NULL)
+        },
+        warning = function(w) {
+          # Also catch warnings and show them
+          showNotification(
+            ui = div(
+              strong("Warning while reading CSV file"),
+              br(),
+              "Warning: ", as.character(w$message)
+            ),
+            type = "warning",
+            duration = 10
+          )
+          # Try to continue with the data if warning occurred
+          return(suppressWarnings(suppressMessages(readr::read_csv(data$datapath, show_col_types = FALSE))))
+        }
+      )
+
+      return(result)
     }) %>%
       bindEvent(input$uploadData)
 
@@ -204,13 +241,25 @@ mod_data_server <- function(id, translations, lang) {
     })
 
     clean_data <- reactive({
-      req(current_data())
       data <- current_data()
+      req(data)
+      req(!is.null(data))
+      req(is.data.frame(data))
+
       if (length(data)) {
         # Remove any column names like X1, X2 (blank headers from excel/numbers)
         data[, colnames(data) %in% paste0("X", 1:200)] <- NULL
-        # Remove any rows with all NA
-        data <- data[!(rowSums(is.na(data) | data == "") == ncol(data)), ]
+
+        # Remove completely empty columns (all NA or empty strings)
+        empty_cols <- vapply(data, function(col) {
+          all(is.na(col) | col == "")
+        }, logical(1))
+        data <- data[, !empty_cols, drop = FALSE]
+
+        # Remove any rows with all NA or empty values
+        if (ncol(data) > 0) {
+          data <- data[!(rowSums(is.na(data) | data == "") == ncol(data)), ]
+        }
       }
       data
     })
