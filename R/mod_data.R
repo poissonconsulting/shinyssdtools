@@ -156,34 +156,23 @@ mod_data_server <- function(id, translations, lang) {
       # Try to read CSV with graceful error handling
       result <- tryCatch(
         {
-          suppressMessages(readr::read_csv(data$datapath, show_col_types = FALSE))
+          suppressMessages(readr::read_csv(
+            data$datapath,
+            show_col_types = FALSE
+          ))
         },
         error = function(e) {
-          # Show notification with error details
           showNotification(
             ui = div(
               strong("Could not read CSV file"),
               br(),
-              "Error: ", as.character(e$message)
+              "Error: ",
+              as.character(e$message)
             ),
             type = "error",
-            duration = NULL  # Keep visible until user dismisses
+            duration = NULL
           )
           return(NULL)
-        },
-        warning = function(w) {
-          # Also catch warnings and show them
-          showNotification(
-            ui = div(
-              strong("Warning while reading CSV file"),
-              br(),
-              "Warning: ", as.character(w$message)
-            ),
-            type = "warning",
-            duration = 10
-          )
-          # Try to continue with the data if warning occurred
-          return(suppressWarnings(suppressMessages(readr::read_csv(data$datapath, show_col_types = FALSE))))
         }
       )
 
@@ -251,9 +240,13 @@ mod_data_server <- function(id, translations, lang) {
         data[, colnames(data) %in% paste0("X", 1:200)] <- NULL
 
         # Remove completely empty columns (all NA or empty strings)
-        empty_cols <- vapply(data, function(col) {
-          all(is.na(col) | col == "")
-        }, logical(1))
+        empty_cols <- vapply(
+          data,
+          function(col) {
+            all(is.na(col) | col == "")
+          },
+          logical(1)
+        )
         data <- data[, !empty_cols, drop = FALSE]
 
         # Remove any rows with all NA or empty values
@@ -264,7 +257,6 @@ mod_data_server <- function(id, translations, lang) {
       data
     })
 
-    # Deal with unacceptable column names
     names_data <- reactive({
       data <- clean_data()
       names(data) %<>% make.names()
@@ -293,7 +285,6 @@ mod_data_server <- function(id, translations, lang) {
     output$has_data <- has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
 
-    # Render handson table
     output$handson <- rhandsontable::renderRHandsontable({
       x <- handson_data()
       if (!is.null(x)) {
@@ -326,7 +317,6 @@ mod_data_server <- function(id, translations, lang) {
         data_cols = reactive({
           names(data_mod$clean_data())
         }),
-        # data_source = reactive({ upload_values$upload_state }),
         has_data = has_data
       )
     )
