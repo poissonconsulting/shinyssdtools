@@ -69,11 +69,25 @@ guess_sp <- function(name) {
   name[grepl("sp", tolower(name))][1]
 }
 
-guess_conc <- function(name) {
-  name[grepl("conc", tolower(name))][1]
+guess_conc <- function(name, data = NULL) {
+  # First try to find column with 'conc' in name
+  conc_match <- name[grepl("conc", tolower(name))][1]
+  if (!is.na(conc_match)) {
+    return(conc_match)
+  }
+
+  # If no 'conc' match and data provided, find first numeric column
+  if (!is.null(data)) {
+    numeric_cols <- vapply(data, is.numeric, logical(1))
+    if (any(numeric_cols)) {
+      return(names(data)[numeric_cols][1])
+    }
+  }
+
+  # Return NA if no match found
+  return(NA_character_)
 }
 
-# functions
 label_mandatory <- function(label) {
   tagList(label, span("*", class = "mandatory_star"))
 }

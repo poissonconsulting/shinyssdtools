@@ -234,8 +234,9 @@ mod_fit_server <- function(
       bindEvent(needs_update())
 
     observe({
-      choices <- names(data_mod$clean_data())
-      selected <- guess_conc(choices)
+      data <- data_mod$clean_data()
+      choices <- names(data)
+      selected <- guess_conc(choices, data)
       if (is.na(selected)) {
         selected <- choices[1]
       }
