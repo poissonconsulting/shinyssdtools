@@ -19,6 +19,26 @@ app_server <- function(input, output, session) {
     )
   })
 
+  # Set up shinyhelper with language-specific help files
+  observe({
+    lang_dir <- switch(
+      current_lang(),
+      "english" = "en",
+      "french" = "fr"
+    )
+
+    shinyhelper::observe_helpers(
+      help_dir = system.file(
+        paste("helpfiles", lang_dir, sep = "_"),
+        package = "shinyssdtools"
+      )
+    )
+  })
+
+  # shinyhelper::observe_helpers(
+  #   help_dir = system.file("helpfiles", package = "shinyssdtools")
+  # )
+
   trans <- reactive({
     translations$trans <- translations[[current_lang()]]
     translations

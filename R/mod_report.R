@@ -8,9 +8,19 @@ mod_report_ui <- function(id) {
         padding = "1rem",
         gap = "1rem",
         sidebar = sidebar(
-          width = 375,
+          width = 350,
           style = "height: calc(100vh - 150px); overflow-y: auto; overflow-x: hidden;",
           tagList(
+            div(
+              h5(span(`data-translate` = "ui_tabreport", "Get BCANZ report")),
+            ) %>%
+              shinyhelper::helper(
+                type = "markdown",
+                content = "reportTab",
+                size = "l",
+                colour = "#759dbe",
+                buttonLabel = "OK"
+              ),
             textInput(
               ns("toxicant"),
               label = span(`data-translate` = "ui_4toxname", "Toxicant name"),
@@ -22,20 +32,7 @@ mod_report_ui <- function(id) {
                 create = TRUE,
                 createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
               ),
-              label = div(
-                span(`data-translate` = "ui_3samples", "Bootstrap samples"),
-                bslib::tooltip(
-                  bsicons::bs_icon(
-                    "question-circle",
-                    style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"
-                  ),
-                  span(
-                    `data-translate` = "ui_3bshint",
-                    "10,000 bootstrap samples recommended"
-                  ),
-                  placement = "right"
-                )
-              ),
+              label = span(`data-translate` = "ui_3samples", "Bootstrap samples"),
               choices = c("500", "1,000", "5,000", "10,000"),
               selected = "10,000"
             ),

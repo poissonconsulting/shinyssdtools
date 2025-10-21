@@ -6,32 +6,23 @@ mod_data_ui <- function(id) {
     padding = "1rem",
     gap = "1rem",
     sidebar = sidebar(
-      width = 375,
+      width = 400,
+      div(
+        h5(span(`data-translate` = "ui_tabdata", "Provide data")),
+      ) %>%
+        shinyhelper::helper(
+          type = "markdown",
+          content = "dataTab",
+          size = "l",
+          colour = "#759dbe",
+          buttonLabel = "OK"
+        ),
       span(
         `data-translate` = "ui_1choose",
-        "Choose one of the following options:"
+        "Choose one of the following options:",
+        id = ns("chooseOptions")
       ),
       p(
-        bslib::popover(
-          bsicons::bs_icon(
-            "question-circle",
-            style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"
-          ),
-          div(
-            span(
-              `data-translate` = "ui_1datahelp",
-              "This can be used to demo the app or view a dataset that 'works'."
-            ),
-            br(),
-            br(),
-            "Citation:",
-            tags$a(
-              "Canadian Council of Ministers of the Environment. 2009. Canadian water quality guidelines for the protection of aquatic life: Boron. In: Canadian environmental quality guidelines, 2009, Canadian Council of Ministers of the Environment, Winnipeg.",
-              href = "http://ceqg-rcqe.ccme.ca/download/en/324/"
-            )
-          ),
-          placement = "right"
-        ),
         span(
           span(`data-translate` = "ui_1data", "1. Use "),
           actionLink(
@@ -47,18 +38,7 @@ mod_data_ui <- function(id) {
         ns("uploadData"),
         buttonLabel = span(tagList(icon("upload"), "csv")),
         label = span(
-          bslib::popover(
-            bsicons::bs_icon(
-              "question-circle",
-              style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"
-            ),
-            span(
-              `data-translate` = "ui_1csvhelp",
-              "Upload your own CSV file with concentration and species data."
-            ),
-            placement = "right"
-          ),
-          span(`data-translate` = "ui_1csv", "2. Upload CSV file")
+          span(`data-translate` = "ui_1csv", "2. Upload CSV file"),
         ),
         placeholder = "...",
         accept = c(".csv")
@@ -69,18 +49,7 @@ mod_data_ui <- function(id) {
         open = FALSE,
         bslib::accordion_panel(
           title = span(
-            bslib::popover(
-              bsicons::bs_icon(
-                "question-circle",
-                style = "margin-right: 0.5rem; color: #6c757d; outline: none; border: none;"
-              ),
-              span(
-                `data-translate` = "ui_1tablehelp",
-                "Manually enter concentration and species data in the table."
-              ),
-              placement = "right"
-            ),
-            span(`data-translate` = "ui_1table", "3. Fill out table below:")
+            span(`data-translate` = "ui_1table", "3. Fill out table below:"),
           ),
           value = "data_table",
           rhandsontable::rHandsontableOutput(ns("handson")),

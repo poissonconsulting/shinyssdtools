@@ -37,6 +37,7 @@ Imports:
     rlang,
     rmarkdown,
     shiny,
+    shinyhelper,
     shinyjs,
     shinyvalidate,
     shinyWidgets,

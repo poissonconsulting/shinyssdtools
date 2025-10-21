@@ -48,6 +48,31 @@ translations <- dplyr::bind_rows(
     french = "Guide de l’utilisateur"
   ),
   dplyr::tibble(
+    id = "ui_tabdata",
+    english = "Provide data",
+    french = "Fournir les données"
+  ),
+  dplyr::tibble(
+    id = "ui_tabfit",
+    english = "Fit distributions",
+    french = "Ajustement des distributions"
+  ),
+  dplyr::tibble(
+    id = "ui_tabpredict",
+    english = "Estimate hazard concentration",
+    french = "Estimation de la concentration présentant un risque"
+  ),
+  dplyr::tibble(
+    id = "ui_tabreport",
+    english = "Get BCANZ report",
+    french = "Obtenir le BCANZ rapport"
+  ),
+  dplyr::tibble(
+    id = "ui_tabcode",
+    english = "Get R code",
+    french = "Obtenir le code R"
+  ),
+  dplyr::tibble(
     id = "ui_1choose",
     english = "Choose one of the following options:",
     french = "Choisir l’une des options suivantes :"
@@ -61,6 +86,11 @@ translations <- dplyr::bind_rows(
     id = "ui_1data2",
     english = "boron dataset",
     french = "l’ensemble de données pour le bore"
+  ),
+  dplyr::tibble(
+    id = "ui_1title",
+    english = "1. Data",
+    french = "1. Données"
   ),
   dplyr::tibble(
     id = "ui_1datahelp",
@@ -101,6 +131,11 @@ translations <- dplyr::bind_rows(
     id = "ui_1preview",
     english = "Preview chosen dataset",
     french = "Prévisualiser l'ensemble de données"
+  ),
+  dplyr::tibble(
+    id = "ui_2title",
+    english = "2. Fit",
+    french = "2. Ajustement"
   ),
   dplyr::tibble(
     id = "ui_2conc",
@@ -186,6 +221,11 @@ translations <- dplyr::bind_rows(
     id = "ui_2dlxlsx",
     english = "XLSX File",
     french = "Fichier XLSX"
+  ),
+  dplyr::tibble(
+    id = "ui_3tabtitle",
+    english = "3. Predict",
+    french = "3. Prédiction"
   ),
   dplyr::tibble(
     id = "ui_3est",
@@ -466,8 +506,7 @@ translations <- dplyr::bind_rows(
     id = "ui_copy",
     english = "Copy code",
     french = "Copier le code"
-  )
-,
+  ),
   dplyr::tibble(
     id = "ui_3conc",
     english = "Concentration",

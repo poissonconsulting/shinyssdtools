@@ -2,20 +2,30 @@
 mod_rcode_ui <- function(id) {
   ns <- NS(id)
 
-  div(
-    style = "padding: 1rem;",
+  layout_sidebar(
+    padding = "1rem",
+    gap = "1rem",
+    sidebar = sidebar(
+      width = 350,
+      div(
+        h5(span(`data-translate` = "ui_tabcode", "Get R code")),
+      ) %>%
+        shinyhelper::helper(
+          type = "markdown",
+          content = "rcodeTab",
+          size = "l",
+          colour = "#759dbe",
+          buttonLabel = "OK"
+        ),
+      conditionalPanel(
+        condition = paste_js("has_code", ns),
+        uiOutput(ns("copyButton"))
+      )
+    ),
     card(
       card_header(uiOutput("ui_nav4")),
       card_body(
         tagList(
-          uiOutput(ns("ui_4help")),
-          conditionalPanel(
-            condition = paste_js("has_code", ns),
-            div(
-              class = "d-flex justify-content-start mb-3",
-              uiOutput(ns("copyButton"))
-            )
-          ),
           div(
             id = ns("code-container"),
             class = "r-code-container",

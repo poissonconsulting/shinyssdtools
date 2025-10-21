@@ -10,9 +10,19 @@ mod_fit_ui <- function(id) {
         padding = "1rem",
         gap = "1rem",
         sidebar = sidebar(
-          width = 375,
+          width = 400,
           style = "height: calc(100vh - 150px); overflow-y: auto; overflow-x: hidden;",
           tagList(
+            div(
+              h5(span(`data-translate` = "ui_tabfit", "Fit distributions")),
+            ) %>%
+              shinyhelper::helper(
+                type = "markdown",
+                content = "fitTab",
+                size = "l",
+                colour = "#759dbe",
+                buttonLabel = "OK"
+              ),
             tags$label(
               `for` = ns("selectConc"),
               class = "control-label",

@@ -9,102 +9,92 @@ mod_predict_ui <- function(id) {
         padding = "1rem",
         gap = "1rem",
         sidebar = sidebar(
-          width = 375,
+          width = 400,
           style = "height: calc(100vh - 150px); overflow-y: auto; overflow-x: hidden;",
-
-          bslib::accordion(
-            open = c("hc_pred", "cl_pred"),
-            # ui thresh ---------------------------------------------------------------
-            accordion_panel(
-              title = span(
-                `data-translate` = "ui_3est",
-                "Estimate hazard concentration"
-              ),
-              value = "hc_pred",
-              radioButtons(
-                ns("threshType"),
-                label = span(
-                  `data-translate` = "ui_3threshlabel",
-                  "Threshold type"
-                ),
-                choices = c(
-                  "Concentration" = "Concentration",
-                  "Fraction affected" = "Fraction"
-                ),
-                selected = "Concentration",
-                inline = TRUE
-              ),
-              conditionalPanel(
-                condition = glue::glue(
-                  "input['{ns(\"threshType\")}'] != 'Concentration'"
-                ),
-                layout_column_wrap(
-                  width = 1 / 2,
-                  numericInput(
-                    ns("conc"),
-                    label = span(
-                      `data-translate` = "ui_3byconc",
-                      "by concentration"
-                    ),
-                    value = 1,
-                    min = 0,
-                    max = 100,
-                    step = 0.1
-                  )
-                )
-              ),
-              conditionalPanel(
-                condition = glue::glue(
-                  "input['{ns(\"threshType\")}'] == 'Concentration'"
-                ),
-                layout_column_wrap(
-                  width = 1 / 2,
-                  selectizeInput(
-                    ns("thresh"),
-                    label = span(
-                      `data-translate` = "ui_3affecting",
-                      "affecting % species"
-                    ),
-                    choices = c(1, 5, 10, 20),
-                    options = list(
-                      create = TRUE,
-                      createFilter = "^[1-9][0-9]?$|^99$"
-                    ),
-                    selected = 5
-                  ),
-                  selectizeInput(
-                    ns("threshPc"),
-                    label = span(
-                      `data-translate` = "ui_3protecting",
-                      "protecting % species"
-                    ),
-                    choices = c(99, 95, 90, 80),
-                    options = list(
-                      create = TRUE,
-                      createFilter = "^[1-9][0-9]?$|^99$"
-                    ),
-                    selected = 95
-                  )
-                )
-              )
-              # uiOutput(ns("uiThresh"))
+          div(
+            h5(span(
+              `data-translate` = "ui_tabpredict",
+              "Get predictions"
+            )),
+          ) %>%
+            shinyhelper::helper(
+              type = "markdown",
+              content = "predictTab",
+              size = "l",
+              colour = "#759dbe",
+              buttonLabel = "OK"
             ),
+          radioButtons(
+            ns("threshType"),
+            label = span(
+              `data-translate` = "ui_3threshlabel",
+              "Threshold type"
+            ),
+            choices = c(
+              "Concentration" = "Concentration",
+              "Fraction affected" = "Fraction"
+            ),
+            selected = "Concentration",
+            inline = TRUE
+          ),
+          conditionalPanel(
+            condition = glue::glue(
+              "input['{ns(\"threshType\")}'] != 'Concentration'"
+            ),
+            layout_column_wrap(
+              width = 1 / 2,
+              numericInput(
+                ns("conc"),
+                label = span(
+                  `data-translate` = "ui_3byconc",
+                  "by concentration"
+                ),
+                value = 1,
+                min = 0,
+                max = 100,
+                step = 0.1
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = glue::glue(
+              "input['{ns(\"threshType\")}'] == 'Concentration'"
+            ),
+            layout_column_wrap(
+              width = 1 / 2,
+              selectizeInput(
+                ns("thresh"),
+                label = span(
+                  `data-translate` = "ui_3affecting",
+                  "affecting % species"
+                ),
+                choices = c(1, 5, 10, 20),
+                options = list(
+                  create = TRUE,
+                  createFilter = "^[1-9][0-9]?$|^99$"
+                ),
+                selected = 5
+              ),
+              selectizeInput(
+                ns("threshPc"),
+                label = span(
+                  `data-translate` = "ui_3protecting",
+                  "protecting % species"
+                ),
+                choices = c(99, 95, 90, 80),
+                options = list(
+                  create = TRUE,
+                  createFilter = "^[1-9][0-9]?$|^99$"
+                ),
+                selected = 95
+              )
+            )
+          ),
+          bslib::accordion(
+            open = c("cl_pred"),
             # ui cl -------------------------------------------------------------------
             accordion_panel(
-              title = div(
-                span(`data-translate` = "ui_3cl", "Get confidence limits"),
-                bslib::tooltip(
-                  bsicons::bs_icon(
-                    "question-circle",
-                    style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"
-                  ),
-                  span(
-                    `data-translate` = "ui_3help",
-                    "Click 'Get CL' to calculate the upper and lower confidence limits (CL) for the estimate."
-                  ),
-                  placement = "right"
-                )
-              ),
+              title = span(`data-translate` = "ui_3cl", "Get confidence limits"),
               value = "cl_pred",
               selectizeInput(
                 ns("bootSamp"),
@@ -112,20 +102,7 @@ mod_predict_ui <- function(id) {
                   create = TRUE,
                   createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
                 ),
-                label = div(
-                  span(`data-translate` = "ui_3samples", "Bootstrap samples"),
-                  bslib::tooltip(
-                    bsicons::bs_icon(
-                      "question-circle",
-                      style = "margin-left: 0.5rem; color: #6c757d; outline: none; border: none;"
-                    ),
-                    span(
-                      `data-translate` = "ui_3bshint",
-                      "10,000 bootstrap samples recommended"
-                    ),
-                    placement = "right"
-                  )
-                ),
+                label = span(`data-translate` = "ui_3samples", "Bootstrap samples"),
                 choices = c(
                   "500" = "500",
                   "1,000" = "1000",
@@ -141,7 +118,7 @@ mod_predict_ui <- function(id) {
                   bsicons::bs_icon("calculator"),
                   span(`data-translate` = "ui_3clbutton", "Get CL")
                 ),
-                class = "btn-primary w-100",
+                class = "btn-primary w-100"
               ),
               shiny::helpText(htmlOutput(ns("describeTime"))),
             ),
