@@ -24,20 +24,43 @@ clean_nboot <- function(x) {
   as.integer(gsub("(,|\\s)", "", x))
 }
 
-# Remove Excel/Numbers blank header columns (X1, X2, etc.)
+#' Remove Excel/Numbers blank header columns (X1, X2, etc.)
+#'
+#' Removes columns named X1, X2, ..., X200 which are typically created by
+#' Excel or Numbers when exporting CSV files with blank column headers.
+#'
+#' @param data A data frame or tibble
+#' @return A tibble with X1, X2, ... X200 columns removed
+#' @keywords internal
 remove_blank_headers <- function(data) {
   data %>%
     dplyr::select(-dplyr::any_of(paste0("X", 1:200)))
 }
 
-# Remove completely empty columns
+#' Remove completely empty columns
+#'
+#' Removes columns where all values are NA or empty strings. This is useful
+#' for cleaning uploaded CSV files or handsontable data where users may leave
+#' optional columns empty.
+#'
+#' @param data A data frame or tibble
+#' @return A tibble with empty columns removed
+#' @keywords internal
 remove_empty_columns <- function(data) {
   data %>%
     dplyr::as_tibble() %>%
     dplyr::select(dplyr::where(~ !all(is.na(.x) | .x == "")))
 }
 
-# Remove completely empty rows
+#' Remove completely empty rows
+#'
+#' Removes rows where all values are NA or empty strings. This is useful
+#' for cleaning uploaded CSV files or handsontable data where users may leave
+#' trailing empty rows.
+#'
+#' @param data A data frame or tibble
+#' @return A tibble with empty rows removed
+#' @keywords internal
 remove_empty_rows <- function(data) {
   data %>%
     dplyr::as_tibble() %>%
@@ -62,6 +85,60 @@ clean_ssd_data <- function(data) {
     remove_blank_headers() %>%
     remove_empty_columns() %>%
     remove_empty_rows()
+}
+
+#' Check if concentration values are numeric
+#'
+#' @param x A vector
+#' @return TRUE if numeric, FALSE otherwise
+#' @keywords internal
+has_numeric_concentration <- function(x) {
+  is.numeric(x)
+}
+
+#' Check if concentration values have no missing values
+#'
+#' @param x A vector
+#' @return TRUE if no missing values, FALSE otherwise
+#' @keywords internal
+has_no_missing_concentration <- function(x) {
+  !anyNA(x)
+}
+
+#' Check if concentration values are all positive
+#'
+#' @param x A numeric vector
+#' @return TRUE if all positive, FALSE otherwise
+#' @keywords internal
+has_positive_concentration <- function(x) {
+  all(x > 0, na.rm = TRUE)
+}
+
+#' Check if concentration values are all finite
+#'
+#' @param x A numeric vector
+#' @return TRUE if all finite, FALSE otherwise
+#' @keywords internal
+has_finite_concentration <- function(x) {
+  all(is.finite(x))
+}
+
+#' Check if there are at least 6 concentration values
+#'
+#' @param x A vector
+#' @return TRUE if at least 6 values, FALSE otherwise
+#' @keywords internal
+has_min_concentration <- function(x) {
+  length(x) >= 6
+}
+
+#' Check if concentration values are not all identical
+#'
+#' @param x A numeric vector
+#' @return TRUE if values are not all identical, FALSE otherwise
+#' @keywords internal
+has_not_all_identical <- function(x) {
+  !zero_range(x)
 }
 
 estimate_time <- function(nboot, lang) {

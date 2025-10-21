@@ -114,7 +114,6 @@ mod_fit_ui <- function(id) {
               ),
               card_body(
                 ui_download_popover(ns = ns),
-                htmlOutput(ns("fitFail")),
                 plotOutput(ns("plotDist"))
               )
             ),
@@ -208,6 +207,7 @@ mod_fit_server <- function(
       req(data_mod$data())
       req(input$selectConc)
       req(input$selectDist)
+      req(iv$is_valid())
 
       waiter_gof$show()
       waiter_distplot$show()
@@ -268,22 +268,22 @@ mod_fit_server <- function(
 
       conc_data <- dat[[value]]
 
-      if (!is.numeric(conc_data)) {
+      if (!has_numeric_concentration(conc_data)) {
         return(as.character(tr("ui_hintnum", trans)[1]))
       }
-      if (any(is.na(conc_data))) {
+      if (!has_no_missing_concentration(conc_data)) {
         return(as.character(tr("ui_hintmiss", trans)[1]))
       }
-      if (any(conc_data <= 0)) {
+      if (!has_positive_concentration(conc_data)) {
         return(as.character(tr("ui_hintpos", trans)[1]))
       }
-      if (any(is.infinite(conc_data))) {
+      if (!has_finite_concentration(conc_data)) {
         return(as.character(tr("ui_hintfin", trans)[1]))
       }
-      if (length(conc_data) < 6) {
+      if (!has_min_concentration(conc_data)) {
         return(as.character(tr("ui_hint6", trans)[1]))
       }
-      if (zero_range(conc_data)) {
+      if (!has_not_all_identical(conc_data)) {
         return(as.character(tr("ui_hintident", trans)[1]))
       }
 
@@ -381,17 +381,17 @@ mod_fit_server <- function(
     }) %>%
       bindEvent(fit_dist())
 
-    output$fitFail <- renderText({
-      failed <- fit_fail()
+    observe({
+      failed <- "gumbel"
       req(failed != "")
-      HTML(paste0(
-        "<font color='grey'>",
+      showNotification(
         paste(
           failed,
           tr("ui_hintfail", translations())
         ),
-        "</font>"
-      ))
+        type = "warning",
+        duration = NULL
+      )
     }) %>%
       bindEvent(fit_fail())
 

@@ -103,11 +103,6 @@ translations <- dplyr::bind_rows(
     french = "2. Télécharger un fichier CSV"
   ),
   dplyr::tibble(
-    id = "ui_1csvhelp",
-    english = "2. Upload a csv file containing your dataset. The dataset must include a column with at least 8 distinct, positive, non-missing, numeric concentration values. Other useful but optional variables include species and group, which may be used to label and color plot output, respectively. If you have an xls/xlsx file, try exporting a worksheet to csv using excel.",
-    french = "2. Télécharger vos données en fichier .csv. L’ensemble de données doit contenir une colonne comportant au minimum 8 valeurs numériques de concentrations distinctes, positives et sans valeur manquantes. Il est possible d'ajouter des colonnes pour les espèces et les groupes taxonomiques, ce qui est pratique mais optionnel. Des étiquettes et des couleurs sont alors disponibles pour permettre leur identification dans le graphique. Si vous avez un fichier .xls/.xlsx, il faut l’exporter dans une feuille de calcul .csv en utilisant Excel."
-  ),
-  dplyr::tibble(
     id = "ui_1csvlabel",
     english = "Upload your data",
     french = "Télécharger les données"
@@ -117,11 +112,7 @@ translations <- dplyr::bind_rows(
     english = "3. Fill out table below:",
     french = "3. Remplir le tableau ci-dessous:"
   ),
-  dplyr::tibble(
-    id = "ui_1tablehelp",
-    english = "3. The table below is interactive and acts like a simple excel spreadsheet. Click on a cell to begin data input. Right-click on the table to delete/insert rows or columns. Column names cannot be changed. The Concentration column must be filled out, with at least 8 distinct, positive, non-missing, numeric values. Species and Group are optional and may be used to format plot outputs. If the table is behaving unexpectedly, please reload the website.",
-    french = "3. Le tableau ci-dessous est interactif et il s’utilise comme une feuille de calcul Excel normale. Cliquer sur une cellule pour commencer à entrer les données. Faire un clic-droit pour ajouter ou supprimer des colonnes ou des rangées. Il n'est pas possiible de modifier le nom des colonnes.  La colonne concentration doit être remplie avec au moins 8 valeurs numériques positives, distinctes et sans valeur manquante. Les colonnes Espèces et Groupes sont optionnelles et sont utilisées pour la mise en forme du graphique. Relancer le site web si des erreurs surviennent dans le tableau."
-  ),
+
   dplyr::tibble(
     id = "ui_1note",
     english = "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value.",
