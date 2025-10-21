@@ -205,23 +205,7 @@ mod_data_server <- function(id, translations, lang) {
       req(is.data.frame(data))
 
       if (length(data)) {
-        # Remove any column names like X1, X2 (blank headers from excel/numbers)
-        data[, colnames(data) %in% paste0("X", 1:200)] <- NULL
-
-        # Remove completely empty columns (all NA or empty strings)
-        empty_cols <- vapply(
-          data,
-          function(col) {
-            all(is.na(col) | col == "")
-          },
-          logical(1)
-        )
-        data <- data[, !empty_cols, drop = FALSE]
-
-        # Remove any rows with all NA or empty values
-        if (ncol(data) > 0) {
-          data <- data[!(rowSums(is.na(data) | data == "") == ncol(data)), ]
-        }
+        data <- clean_ssd_data(data)
       }
       data
     })
@@ -244,7 +228,7 @@ mod_data_server <- function(id, translations, lang) {
         return(FALSE)
       }
 
-      if (active_source() == "hot" && all(is.na(data[[1]]))) {
+      if (active_source() == "handson" && all(is.na(data[[1]]))) {
         return(FALSE)
       }
 

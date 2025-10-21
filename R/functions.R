@@ -24,6 +24,46 @@ clean_nboot <- function(x) {
   as.integer(gsub("(,|\\s)", "", x))
 }
 
+# Remove Excel/Numbers blank header columns (X1, X2, etc.)
+remove_blank_headers <- function(data) {
+  data %>%
+    dplyr::select(-dplyr::any_of(paste0("X", 1:200)))
+}
+
+# Remove completely empty columns
+remove_empty_columns <- function(data) {
+  data %>%
+    dplyr::as_tibble() %>%
+    dplyr::select(dplyr::where(~ !all(is.na(.x) | .x == "")))
+}
+
+# Remove completely empty rows
+remove_empty_rows <- function(data) {
+  data %>%
+    dplyr::as_tibble() %>%
+    dplyr::filter(
+      if (ncol(.) > 0) {
+        !dplyr::if_all(dplyr::everything(), ~ is.na(.x) | .x == "")
+      } else {
+        TRUE
+      }
+    )
+}
+
+#' Clean uploaded data
+#'
+#' Removes blank headers, empty columns, and empty rows from uploaded data
+#'
+#' @param data A data frame or tibble
+#' @return A cleaned tibble
+#' @export
+clean_ssd_data <- function(data) {
+  data %>%
+    remove_blank_headers() %>%
+    remove_empty_columns() %>%
+    remove_empty_rows()
+}
+
 estimate_time <- function(nboot, lang) {
   preset_df <- data.frame(
     n = c(500, 1000, 5000, 10000),
