@@ -114,6 +114,7 @@ mod_fit_ui <- function(id) {
               ),
               card_body(
                 ui_download_popover(ns = ns),
+                htmlOutput(ns("fitFail")),
                 plotOutput(ns("plotDist"))
               )
             ),
@@ -381,17 +382,17 @@ mod_fit_server <- function(
     }) %>%
       bindEvent(fit_dist())
 
-    observe({
-      failed <- "gumbel"
+    output$fitFail <- renderText({
+      failed <- fit_fail()
       req(failed != "")
-      showNotification(
+      HTML(paste0(
+        "<font color='grey'>",
         paste(
           failed,
           tr("ui_hintfail", translations())
         ),
-        type = "warning",
-        duration = NULL
-      )
+        "</font>"
+      ))
     }) %>%
       bindEvent(fit_fail())
 
