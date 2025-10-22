@@ -20,7 +20,7 @@ mod_fit_ui <- function(id) {
                 type = "markdown",
                 content = "fitTab",
                 size = "l",
-                colour = "#759dbe",
+                colour = color_primary,
                 buttonLabel = "OK"
               ),
             tags$label(
@@ -237,9 +237,9 @@ mod_fit_server <- function(
     # Dynamic icon for update button
     output$update_icon <- renderUI({
       if (needs_update()) {
-        icon("refresh", class = "text-white me-1")
+        icon("refresh", class = "text-dark me-1")
       } else {
-        icon("check-circle", class = "text-white me-1")
+        icon("check-circle", class = "text-dark me-1")
       }
     }) %>%
       bindEvent(needs_update())

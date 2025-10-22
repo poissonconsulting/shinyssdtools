@@ -26,7 +26,6 @@ app_server <- function(input, output, session) {
       "english" = "en",
       "french" = "fr"
     )
-
     shinyhelper::observe_helpers(
       help_dir = system.file(
         paste("helpfiles", lang_dir, sep = "_"),

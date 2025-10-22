@@ -14,7 +14,7 @@ mod_rcode_ui <- function(id) {
           type = "markdown",
           content = "rcodeTab",
           size = "l",
-          colour = "#759dbe",
+          colour = color_primary,
           buttonLabel = "OK"
         ),
       conditionalPanel(

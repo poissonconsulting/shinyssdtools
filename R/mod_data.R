@@ -14,7 +14,7 @@ mod_data_ui <- function(id) {
           type = "markdown",
           content = "dataTab",
           size = "l",
-          colour = "#759dbe",
+          colour = color_primary,
           buttonLabel = "OK"
         ),
       span(
@@ -58,7 +58,7 @@ mod_data_ui <- function(id) {
             actionButton(
               ns("handson_done"),
               label = tagList(
-                icon("refresh", class = "text-white me-1"),
+                icon("refresh", class = "text-dark me-1"),
                 span(`data-translate` = "ui_update_data", "Update")
               ),
               class = "btn-primary w-100"

@@ -54,7 +54,13 @@ app_ui <- function() {
 
     page_navbar(
       title = "shinyssdtools",
-      navbar_options = navbar_options(bg = "#759dbe", underline = TRUE),
+      theme = bs_theme(
+        primary = color_primary,
+        secondary = color_secondary,
+        success = color_primary,
+        info = color_primary
+      ),
+      navbar_options = navbar_options(bg = color_secondary, underline = TRUE),
       nav_panel(
         title = span(`data-translate` = "ui_navanalyse", "Analyse"),
         page_fillable(
@@ -65,7 +71,7 @@ app_ui <- function() {
             # nav ---------------------------------------------------------------------
             sidebar = sidebar(
               width = 180,
-              bg = "#e5eff7",
+              bg = color_sidebar,
               navset_underline(
                 id = "main_nav",
                 nav_panel(
