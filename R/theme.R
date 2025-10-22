@@ -46,6 +46,23 @@
 # color_button_icon <- "text-dark" # White icons for buttons
 
 # ==============================================================================
+# Deep Blue & Slate
+# ==============================================================================
+# color_primary <- "#0066cc" # Professional blue for buttons, primary actions, and links
+# color_secondary <- "#1e3a5f" # Deep navy blue for navbar
+# color_sidebar <- "#f0f4f7" # Light blue-gray for sidebar background
+# color_button_icon <- "text-white" # White icons for buttons
+
+# ==============================================================================
+# Charcoal & Warm Gray
+# ==============================================================================
+# color_primary <- "#00897b" # Teal for buttons, primary actions, and links
+# color_secondary <- "#2d3436" # Charcoal for navbar
+# color_sidebar <- "#f5f5f5" # Warm light gray for sidebar background
+# color_button_icon <- "text-dark" # White icons for buttons
+
+# WCAG accessibility standards - suggestions from Claude opus
+# ==============================================================================
 # Deep Navy Academic
 # ==============================================================================
 color_primary <- "#2e7d9a" # Professional teal-blue for buttons, primary actions, and links
@@ -68,19 +85,3 @@ color_button_icon <- "text-white" # White icons for buttons
 # color_secondary <- "#134e4a" # Dark teal/forest for navbar
 # color_sidebar <- "#f0fdfa" # Mint white for sidebar
 # color_button_icon <- "text-white" # White icons for buttons
-
-# ==============================================================================
-# Deep Blue & Slate
-# ==============================================================================
-# color_primary <- "#0066cc" # Professional blue for buttons, primary actions, and links
-# color_secondary <- "#1e3a5f" # Deep navy blue for navbar
-# color_sidebar <- "#f0f4f7" # Light blue-gray for sidebar background
-# color_button_icon <- "text-white" # White icons for buttons
-
-# ==============================================================================
-# Charcoal & Warm Gray
-# ==============================================================================
-# color_primary <- "#00897b" # Teal for buttons, primary actions, and links
-# color_secondary <- "#2d3436" # Charcoal for navbar
-# color_sidebar <- "#f5f5f5" # Warm light gray for sidebar background
-# color_button_icon <- "text-dark" # White icons for buttons
