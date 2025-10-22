@@ -61,7 +61,7 @@
 # color_sidebar <- "#f5f5f5" # Warm light gray for sidebar background
 # color_button_icon <- "text-dark" # White icons for buttons
 
-# WCAG accessibility standards - suggestions from Claude opus
+# WCAG accessibility standards (https://www.w3.org/WAI/standards-guidelines/wcag/) - suggestions from Claude opus
 # ==============================================================================
 # Deep Navy Academic
 # ==============================================================================
