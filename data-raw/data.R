@@ -494,6 +494,21 @@ translations <- dplyr::bind_rows(
     french = "La colonne 'Symboles' ne doit pas contenir de nombres."
   ),
   dplyr::tibble(
+    id = "ui_hintthresh",
+    english = "Affecting % species must not be missing.",
+    french = "Le % d'espèces affectées ne doit pas être manquant."
+  ),
+  dplyr::tibble(
+    id = "ui_hintthreshpc",
+    english = "Protecting % species must not be missing.",
+    french = "Le % d'espèces protégées ne doit pas être manquant."
+  ),
+  dplyr::tibble(
+    id = "ui_hintboot",
+    english = "Bootstrap samples must not be missing.",
+    french = "Les échantillons bootstrap ne doivent pas être manquants."
+  ),
+  dplyr::tibble(
     id = "ui_copy",
     english = "Copy code",
     french = "Copier le code"

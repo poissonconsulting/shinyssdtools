@@ -94,7 +94,10 @@ mod_predict_ui <- function(id) {
             open = c("cl_pred"),
             # ui cl -------------------------------------------------------------------
             accordion_panel(
-              title = span(`data-translate` = "ui_3cl", "Get confidence limits"),
+              title = span(
+                `data-translate` = "ui_3cl",
+                "Get confidence limits"
+              ),
               value = "cl_pred",
               selectizeInput(
                 ns("bootSamp"),
@@ -102,7 +105,10 @@ mod_predict_ui <- function(id) {
                   create = TRUE,
                   createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
                 ),
-                label = span(`data-translate` = "ui_3samples", "Bootstrap samples"),
+                label = span(
+                  `data-translate` = "ui_3samples",
+                  "Bootstrap samples"
+                ),
                 choices = c(
                   "500" = "500",
                   "1,000" = "1000",
@@ -251,61 +257,59 @@ mod_predict_ui <- function(id) {
           class = "p-3",
           conditionalPanel(
             condition = paste_js('has_predict', ns),
-            div(
-              id = ns("divPred"),
-              card(
-                full_screen = TRUE,
-                card_header(
-                  class = "d-flex justify-content-between align-items-center",
-                  span(`data-translate` = "ui_3model", "Model Average Plot")
-                ),
-                card_body(
-                  ui_download_popover(tab = "pred", ns = ns),
-                  plotOutput(ns("plotPred")),
+            card(
+              full_screen = TRUE,
+              card_header(
+                class = "d-flex justify-content-between align-items-center",
+                span(`data-translate` = "ui_3model", "Model Average Plot")
+              ),
+              card_body(
+                ui_download_popover(tab = "pred", ns = ns),
+                plotOutput(ns("plotPred")),
+                conditionalPanel(
+                  condition = glue::glue(
+                    "input['{ns(\"threshType\")}'] == 'Concentration'"
+                  ),
                   div(
-                    conditionalPanel(
-                      condition = glue::glue(
-                        "input['{ns(\"threshType\")}'] == 'Concentration'"
-                      ),
-                      div(
-                        span("HC"),
-                        textOutput(ns("hcPercent"), inline = TRUE),
-                        span("/ PC"),
-                        textOutput(ns("pcPercent"), inline = TRUE),
-                        span(": "),
-                        tags$b(textOutput(ns("hcConc"), inline = TRUE))
-                      ),
-                      div(
-                        span(
-                          `data-translate` = "ui_3hc",
-                          "The model averaged estimate of the concentration that affects "
-                        ),
-                        tags$b(textOutput(ns("estPerc"), inline = TRUE)),
-                        span(`data-translate` = "ui_3hc2", " % of species is "),
-                        tags$b(textOutput(ns("estConc"), inline = TRUE))
-                      )
+                    span("HC"),
+                    textOutput(ns("hcPercent"), inline = TRUE),
+                    span("/ PC"),
+                    textOutput(ns("pcPercent"), inline = TRUE),
+                    span(": "),
+                    tags$b(textOutput(ns("hcConc"), inline = TRUE))
+                  ),
+                  div(
+                    span(
+                      `data-translate` = "ui_3hc",
+                      "The model averaged estimate of the concentration that affects "
                     ),
-                    conditionalPanel(
-                      condition = glue::glue(
-                        "input['{ns(\"threshType\")}'] != 'Concentration'"
-                      ),
-                      div(
-                        span(
-                          `data-translate` = "ui_3perc",
-                          "The model averaged estimate of the fraction affected by a concentration of "
-                        ),
-                        tags$b(textOutput(ns("estConc2"), inline = TRUE)),
-                        span(`data-translate` = "ui_3perc2", " is "),
-                        tags$b(textOutput(ns("estPerc2"), inline = TRUE)),
-                        span(`data-translate` = "ui_3perc3", " % of species")
-                      )
-                    )
+                    tags$b(textOutput(ns("estPerc"), inline = TRUE)),
+                    span(`data-translate` = "ui_3hc2", " % of species is "),
+                    tags$b(textOutput(ns("estConc"), inline = TRUE))
+                  )
+                ),
+                conditionalPanel(
+                  condition = glue::glue(
+                    "input['{ns(\"threshType\")}'] != 'Concentration'"
+                  ),
+                  div(
+                    span(
+                      `data-translate` = "ui_3perc",
+                      "The model averaged estimate of the fraction affected by a concentration of "
+                    ),
+                    tags$b(textOutput(ns("estConc2"), inline = TRUE)),
+                    span(`data-translate` = "ui_3perc2", " is "),
+                    tags$b(textOutput(ns("estPerc2"), inline = TRUE)),
+                    span(`data-translate` = "ui_3perc3", " % of species")
                   )
                 )
               )
-            ),
+            )
+          ),
+          conditionalPanel(
+            condition = paste_js('has_predict', ns),
             conditionalPanel(
-              condition = paste_js("has_cl", ns = ns),
+              condition = paste_js("has_cl", ns),
               card(
                 full_screen = TRUE,
                 card_header(
@@ -354,6 +358,10 @@ mod_predict_server <- function(
 
     output$has_fit <- fit_mod$has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
+
+    observe({
+      print(has_predict())
+    })
 
     # trigger for updating predictions - only occur when on predict tab
     predict_trigger <- reactiveVal(0)
@@ -428,6 +436,11 @@ mod_predict_server <- function(
     iv <- InputValidator$new()
 
     iv$add_rule("conc", function(value) {
+      # Only validate when threshType is "Fraction"
+      if (input$threshType != "Fraction") {
+        return(NULL)
+      }
+
       trans <- translations()
 
       if (is.null(value)) {
@@ -468,6 +481,27 @@ mod_predict_server <- function(
 
       if (is.numeric(sym_data)) {
         return(as.character(tr("ui_hintsym", trans)[1]))
+      }
+      NULL
+    })
+
+    iv$add_rule("thresh", function(value) {
+      # Only validate when threshType is "Concentration"
+      if (input$threshType != "Concentration") {
+        return(NULL)
+      }
+
+      trans <- translations()
+      if (is.null(value) || value == "") {
+        return(as.character(tr("ui_hintthresh", trans)[1]))
+      }
+      NULL
+    })
+
+    iv$add_rule("bootSamp", function(value) {
+      trans <- translations()
+      if (is.null(value) || value == "") {
+        return(as.character(tr("ui_hintboot", trans)[1]))
       }
       NULL
     })
@@ -642,6 +676,7 @@ mod_predict_server <- function(
     predict_hc <- reactive({
       req(predict_trigger() > 0)
       req(main_nav() == "predict")
+      req(iv$is_valid())
       fit <- fit_mod$fit_dist()
       req(fit)
       req(thresh_rv$percent)
@@ -848,9 +883,10 @@ mod_predict_server <- function(
     })
 
     has_predict <- reactive({
-      !is.null(predict_hc())
+      iv$is_valid() &&
+        !is.null(predict_hc())
     }) %>%
-      bindEvent(predict_hc())
+      bindEvent(predict_hc(), iv$is_valid())
 
     output$has_predict <- has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
