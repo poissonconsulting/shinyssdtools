@@ -16,27 +16,71 @@
 # ==============================================================================
 # REFINED NAVY (CURRENT)
 # ==============================================================================
-color_primary <- "#3498DB"   # Bright blue for buttons, primary actions, and help icons
-color_secondary <- "#2C3E50" # Darker slate blue for navbar and secondary elements
-color_sidebar <- "#D5DBDF"   # Light tint of navbar
+# color_primary <- "#3498DB" # Bright blue for buttons, primary actions, and help icons
+# color_secondary <- "#2C3E50" # Darker slate blue for navbar and secondary elements
+# color_sidebar <- "#D5DBDF" # Light tint of navbar
+# color_button_icon <- "text-dark" # Black icons for buttons
 
 # ==============================================================================
 # TEAL
 # ==============================================================================
-# color_primary <- "#26A69A"   # Teal for buttons, primary actions, and help icons
+# color_primary <- "#26A69A" # Teal for buttons, primary actions, and help icons
 # color_secondary <- "#1A5F7A" # Darker teal for navbar and secondary elements
-# color_sidebar <- "#C8E1E7"   # Light tint of navbar
+# color_sidebar <- "#C8E1E7" # Light tint of navbar
+# color_button_icon <- "text-white" # White icons for buttons
 
 # ==============================================================================
-# RICH INDIGO
+# slate and teal
 # ==============================================================================
-# color_primary <- "#5C6BC0"   # Lighter indigo for buttons, primary actions, and help icons
-# color_secondary <- "#283593" # Rich indigo for navbar and secondary elements
-# color_sidebar <- "#D4D7F0"   # Light lavender tint of navbar
+# color_primary <- "#0D9488" # Teal accent for buttons, primary actions, and help icons
+# color_secondary <- "#1F2937" # Charcoal for navbar and secondary elements
+# color_sidebar <- "#F3F4F6" # Light gray tint of navbar
+# color_button_icon <- "text-dark" # White icons for buttons
 
 # ==============================================================================
-# CHARCOAL
+# deep blue sage
 # ==============================================================================
-# color_primary <- "#26A69A"   # Teal accent for buttons, primary actions, and help icons
-# color_secondary <- "#2C3E50" # Charcoal for navbar and secondary elements
-# color_sidebar <- "#D5DBDF"   # Light gray tint of navbar
+# color_primary <- "#4B9C8E" # Teal accent for buttons, primary actions, and help icons
+# color_secondary <- "#0F172A" # Charcoal for navbar and secondary elements
+# color_sidebar <- "#E5E7EB" # Light gray tint of navbar
+# color_button_icon <- "text-dark" # White icons for buttons
+
+# ==============================================================================
+# Deep Navy Academic
+# ==============================================================================
+# color_primary <- "#2e7d9a" # Professional teal-blue for buttons, primary actions, and links
+# color_secondary <- "#1e3a5f" # Deep navy blue for navbar
+# color_sidebar <- "#f4f6f9" # Cool light gray for sidebar
+# color_button_icon <- "text-white" # White icons for buttons
+
+# ==============================================================================
+# Modern Slate
+# ==============================================================================
+# color_primary <- "#3182ce" # Bright accessible blue for buttons, primary actions, and links
+# color_secondary <- "#2d3748" # Dark slate gray for navbar
+# color_sidebar <- "#f7fafc" # Near-white with subtle gray for sidebar
+# color_button_icon <- "text-white" # White icons for buttons
+
+# ==============================================================================
+# Scientific Teal
+# ==============================================================================
+# color_primary <- "#0d9488" # Vibrant teal for buttons, primary actions, and links
+# color_secondary <- "#134e4a" # Dark teal/forest for navbar
+# color_sidebar <- "#f0fdfa" # Mint white for sidebar
+# color_button_icon <- "text-white" # White icons for buttons
+
+# ==============================================================================
+# Deep Blue & Slate
+# ==============================================================================
+# color_primary <- "#0066cc" # Professional blue for buttons, primary actions, and links
+# color_secondary <- "#1e3a5f" # Deep navy blue for navbar
+# color_sidebar <- "#f0f4f7" # Light blue-gray for sidebar background
+# color_button_icon <- "text-white" # White icons for buttons
+
+# ==============================================================================
+# Charcoal & Warm Gray
+# ==============================================================================
+# color_primary <- "#00897b" # Teal for buttons, primary actions, and links
+# color_secondary <- "#2d3436" # Charcoal for navbar
+# color_sidebar <- "#f5f5f5" # Warm light gray for sidebar background
+# color_button_icon <- "text-dark" # White icons for buttons

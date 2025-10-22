@@ -15,3 +15,36 @@ input[type="number"] {
   border-radius: 8px;
   border: 1px solid #dee2e6;
 }
+
+/* Ensure primary buttons use theme colors */
+.btn-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+  opacity: 0.9;
+}
+
+/* Language dropdown menu background matches navbar */
+.dropdown-menu {
+  background-color: var(--bs-secondary) !important;
+  --bs-dropdown-color: #FFFFFF;
+}
+
+.dropdown-menu .bslib-nav-item a,
+.dropdown-menu .action-button {
+  color: #FFFFFF !important;
+  display: block;
+  padding: 0.5rem 1rem;
+}
+
+.dropdown-menu .bslib-nav-item a:hover,
+.dropdown-menu .action-button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+  text-decoration: none;
+}

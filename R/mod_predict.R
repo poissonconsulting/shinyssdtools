@@ -121,7 +121,7 @@ mod_predict_ui <- function(id) {
               actionButton(
                 ns("getCl"),
                 label = tagList(
-                  bsicons::bs_icon("calculator"),
+                  bsicons::bs_icon("calculator", class = color_button_icon),
                   span(`data-translate` = "ui_3clbutton", "Get CL")
                 ),
                 class = "btn-primary w-100"

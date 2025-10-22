@@ -237,9 +237,9 @@ mod_fit_server <- function(
     # Dynamic icon for update button
     output$update_icon <- renderUI({
       if (needs_update()) {
-        icon("refresh", class = "text-dark me-1")
+        icon("refresh", class = paste(color_button_icon, "me-1"))
       } else {
-        icon("check-circle", class = "text-dark me-1")
+        icon("check-circle", class = paste(color_button_icon, "me-1"))
       }
     }) %>%
       bindEvent(needs_update())

@@ -39,7 +39,7 @@ mod_report_ui <- function(id) {
             actionButton(
               ns("generateReport"),
               label = tagList(
-                bsicons::bs_icon("file-earmark-text"),
+                bsicons::bs_icon("file-earmark-text", class = color_button_icon),
                 span(`data-translate` = "ui_getreport", "Get Report")
               ),
               class = "btn-primary w-100"
