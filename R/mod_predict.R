@@ -359,10 +359,6 @@ mod_predict_server <- function(
     output$has_fit <- fit_mod$has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
 
-    observe({
-      print(has_predict())
-    })
-
     # trigger for updating predictions - only occur when on predict tab
     predict_trigger <- reactiveVal(0)
 
