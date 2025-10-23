@@ -654,7 +654,7 @@ mod_predict_server <- function(
         conc <- input$conc
         req(conc)
 
-        thresh <- signif(estimate_hp(fit, conc), 3)
+        thresh <- signif(estimate_hp(fit, conc), 3) * 100
         if (thresh < 1 | thresh > 99) {
           return()
         }
@@ -674,7 +674,7 @@ mod_predict_server <- function(
     predict_hc <- reactive({
       req(predict_trigger() > 0)
       req(main_nav() == "predict")
-      req(iv$is_valid())
+      # req(iv$is_valid())
       fit <- fit_mod$fit_dist()
       req(fit)
       req(thresh_rv$percent)
