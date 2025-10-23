@@ -3,12 +3,11 @@ title: "ssdtools BCANZ Report"
 params:
   toxicant: NA
   dists: NA
-  fit_dist: NA
   fit_plot: NA
   gof_table: NA
   model_average_plot: NA
+  pred_cl: NA
   data: NA
-  nboot: NA
 ---
 
 ```{r setup, include=FALSE}
@@ -27,6 +26,7 @@ The app is built from the R package [ssdtools](https://cran.r-project.org/web/pa
 **Report created:** `r format(Sys.Date(), "%d/%m/%Y")`  
 **Input distributions:** `r params$dists`  
 **ssdtools version:** `r utils::packageVersion("ssdtools")`  
+**shinyssdtools version:** `r utils::packageVersion("shinyssdtools")`  
 **R version:** `r gsub("R version ", "", R.version$version.string)`   
 
 \newpage
@@ -52,11 +52,7 @@ params$model_average_plot
 
 # Estimated hazardous/protective concentration
 ```{r, message=FALSE, warning=FALSE}
-avehc <- ssd_hc(params$fit_dist, proportion = c(0.01, 0.05, 0.1, 0.2), ci = TRUE, nboot = params$nboot, min_pboot = 0.8)
-avehc |>
-  mutate(HCx = proportion*100,
-         PCx = (1 - proportion) * 100) |> 
-  dplyr::select(HCx, PCx, est, se, lcl, ucl, nboot, pboot) |>
+params$pred_cl |>
   kable(digits = 3)
 ```
 Table 2. The estimated hazardous/protective concentrations. 

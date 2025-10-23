@@ -37,7 +37,9 @@ Imports:
     rlang,
     rmarkdown,
     shiny,
+    shinyhelper,
     shinyjs,
+    shinyvalidate,
     shinyWidgets,
     stats,
     waiter
@@ -46,10 +48,11 @@ Suggests:
     RColorBrewer,
     rsconnect,
     testthat (>= 3.0.0),
-    ssddata
+    ssddata,
+    shinytest2
 Encoding: UTF-8
 Language: en-US
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3.9000
 Config/testthat/edition: 3
