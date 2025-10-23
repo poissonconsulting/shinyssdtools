@@ -32,14 +32,20 @@ mod_report_ui <- function(id) {
                 create = TRUE,
                 createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
               ),
-              label = span(`data-translate` = "ui_3samples", "Bootstrap samples"),
+              label = span(
+                `data-translate` = "ui_3samples",
+                "Bootstrap samples"
+              ),
               choices = c("500", "1,000", "5,000", "10,000"),
               selected = "10,000"
             ),
             actionButton(
               ns("generateReport"),
               label = tagList(
-                bsicons::bs_icon("file-earmark-text", class = color_button_icon),
+                bsicons::bs_icon(
+                  "file-earmark-text",
+                  class = color_button_icon
+                ),
                 span(`data-translate` = "ui_getreport", "Get Report")
               ),
               class = "btn-primary w-100"
@@ -177,7 +183,10 @@ mod_report_server <- function(
 
     # Generate HTML report for preview
     report_preview_html <- reactive({
-      waiter::waiter_show(html = waiting_screen_report(), color = "#759dbe")
+      waiter::waiter_show(
+        html = waiting_screen_report(),
+        color = color_secondary
+      )
 
       trans <- translations()
       temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans))

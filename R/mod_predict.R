@@ -824,7 +824,7 @@ mod_predict_server <- function(
 
     table_cl <- reactive({
       dist <- fit_mod$fit_dist()
-      waiter::waiter_show(html = waiting_screen_cl(), color = "#759dbe")
+      waiter::waiter_show(html = waiting_screen_cl(), color = color_secondary)
       nboot <- clean_nboot(input$bootSamp)
       if (input$threshType != "Concentration") {
         y <- ssd_hp_ave(dist, conc = thresh_rv$conc, nboot = nboot)
