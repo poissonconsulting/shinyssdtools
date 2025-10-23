@@ -835,6 +835,9 @@ mod_predict_server <- function(
       }
       y$dists <- NULL
       y$samples <- NULL
+      y <-
+        y %>%
+        dplyr::arrange(dplyr::desc(.data$wt))
       waiter::waiter_hide()
       y
     }) %>%
