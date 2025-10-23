@@ -97,6 +97,7 @@ ui_download_popover_table <- function(tab = "fit", ns) {
       style = "padding:4px; font-size:80%; width: 100px"
     ),
     card(
+      class = card_shadow,
       style = "width: 250px; margin-top: 10px;",
       card_body(
         div(
@@ -131,6 +132,7 @@ ui_download_report <- function(tab = "report", ns) {
       style = "padding:4px; font-size:80%; width: 100px"
     ),
     card(
+      class = card_shadow,
       style = "width: 250px; margin-top: 10px;",
       card_body(
         div(
@@ -165,6 +167,7 @@ ui_download_popover <- function(tab = "fit", ns) {
       style = "padding:4px; font-size:80%; width: 100px;"
     ),
     card(
+      class = card_shadow,
       style = "width: 250px; margin-top: 10px;",
       card_body(
         div(

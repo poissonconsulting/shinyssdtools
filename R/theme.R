@@ -69,3 +69,6 @@ color_primary <- "#2e7d9a" # Professional teal-blue for buttons, primary actions
 color_secondary <- "#1e3a5f" # Deep navy blue for navbar
 color_sidebar <- "#f4f6f9" # Cool light gray for sidebar
 color_button_icon <- "text-white" # White icons for buttons
+
+# Card styling
+card_shadow <- "border" # Bootstrap shadow class for cards

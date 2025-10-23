@@ -57,6 +57,7 @@ mod_report_ui <- function(id) {
           conditionalPanel(
             condition = paste_js("has_preview", ns),
             card(
+              class = card_shadow,
               full_screen = TRUE,
               card_header(
                 class = "d-flex justify-content-between align-items-center",

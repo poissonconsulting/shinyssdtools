@@ -73,6 +73,7 @@ mod_data_ui <- function(id) {
         "input.main_nav == 'data' && {paste_js('has_data', ns)} == true"
       ),
       card(
+        class = card_shadow,
         card_header(span(
           `data-translate` = "ui_1preview",
           "Preview chosen dataset"
@@ -80,7 +81,7 @@ mod_data_ui <- function(id) {
         card_body(DT::DTOutput(ns("viewUpload")))
       ),
       card(
-        class = "mt-3",
+        class = paste("mt-3", card_shadow),
         card_body(span(
           `data-translate` = "ui_1note",
           "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value."

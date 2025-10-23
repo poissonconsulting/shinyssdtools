@@ -23,6 +23,7 @@ mod_rcode_ui <- function(id) {
       )
     ),
     card(
+      class = card_shadow,
       card_header(uiOutput("ui_nav4")),
       card_body(
         tagList(
@@ -364,40 +365,60 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       req(predict_mod$has_predict())
 
       threshold_vals <- predict_mod$threshold_values()
-      form <- "ssd_hc"
-      arg <- "proportion"
-      prop <- "FALSE"
-      thresh <- threshold_vals$percent / 100
+
+      nboot_clean <- clean_nboot(predict_mod$nboot()) %>% as.integer()
+
       if (predict_mod$threshold_type() != "Concentration") {
         form <- "ssd_hp"
         arg <- "conc"
-        prop <- "TRUE"
         thresh <- threshold_vals$conc
+        c(
+          paste0("cl_average <- ", form, "("),
+          paste0("  dist,"),
+          paste0("  ", arg, " = ", thresh, ","),
+          paste0("  ci = TRUE,"),
+          paste0("  nboot = ", nboot_clean, "L,"),
+          paste0("  proportion = TRUE,"),
+          paste0("  min_pboot = 0.8"),
+          ")",
+          "",
+          paste0("cl_individual <- ", form, "("),
+          paste0("  dist,"),
+          paste0("  ", arg, " = ", thresh, ","),
+          paste0("  ci = TRUE,"),
+          paste0("  average = FALSE,"),
+          paste0("  nboot = ", nboot_clean, "L,"),
+          paste0("  proportion = TRUE,"),
+          paste0("  min_pboot = 0.8"),
+          ")",
+          "",
+          "dplyr::bind_rows(cl_average, cl_individual)"
+        )
+      } else {
+        form <- "ssd_hc"
+        arg <- "proportion"
+        thresh <- threshold_vals$percent / 100
+        c(
+          paste0("cl_average <- ", form, "("),
+          paste0("  dist,"),
+          paste0("  ", arg, " = ", thresh, ","),
+          paste0("  ci = TRUE,"),
+          paste0("  nboot = ", nboot_clean, "L,"),
+          paste0("  min_pboot = 0.8"),
+          ")",
+          "",
+          paste0("cl_individual <- ", form, "("),
+          paste0("  dist,"),
+          paste0("  ", arg, " = ", thresh, ","),
+          paste0("  ci = TRUE,"),
+          paste0("  average = FALSE,"),
+          paste0("  nboot = ", nboot_clean, "L,"),
+          paste0("  min_pboot = 0.8"),
+          ")",
+          "",
+          "dplyr::bind_rows(cl_average, cl_individual)"
+        )
       }
-      nboot_clean <- clean_nboot(predict_mod$nboot()) %>% as.integer()
-
-      c(
-        paste0("cl_average <- ", form, "("),
-        paste0("  dist,"),
-        paste0("  ", arg, " = ", thresh, ","),
-        paste0("  ci = TRUE,"),
-        paste0("  nboot = ", nboot_clean, "L,"),
-        paste0("  proportion = ", prop, ","),
-        paste0("  min_pboot = 0.8"),
-        ")",
-        "",
-        paste0("cl_individual <- ", form, "("),
-        paste0("  dist,"),
-        paste0("  ", arg, " = ", thresh, ","),
-        paste0("  ci = TRUE,"),
-        paste0("  average = FALSE,"),
-        paste0("  nboot = ", nboot_clean, "L,"),
-        paste0("  proportion = ", prop, ","),
-        paste0("  min_pboot = 0.8"),
-        ")",
-        "",
-        "dplyr::bind_rows(cl_average, cl_individual)"
-      )
     }
 
     all_code <- reactive({

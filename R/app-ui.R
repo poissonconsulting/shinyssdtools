@@ -171,11 +171,11 @@ app_ui <- function() {
       ),
       nav_panel(
         title = span(`data-translate` = "ui_navabout", "About"),
-        card(card_body(uiOutput("ui_about")))
+        card(class = card_shadow, card_body(uiOutput("ui_about")))
       ),
       nav_panel(
         title = span(`data-translate` = "ui_navguide", "User Guide"),
-        card(uiOutput("ui_userguide"))
+        card(class = card_shadow, uiOutput("ui_userguide"))
       ),
       nav_spacer(),
       nav_menu(
