@@ -230,7 +230,7 @@ estimate_hc <- function(x, percent) {
 }
 
 estimate_hp <- function(x, conc) {
-  ssdtools::ssd_hp(x, conc = conc)$est
+  ssdtools::ssd_hp(x, conc = conc, proportion = TRUE)$est
 }
 
 ssd_hc_ave <- function(x, percent, nboot) {
@@ -268,7 +268,8 @@ ssd_hp_ave <- function(x, conc, nboot) {
     ci = TRUE,
     average = FALSE,
     nboot = nboot,
-    min_pboot = 0.8
+    min_pboot = 0.8,
+    proportion = TRUE
   )
 
   if (length(x) == 1) {
@@ -281,7 +282,8 @@ ssd_hp_ave <- function(x, conc, nboot) {
       ci = TRUE,
       average = TRUE,
       nboot = nboot,
-      min_pboot = 0.8
+      min_pboot = 0.8,
+      proportion = TRUE
     )
   }
 

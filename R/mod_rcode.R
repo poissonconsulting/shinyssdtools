@@ -366,10 +366,12 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       threshold_vals <- predict_mod$threshold_values()
       form <- "ssd_hc"
       arg <- "proportion"
+      prop <- "FALSE"
       thresh <- threshold_vals$percent / 100
       if (predict_mod$threshold_type() != "Concentration") {
         form <- "ssd_hp"
         arg <- "conc"
+        prop <- "TRUE"
         thresh <- threshold_vals$conc
       }
       nboot_clean <- clean_nboot(predict_mod$nboot()) %>% as.integer()
@@ -380,6 +382,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  ", arg, " = ", thresh, ","),
         paste0("  ci = TRUE,"),
         paste0("  nboot = ", nboot_clean, "L,"),
+        paste0("  proportion = ", prop, ","),
         paste0("  min_pboot = 0.8"),
         ")",
         "",
@@ -389,6 +392,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  ci = TRUE,"),
         paste0("  average = FALSE,"),
         paste0("  nboot = ", nboot_clean, "L,"),
+        paste0("  proportion = ", prop, ","),
         paste0("  min_pboot = 0.8"),
         ")",
         "",
