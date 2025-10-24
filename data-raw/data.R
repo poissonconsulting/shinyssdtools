@@ -331,6 +331,11 @@ translations <- dplyr::bind_rows(
     french = "Bornes de l'intervalle de confiance"
   ),
   dplyr::tibble(
+    id = "ui_3includeci",
+    english = "Include on model average plot",
+    french = "Inclure sur le graphique de la moyenne du modèle"
+  ),
+  dplyr::tibble(
     id = "ui_3pal",
     english = "Colour palette",
     french = "Éventail de couleur"

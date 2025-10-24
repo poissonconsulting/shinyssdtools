@@ -116,6 +116,14 @@ mod_predict_ui <- function(id) {
                 "Get confidence limits"
               ),
               value = "cl_pred",
+              checkboxInput(
+                ns("includeCi"),
+                label = span(
+                  `data-translate` = "ui_3includeci",
+                  "Include on model average plot"
+                ),
+                value = FALSE
+              ),
               selectizeInput(
                 ns("bootSamp"),
                 options = list(
@@ -402,6 +410,15 @@ mod_predict_server <- function(
         ignoreNULL = FALSE,
         ignoreInit = TRUE
       )
+
+    # Trigger when getCl is clicked to update plot with CI
+    observe({
+      if (isolate(main_nav()) == "predict") {
+        current_val <- isolate(predict_trigger())
+        predict_trigger(current_val + 1)
+      }
+    }) %>%
+      bindEvent(input$getCl)
 
     observe({
       trans <- translations()
@@ -700,6 +717,20 @@ mod_predict_server <- function(
     })
 
     # reactives ---------------------------------------------------------------
+    cl_requested <- reactiveVal(FALSE)
+    cl_nboot <- reactiveVal(NULL)
+
+    observe({
+      if (input$includeCi) {
+        cl_requested(TRUE)
+        cl_nboot(clean_nboot(input$bootSamp))
+      } else {
+        cl_requested(FALSE)
+        cl_nboot(NULL)
+      }
+    }) %>%
+      bindEvent(input$getCl)
+
     predict_hc <- reactive({
       req(predict_trigger() > 0)
       req(main_nav() == "predict")
@@ -707,12 +738,25 @@ mod_predict_server <- function(
       fit <- fit_mod$fit_dist()
       req(fit)
       req(thresh_rv$percent)
-      stats::predict(fit, proportion = unique(c(1:99, thresh_rv$percent)) / 100)
+
+      # Include CI if checkbox is checked and getCl was clicked
+      if (input$includeCi && cl_requested() && !is.null(cl_nboot())) {
+        stats::predict(
+          fit,
+          proportion = unique(c(1:99, thresh_rv$percent)) / 100,
+          nboot = cl_nboot(),
+          ci = TRUE
+        )
+      } else {
+        stats::predict(fit, proportion = unique(c(1:99, thresh_rv$percent)) / 100)
+      }
     }) %>%
       bindCache(
         thresh_rv$percent,
         thresh_rv$conc,
-        fit_mod$fit_dist()
+        fit_mod$fit_dist(),
+        cl_requested(),
+        cl_nboot()
       ) %>%
       bindEvent(predict_trigger())
 
@@ -843,7 +887,8 @@ mod_predict_server <- function(
         label_size = input$sizeLabel3,
         conc_value = thresh_rv$conc,
         big.mark = big_mark(),
-        decimal.mark = decimal_mark()
+        decimal.mark = decimal_mark(),
+        ci = input$includeCi && cl_requested()
       ))
 
       if (!is.null(x)) {
@@ -1052,6 +1097,11 @@ mod_predict_server <- function(
         x_log = reactive({
           input$xlog
         }),
+        include_ci = reactive({
+          input$includeCi
+        }),
+        cl_requested = cl_requested,
+        cl_nboot = cl_nboot,
         has_cl = has_cl,
         has_predict = has_predict
       )

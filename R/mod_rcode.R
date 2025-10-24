@@ -329,15 +329,40 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         ")"
       )
 
+      # Check if CI should be included
+      include_ci <- predict_mod$include_ci() && predict_mod$cl_requested()
+      ci_value <- if (include_ci) "TRUE" else "FALSE"
+
+      # Generate predict() call
+      if (include_ci) {
+        nboot <- predict_mod$cl_nboot()
+        predict_code <- c(
+          paste0("pred <- predict("),
+          paste0("  dist,"),
+          paste0(
+            "  proportion = unique(c(1:99, ",
+            threshold_vals$percent,
+            ") / 100),"
+          ),
+          paste0("  nboot = ", nboot, ","),
+          "  ci = TRUE",
+          ")"
+        )
+      } else {
+        predict_code <- c(
+          paste0("pred <- predict("),
+          paste0("  dist,"),
+          paste0(
+            "  proportion = unique(c(1:99, ",
+            threshold_vals$percent,
+            ") / 100)"
+          ),
+          ")"
+        )
+      }
+
       c(
-        paste0("pred <- predict("),
-        paste0("  dist,"),
-        paste0(
-          "  proportion = unique(c(1:99, ",
-          threshold_vals$percent,
-          ") / 100)"
-        ),
-        ")",
+        predict_code,
         "",
         paste0("ssd_plot("),
         paste0("  data,"),
@@ -349,7 +374,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  label_size = ", predict_mod$label_size(), ","),
         paste0("  ylab = '", ylab, "',"),
         paste0("  xlab = '", xlab, "',"),
-        paste0("  ci = FALSE,"),
+        paste0("  ci = ", ci_value, ","),
         paste0("  shift_x = ", predict_mod$adjust_label(), ","),
         paste0("  hc = ", code_hc(), ","),
         paste0("  big.mark = '", predict_mod$big_mark(), "',"),

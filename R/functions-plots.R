@@ -71,7 +71,8 @@ plot_predictions <- function(
   label_size,
   conc_value,
   big.mark,
-  decimal.mark
+  decimal.mark,
+  ci = FALSE
 ) {
   proportion <- percent / 100
   if (!length(proportion)) {
@@ -93,7 +94,7 @@ plot_predictions <- function(
     label_size = label_size,
     xlab = xaxis,
     ylab = yaxis,
-    ci = FALSE,
+    ci = ci,
     hc = proportion,
     shift_x = as.numeric(label_adjust),
     big.mark = big.mark,
