@@ -73,8 +73,5 @@ Any options selected in the app will be incorporated into the report.
 
 Copy R code to reproduce outputs programmatically. 
 Code is dynamically generated based on user inputs and functions executed within the app (e.g., code for generating confidence limits will appear after `Get CL` button is clicked). 
-
-To generate a graph with confidence intervals, copy the R code and paste in R.  Then set `ci = TRUE` in the predict and `ssd_plot` functions.
-
  
 
