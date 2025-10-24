@@ -21,7 +21,8 @@ plot_distributions <- function(
   xlab,
   text_size,
   big.mark,
-  decimal.mark
+  decimal.mark,
+  title = NULL
 ) {
   gp <- ssdtools::ssd_plot_cdf(
     x,
@@ -34,6 +35,11 @@ plot_distributions <- function(
     big.mark = big.mark,
     decimal.mark = decimal.mark
   )
+
+  if (!is.null(title) && title != "") {
+    gp <- gp + ggplot2::ggtitle(title)
+  }
+
   gp
 }
 

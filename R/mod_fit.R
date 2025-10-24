@@ -112,6 +112,11 @@ mod_fit_ui <- function(id) {
                   value = 12,
                   min = 1,
                   max = 100
+                ),
+                textInput(
+                  ns("title"),
+                  value = "",
+                  label = span(`data-translate` = "ui_3title", "Title")
                 )
               )
             )
@@ -277,6 +282,18 @@ mod_fit_server <- function(
     }) %>%
       bindEvent(data_mod$clean_data())
 
+    observe({
+      toxicant_name <- data_mod$toxicant_name()
+      if (!is.null(toxicant_name) && toxicant_name != "") {
+        updateTextInput(
+          session,
+          "title",
+          value = toxicant_name
+        )
+      }
+    }) %>%
+      bindEvent(data_mod$toxicant_name())
+
     # validation --------------------------------------------------------------
     iv <- InputValidator$new()
 
@@ -329,7 +346,8 @@ mod_fit_server <- function(
         xlab = append_unit(input$xaxis2, input$selectUnit),
         text_size = input$size2,
         big.mark = big_mark(),
-        decimal.mark = decimal_mark()
+        decimal.mark = decimal_mark(),
+        title = input$title
       )
     })
 
@@ -493,6 +511,9 @@ mod_fit_server <- function(
         }),
         text_size = reactive({
           input$size2
+        }),
+        title = reactive({
+          input$title
         }),
         has_fit = has_fit
       )

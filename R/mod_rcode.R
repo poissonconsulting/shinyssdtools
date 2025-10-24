@@ -242,16 +242,10 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         ")"
       )
 
-      c(
-        paste0("dist <- ssd_fit_dists("),
-        paste0("  data,"),
-        paste0("  left = '", fit_mod$conc_column() %>% make.names(), "',"),
-        paste0("  dists = ", dists_str, ","),
-        paste0("  silent = TRUE,"),
-        paste0("  reweight = FALSE,"),
-        paste0("  rescale = ", fit_mod$rescale()),
-        ")",
-        "",
+      title <- fit_mod$title()
+      has_title <- !is.null(title) && title != ""
+
+      plot_code <- c(
         paste0("ssd_plot_cdf("),
         paste0("  dist,"),
         paste0("  ylab = '", ylab, "',"),
@@ -262,7 +256,24 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  text_size = ", text_size, ","),
         paste0("  big.mark = '", fit_mod$big_mark(), "',"),
         paste0("  decimal.mark = '", fit_mod$decimal_mark(), "'"),
+        if (has_title) ") +" else ")"
+      )
+
+      if (has_title) {
+        plot_code <- c(plot_code, paste0("  ggtitle('", title, "')"))
+      }
+
+      c(
+        paste0("dist <- ssd_fit_dists("),
+        paste0("  data,"),
+        paste0("  left = '", fit_mod$conc_column() %>% make.names(), "',"),
+        paste0("  dists = ", dists_str, ","),
+        paste0("  silent = TRUE,"),
+        paste0("  reweight = FALSE,"),
+        paste0("  rescale = ", fit_mod$rescale()),
         ")",
+        "",
+        plot_code,
         "",
         "ssd_gof(dist, wt = TRUE) %>%",
         "    dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%

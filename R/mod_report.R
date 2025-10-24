@@ -175,6 +175,18 @@ mod_report_server <- function(
     }) %>%
       bindEvent(lang(), predict_mod$nboot())
 
+    observe({
+      toxicant_name <- data_mod$toxicant_name()
+      if (!is.null(toxicant_name) && toxicant_name != "") {
+        updateTextInput(
+          session,
+          "toxicant",
+          value = toxicant_name
+        )
+      }
+    }) %>%
+      bindEvent(data_mod$toxicant_name())
+
     params_list <- reactive({
       req(predict_mod$has_predict())
       req(fit_mod$has_fit())

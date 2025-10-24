@@ -434,6 +434,18 @@ mod_predict_server <- function(
     }) %>%
       bindEvent(lang())
 
+    observe({
+      toxicant_name <- data_mod$toxicant_name()
+      if (!is.null(toxicant_name) && toxicant_name != "") {
+        updateTextInput(
+          session,
+          "title",
+          value = toxicant_name
+        )
+      }
+    }) %>%
+      bindEvent(data_mod$toxicant_name())
+
     thresh_rv <- reactiveValues(
       percent = NULL,
       conc = NULL

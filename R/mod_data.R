@@ -82,6 +82,15 @@ mod_data_ui <- function(id) {
             )
           )
         )
+      ),
+      textInput(
+        ns("toxicant"),
+        label = span(
+          `data-translate` = "ui_1toxname",
+          "Toxicant name (optional)"
+        ),
+        value = "",
+        placeholder = ""
       )
     ),
 
@@ -288,7 +297,10 @@ mod_data_server <- function(id, translations, lang) {
         data_cols = reactive({
           names(data_mod$clean_data())
         }),
-        has_data = has_data
+        has_data = has_data,
+        toxicant_name = reactive({
+          input$toxicant
+        })
       )
     )
   })

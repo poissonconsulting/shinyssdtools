@@ -621,9 +621,14 @@ translations <- dplyr::bind_rows(
     french = "protégeant % des espèces"
   ),
   dplyr::tibble(
+    id = "ui_1toxname",
+    english = "Toxicant name (optional)",
+    french = "Nom de la substance (optionnel)"
+  ),
+  dplyr::tibble(
     id = "ui_4toxname",
-    english = "Toxicant name",
-    french = "Nom de la substance"
+    english = "Toxicant name (optional)",
+    french = "Nom de la substance (optionnel)"
   ),
   dplyr::tibble(
     id = "ui_4download",
