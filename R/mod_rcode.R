@@ -41,7 +41,6 @@ mod_rcode_ui <- function(id) {
     ),
     card(
       class = card_shadow,
-      card_header(uiOutput("ui_nav4")),
       card_body(
         tagList(
           div(
