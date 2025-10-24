@@ -161,6 +161,15 @@ mod_predict_ui <- function(id) {
               ),
               value = "plot_format_pred",
               selected = FALSE,
+              radioButtons(
+                ns("ribbonStyle"),
+                label = span(`data-translate` = "ui_3ribbonstyle", "Estimate and CI style"),
+                choices = c(
+                  "Black filled ribbon" = "TRUE",
+                  "Red/green lines" = "FALSE"
+                ),
+                selected = "TRUE"
+              ),
               static_label_input(
                 ns("selectLabel"),
                 "ui_3label",
@@ -432,6 +441,23 @@ mod_predict_server <- function(
         "threshType",
         choices = choices,
         selected = input$threshType
+      )
+    }) %>%
+      bindEvent(translations())
+
+    observe({
+      trans <- translations()
+      black_ribbon <- tr("ui_3ribbonblack", trans)
+      lines <- tr("ui_3ribbonlines", trans)
+      choices <- c(
+        setNames("TRUE", black_ribbon),
+        setNames("FALSE", lines)
+      )
+      updateRadioButtons(
+        session,
+        "ribbonStyle",
+        choices = choices,
+        selected = input$ribbonStyle
       )
     }) %>%
       bindEvent(translations())
@@ -888,7 +914,8 @@ mod_predict_server <- function(
         conc_value = thresh_rv$conc,
         big.mark = big_mark(),
         decimal.mark = decimal_mark(),
-        ci = input$includeCi && cl_requested()
+        ci = input$includeCi && cl_requested(),
+        ribbon = as.logical(input$ribbonStyle)
       ))
 
       if (!is.null(x)) {
@@ -1099,6 +1126,9 @@ mod_predict_server <- function(
         }),
         include_ci = reactive({
           input$includeCi
+        }),
+        ribbon = reactive({
+          as.logical(input$ribbonStyle)
         }),
         cl_requested = cl_requested,
         cl_nboot = cl_nboot,

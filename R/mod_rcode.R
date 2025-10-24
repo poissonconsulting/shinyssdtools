@@ -332,6 +332,9 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       include_ci <- predict_mod$include_ci() && predict_mod$cl_requested()
       ci_value <- if (include_ci) "TRUE" else "FALSE"
 
+      # Get ribbon value
+      ribbon_value <- if (predict_mod$ribbon()) "TRUE" else "FALSE"
+
       # Generate predict() call
       if (include_ci) {
         nboot <- predict_mod$cl_nboot()
@@ -374,6 +377,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  ylab = '", ylab, "',"),
         paste0("  xlab = '", xlab, "',"),
         paste0("  ci = ", ci_value, ","),
+        paste0("  ribbon = ", ribbon_value, ","),
         paste0("  shift_x = ", predict_mod$adjust_label(), ","),
         paste0("  hc = ", code_hc(), ","),
         paste0("  big.mark = '", predict_mod$big_mark(), "',"),

@@ -336,6 +336,21 @@ translations <- dplyr::bind_rows(
     french = "Inclure sur le graphique de la moyenne du modèle"
   ),
   dplyr::tibble(
+    id = "ui_3ribbonstyle",
+    english = "Estimate and CL style",
+    french = "Style d'estimation et bornes"
+  ),
+  dplyr::tibble(
+    id = "ui_3ribbonblack",
+    english = "Black filled ribbon",
+    french = "Ruban noir rempli"
+  ),
+  dplyr::tibble(
+    id = "ui_3ribbonlines",
+    english = "Red/green lines",
+    french = "Lignes rouges/vertes"
+  ),
+  dplyr::tibble(
     id = "ui_3pal",
     english = "Colour palette",
     french = "Éventail de couleur"
