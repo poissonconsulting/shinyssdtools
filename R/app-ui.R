@@ -49,6 +49,28 @@ app_ui <- function() {
         display: none;
       }"
     ),
+
+    # Language dropdown menu styling with theme colors
+    tags$style(
+      type = "text/css",
+      glue::glue("
+        .dropdown-menu {{
+          background-color: {color_secondary} !important;
+        }}
+        .dropdown-menu .bslib-nav-item a,
+        .dropdown-menu .action-button {{
+          color: #FFFFFF !important;
+          display: block;
+          padding: 0.5rem 1rem;
+        }}
+        .dropdown-menu .bslib-nav-item a:hover,
+        .dropdown-menu .action-button:hover {{
+          background-color: rgba(255, 255, 255, 0.1) !important;
+          color: #FFFFFF !important;
+          text-decoration: none;
+        }}
+      ")
+    ),
     tags$script(HTML(
       "
       $(document).on('shiny:connected', function() {

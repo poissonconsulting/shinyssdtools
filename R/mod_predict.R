@@ -691,7 +691,7 @@ mod_predict_server <- function(
     predict_hc <- reactive({
       req(predict_trigger() > 0)
       req(main_nav() == "predict")
-      # req(iv$is_valid())
+
       fit <- fit_mod$fit_dist()
       req(fit)
       req(thresh_rv$percent)
