@@ -78,11 +78,10 @@ remove_empty_rows <- function(data) {
 #' @return A cleaned tibble
 #' @export
 clean_ssd_data <- function(data) {
-  # data %>%
-  #   remove_blank_headers() %>%
-  #   remove_empty_columns() %>%
-  #   remove_empty_rows()
-  data
+  data %>%
+    remove_blank_headers() %>%
+    remove_empty_columns() %>%
+    remove_empty_rows()
 }
 
 #' Check if concentration values are numeric
