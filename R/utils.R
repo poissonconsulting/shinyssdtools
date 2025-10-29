@@ -15,10 +15,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+#' Print plot silently
+#' @param x A plot object (typically ggplot2)
+#' @return NULL (invisibly prints plot)
+#' @keywords internal
 silent_plot <- function(x) {
   suppressMessages(suppressWarnings(print(x)))
 }
 
+#' Get available concentration units
+#' @return Character vector of unit strings with Unicode symbols
+#' @keywords internal
 units <- function() {
   c(
     "",
@@ -34,6 +41,11 @@ units <- function() {
   )
 }
 
+#' Append unit to label text
+#' @param x Character string label text
+#' @param unit Character string unit (e.g., "mg/L")
+#' @return Character string with unit appended in parentheses, or original if unit empty
+#' @keywords internal
 append_unit <- function(x, unit) {
   if (unit == "") {
     return(x)

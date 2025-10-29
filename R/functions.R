@@ -17,6 +17,11 @@
 
 utils::globalVariables(c("."))
 
+#' Safely try an expression and return NULL on error
+#' @param expr An R expression to evaluate
+#' @param silent Logical indicating whether to suppress error messages (default: TRUE)
+#' @return The result of expr on success, NULL on error
+#' @keywords internal
 safe_try <- function(expr, silent = TRUE) {
   result <- try(expr, silent = silent)
   if (inherits(result, "try-error")) {
@@ -25,15 +30,15 @@ safe_try <- function(expr, silent = TRUE) {
   result
 }
 
+#' Clean bootstrap sample count from formatted string
+#' @param x Character string representing a number with separators
+#' @return Integer value with separators removed
+#' @keywords internal
 clean_nboot <- function(x) {
   as.integer(gsub("(,|\\s)", "", x))
 }
 
 #' Remove Excel/Numbers blank header columns (X1, X2, etc.)
-#'
-#' Removes columns named X1, X2, ..., X200 which are typically created by
-#' Excel or Numbers when exporting CSV files with blank column headers.
-#'
 #' @param data A data frame or tibble
 #' @return A tibble with X1, X2, ... X200 columns removed
 #' @keywords internal
@@ -43,11 +48,6 @@ remove_blank_headers <- function(data) {
 }
 
 #' Remove completely empty columns
-#'
-#' Removes columns where all values are NA or empty strings. This is useful
-#' for cleaning uploaded CSV files or handsontable data where users may leave
-#' optional columns empty.
-#'
 #' @param data A data frame or tibble
 #' @return A tibble with empty columns removed
 #' @keywords internal
@@ -58,11 +58,6 @@ remove_empty_columns <- function(data) {
 }
 
 #' Remove completely empty rows
-#'
-#' Removes rows where all values are NA or empty strings. This is useful
-#' for cleaning uploaded CSV files or handsontable data where users may leave
-#' trailing empty rows.
-#'
 #' @param data A data frame or tibble
 #' @return A tibble with empty rows removed
 #' @keywords internal
@@ -79,21 +74,18 @@ remove_empty_rows <- function(data) {
 }
 
 #' Clean uploaded data
-#'
-#' Removes blank headers, empty columns, and empty rows from uploaded data
-#'
 #' @param data A data frame or tibble
 #' @return A cleaned tibble
 #' @export
 clean_ssd_data <- function(data) {
-  data %>%
-    remove_blank_headers() %>%
-    remove_empty_columns() %>%
-    remove_empty_rows()
+  # data %>%
+  #   remove_blank_headers() %>%
+  #   remove_empty_columns() %>%
+  #   remove_empty_rows()
+  data
 }
 
 #' Check if concentration values are numeric
-#'
 #' @param x A vector
 #' @return TRUE if numeric, FALSE otherwise
 #' @keywords internal
@@ -102,7 +94,6 @@ has_numeric_concentration <- function(x) {
 }
 
 #' Check if concentration values have no missing values
-#'
 #' @param x A vector
 #' @return TRUE if no missing values, FALSE otherwise
 #' @keywords internal
@@ -111,7 +102,6 @@ has_no_missing_concentration <- function(x) {
 }
 
 #' Check if concentration values are all positive
-#'
 #' @param x A numeric vector
 #' @return TRUE if all positive, FALSE otherwise
 #' @keywords internal
@@ -120,7 +110,6 @@ has_positive_concentration <- function(x) {
 }
 
 #' Check if concentration values are all finite
-#'
 #' @param x A numeric vector
 #' @return TRUE if all finite, FALSE otherwise
 #' @keywords internal
@@ -129,7 +118,6 @@ has_finite_concentration <- function(x) {
 }
 
 #' Check if there are at least 6 concentration values
-#'
 #' @param x A vector
 #' @return TRUE if at least 6 values, FALSE otherwise
 #' @keywords internal
@@ -138,7 +126,6 @@ has_min_concentration <- function(x) {
 }
 
 #' Check if concentration values are not all identical
-#'
 #' @param x A numeric vector
 #' @return TRUE if values are not all identical, FALSE otherwise
 #' @keywords internal
@@ -146,6 +133,11 @@ has_not_all_identical <- function(x) {
   !zero_range(x)
 }
 
+#' Estimate bootstrap computation time
+#' @param nboot Integer number of bootstrap samples
+#' @param lang Character string: "english" or "french" for language
+#' @return Character string with formatted time estimate
+#' @keywords internal
 estimate_time <- function(nboot, lang) {
   preset_df <- data.frame(
     n = c(500, 1000, 5000, 10000),
@@ -179,18 +171,37 @@ estimate_time <- function(nboot, lang) {
   time_str
 }
 
+#' Get translation value by ID
+#' @param id Character string translation identifier
+#' @param trans Data frame with columns 'id' and 'trans'
+#' @return Character vector of translation text(s)
+#' @keywords internal
 tr <- function(id, trans) {
   trans$trans[trans$id == id]
 }
 
+#' Create JavaScript conditional for Shiny output
+#' @param x Character string output name
+#' @param ns Shiny namespace function
+#' @return Character string with JavaScript expression
+#' @keywords internal
 paste_js <- function(x, ns) {
   paste0("output['", ns(x), "']")
 }
 
+#' Guess species column name
+#' @param name Character vector of column names
+#' @return Character string of matched column name, or NA if no match
+#' @keywords internal
 guess_sp <- function(name) {
   name[grepl("sp", tolower(name))][1]
 }
 
+#' Guess concentration column name
+#' @param name Character vector of column names
+#' @param data Optional data frame to identify numeric columns
+#' @return Character string of matched column name, or NA if no match
+#' @keywords internal
 guess_conc <- function(name, data = NULL) {
   # First try to find column with 'conc' in name
   conc_match <- name[grepl("conc", tolower(name))][1]
@@ -210,18 +221,35 @@ guess_conc <- function(name, data = NULL) {
   return(NA_character_)
 }
 
+#' Add mandatory field indicator to label
+#' @param label Character string or tag for the label
+#' @return tagList with label and asterisk span
+#' @keywords internal
 label_mandatory <- function(label) {
   tagList(label, span("*", class = "mandatory_star"))
 }
 
+#' Create inline-block div wrapper
+#' @param x Shiny UI element(s) to wrap
+#' @return tags$div with inline-block styling
+#' @keywords internal
 inline <- function(x) {
   tags$div(style = "display:inline-block;", x)
 }
 
+#' Create grey hint text
+#' @param x Character string hint text
+#' @return HTML object with grey font color
+#' @keywords internal
 hint <- function(x) {
   HTML(paste0("<font color='grey'>", x, "</font>"))
 }
 
+#' Check if values have zero range
+#' @param x Numeric vector
+#' @param tol Tolerance for comparison (default: sqrt of machine precision)
+#' @return TRUE if range is zero (within tolerance), FALSE otherwise
+#' @keywords internal
 zero_range <- function(x, tol = .Machine$double.eps^0.5) {
   if (length(x) == 1) {
     return(TRUE)
@@ -230,14 +258,50 @@ zero_range <- function(x, tol = .Machine$double.eps^0.5) {
   isTRUE(all.equal(x[1], x[2], tolerance = tol))
 }
 
+#' Estimate hazard concentration
+#' @param x A fitdists object from ssd_fit_dists()
+#' @param percent Numeric percent of species affected (0-100 scale)
+#' @return Numeric concentration estimate
+#' @keywords internal
 estimate_hc <- function(x, percent) {
   ssdtools::ssd_hc(x, proportion = percent / 100)$est
 }
 
+#' Estimate hazard percent
+#' @param x A fitdists object from ssd_fit_dists()
+#' @param conc Numeric concentration value
+#' @return Numeric proportion estimate (0-1 scale)
+#' @keywords internal
 estimate_hp <- function(x, conc) {
   ssdtools::ssd_hp(x, conc = conc, proportion = TRUE)$est
 }
 
+#' Calculate threshold percent from concentration with rounding
+#' @param fit A fitdists object
+#' @param conc Numeric concentration value
+#' @param digits Number of significant digits for rounding (default: 3)
+#' @return Numeric percent value (0-100 scale)
+#' @keywords internal
+calculate_threshold_percent <- function(fit, conc, digits = 3) {
+  signif(estimate_hp(fit, conc), digits) * 100
+}
+
+#' Calculate threshold concentration from percent with rounding
+#' @param fit A fitdists object
+#' @param thresh Numeric threshold percent (0-100 scale)
+#' @param digits Number of significant digits for rounding (default: 3)
+#' @return Numeric concentration value
+#' @keywords internal
+calculate_threshold_conc <- function(fit, thresh, digits = 3) {
+  signif(estimate_hc(fit, thresh), digits)
+}
+
+#' Calculate hazard concentration with confidence intervals
+#' @param x A fitdists object from ssd_fit_dists()
+#' @param percent Numeric percent of species affected (0-100 scale)
+#' @param nboot Integer number of bootstrap samples for confidence intervals
+#' @return Data frame with columns: dist, est, se, lcl, ucl, wt
+#' @keywords internal
 ssd_hc_ave <- function(x, percent, nboot) {
   dist <- ssdtools::ssd_hc(
     x,
@@ -266,6 +330,12 @@ ssd_hc_ave <- function(x, percent, nboot) {
     dplyr::mutate_at(c("est", "se", "ucl", "lcl", "wt"), ~ signif(., 3))
 }
 
+#' Calculate hazard percent with confidence intervals
+#' @param x A fitdists object from ssd_fit_dists()
+#' @param conc Numeric concentration value
+#' @param nboot Integer number of bootstrap samples for confidence intervals
+#' @return Data frame with columns: dist, est, se, lcl, ucl, wt
+#' @keywords internal
 ssd_hp_ave <- function(x, conc, nboot) {
   dist <- ssdtools::ssd_hp(
     x,
@@ -296,7 +366,10 @@ ssd_hp_ave <- function(x, conc, nboot) {
     dplyr::mutate_at(c("est", "se", "ucl", "lcl", "wt"), ~ signif(., 3))
 }
 
-# Helper function to format R code with proper indentation using styler
+#' Format R code with proper styling
+#' @param code_lines Character vector of R code lines
+#' @return Single character string with formatted, styled code
+#' @keywords internal
 format_r_code <- function(code_lines) {
   # Join lines into a single string
   code_text <- paste(code_lines, collapse = "\n")

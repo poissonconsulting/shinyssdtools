@@ -726,7 +726,7 @@ mod_predict_server <- function(
         conc <- input$conc
         req(conc)
 
-        thresh <- signif(estimate_hp(fit, conc), 3) * 100
+        thresh <- calculate_threshold_percent(fit, conc)
         if (thresh < 1 | thresh > 99) {
           return()
         }
@@ -737,7 +737,7 @@ mod_predict_server <- function(
         req(thresh)
 
         thresh_rv$percent <- thresh
-        conc <- signif(estimate_hc(fit, thresh), 3)
+        conc <- calculate_threshold_conc(fit, thresh)
         thresh_rv$conc <- conc
       }
     })

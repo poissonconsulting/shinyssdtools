@@ -15,6 +15,16 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+#' Plot species sensitivity distributions
+#' @param x A fitdists object from ssd_fit_dists()
+#' @param ylab Character string for y-axis label
+#' @param xlab Character string for x-axis label
+#' @param text_size Numeric text size for plot elements
+#' @param big.mark Character used as thousands separator (e.g., "," or " ")
+#' @param decimal.mark Character used as decimal separator (e.g., "." or ",")
+#' @param title Optional character string plot title (default: NULL)
+#' @return ggplot2 object with SSD CDF plot
+#' @keywords internal
 plot_distributions <- function(
   x,
   ylab,
@@ -43,11 +53,43 @@ plot_distributions <- function(
   gp
 }
 
+#' Extract and format x-axis breaks from ggplot
+#' @param gp A ggplot2 object
+#' @return Numeric vector of sorted, rounded x-axis break values
+#' @keywords internal
 gp_xbreaks <- function(gp) {
   breaks <- ggplot2::ggplot_build(gp)$layout$panel_params[[1]]$x$breaks
   sort(signif(as.numeric(stats::na.omit(breaks)), 3))
 }
 
+#' Plot SSD predictions with confidence intervals
+#' @param x A fitdists object from ssd_fit_dists()
+#' @param pred Prediction data frame from predict()
+#' @param conc Character string column name for concentration values
+#' @param label Character string column name for point labels
+#' @param colour Character string column name for point colors
+#' @param shape Character string column name for point shapes
+#' @param percent Numeric hazard concentration percent to display (0-100 scale)
+#' @param label_adjust Numeric horizontal adjustment for point labels
+#' @param xaxis Character string x-axis label
+#' @param yaxis Character string y-axis label
+#' @param title Character string plot title
+#' @param xmin Numeric minimum x-axis limit (use NA for auto)
+#' @param xmax Numeric maximum x-axis limit (use NA for auto)
+#' @param palette Character string ggplot2 color palette name
+#' @param legend_colour Character string legend title for color aesthetic
+#' @param legend_shape Character string legend title for shape aesthetic
+#' @param xbreaks Optional numeric vector of x-axis break points (default: NULL)
+#' @param trans Character string axis transformation (e.g., "log10")
+#' @param text_size Numeric text size for plot elements
+#' @param label_size Numeric size for point labels
+#' @param conc_value Numeric concentration value for threshold line
+#' @param big.mark Character used as thousands separator
+#' @param decimal.mark Character used as decimal separator
+#' @param ci Logical whether to display confidence intervals (default: FALSE)
+#' @param ribbon Logical whether to display CI as ribbon vs lines (default: TRUE)
+#' @return ggplot2 object with SSD prediction plot
+#' @keywords internal
 plot_predictions <- function(
   x,
   pred,

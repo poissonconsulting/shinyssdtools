@@ -15,11 +15,22 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+#' Create a waiter loading screen
+#' @param id Character string output ID to attach waiter to
+#' @param ns Shiny namespace function
+#' @return A Waiter object configured for the namespaced output
+#' @keywords internal
 ui_waiter <- function(id, ns) {
   waiter::Waiter$new(id = ns(id), html = waiter::spin_2(), color = "white")
 }
 
-# Helper function for static label + dynamic input pattern
+#' Create static label with dynamic input pattern
+#' @param ns_id Character string namespaced input ID for label's 'for' attribute
+#' @param translate_key Character string translation key for data-translate attribute
+#' @param default_text Character string default text to display in label
+#' @param ui_output_id Character string ID for the uiOutput element
+#' @return tagList with label and uiOutput elements
+#' @keywords internal
 static_label_input <- function(
   ns_id,
   translate_key,
@@ -36,6 +47,10 @@ static_label_input <- function(
   )
 }
 
+#' Generate DataTables options with language support
+#' @param lang Character string language code: "english" or "french" (default: "english")
+#' @return List of DataTables options including pageLength, language translations, and column definitions
+#' @keywords internal
 dt_options <- function(lang = "english") {
   # Language-specific translations
   lang_options <- if (lang == "french") {
@@ -95,6 +110,10 @@ dt_options <- function(lang = "english") {
   )
 }
 
+#' Create a dashed border info box
+#' @param x UI content to display inside the box
+#' @return div element with dashed border styling and centered muted text
+#' @keywords internal
 ui_dashbox <- function(x) {
   div(
     class = "text-muted text-center p-5",
@@ -103,6 +122,11 @@ ui_dashbox <- function(x) {
   )
 }
 
+#' Create table download popover button
+#' @param tab Character string module prefix for button IDs (default: "fit")
+#' @param ns Shiny namespace function
+#' @return bslib popover element with download button and format options
+#' @keywords internal
 ui_download_popover_table <- function(tab = "fit", ns) {
   bslib::popover(
     actionButton(
@@ -138,6 +162,11 @@ ui_download_popover_table <- function(tab = "fit", ns) {
   )
 }
 
+#' Create report download popover button
+#' @param tab Character string module prefix for button IDs (default: "report")
+#' @param ns Shiny namespace function
+#' @return bslib popover element with download button and format options
+#' @keywords internal
 ui_download_report <- function(tab = "report", ns) {
   bslib::popover(
     actionButton(
@@ -173,6 +202,11 @@ ui_download_report <- function(tab = "report", ns) {
   )
 }
 
+#' Create plot download popover button with settings
+#' @param tab Character string module prefix for button IDs (default: "fit")
+#' @param ns Shiny namespace function
+#' @return bslib popover element with download button, format options, and PNG settings
+#' @keywords internal
 ui_download_popover <- function(tab = "fit", ns) {
   bslib::popover(
     actionButton(
