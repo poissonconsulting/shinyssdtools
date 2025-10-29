@@ -18,3 +18,4 @@ inst/docs/
 .vscode/
 
 .claude/settings.local.json
+tests/resources/
