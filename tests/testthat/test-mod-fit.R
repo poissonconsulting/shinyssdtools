@@ -298,3 +298,30 @@ test_that("mod_fit_server returns all expected reactive values", {
     }
   )
 })
+
+# Validation Tests ------------------------------------------------------------
+test_that("validation fails if concentration column not selected", {
+  testServer(
+    mod_fit_server,
+    args = list(
+      translations = reactive(test_translations),
+      lang = reactive("english"),
+      data_mod = data_mod,
+      big_mark = reactive(","),
+      decimal_mark = reactive("."),
+      main_nav = reactive("fit")
+    ),
+    {
+      session$setInputs(
+        selectConc = "Species",
+        selectDist = c("lnorm", "gamma"),
+        rescale = FALSE,
+        updateFit = 1,
+        selectUnit = "mg/L",
+      )
+      session$flushReact()
+
+      expect_false(iv$is_valid())
+    }
+  )
+})
