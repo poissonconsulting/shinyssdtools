@@ -118,13 +118,10 @@ mock_data_module <- function(data = NULL,
   }
   list(
     data = shiny::reactive(data),
+    clean_data = shiny::reactive(data),
+    data_cols = shiny::reactive(names(data)),
     has_data = shiny::reactive(!is.null(data)),
-    toxicant_name = shiny::reactive(toxicant_name),
-    conc = shiny::reactive("Conc"),
-    conc_value = shiny::reactive(NULL),
-    group = shiny::reactive("Group"),
-    units = shiny::reactive(""),
-    has_group = shiny::reactive("Group" %in% names(data))
+    toxicant_name = shiny::reactive(toxicant_name)
   )
 }
 
