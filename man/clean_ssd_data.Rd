@@ -13,5 +13,5 @@ clean_ssd_data(data)
 A cleaned tibble
 }
 \description{
-Removes blank headers, empty columns, and empty rows from uploaded data
+Clean uploaded data
 }

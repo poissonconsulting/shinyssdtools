@@ -13,7 +13,6 @@ remove_blank_headers(data)
 A tibble with X1, X2, ... X200 columns removed
 }
 \description{
-Removes columns named X1, X2, ..., X200 which are typically created by
-Excel or Numbers when exporting CSV files with blank column headers.
+Remove Excel/Numbers blank header columns (X1, X2, etc.)
 }
 \keyword{internal}

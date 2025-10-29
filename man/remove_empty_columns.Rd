@@ -13,8 +13,6 @@ remove_empty_columns(data)
 A tibble with empty columns removed
 }
 \description{
-Removes columns where all values are NA or empty strings. This is useful
-for cleaning uploaded CSV files or handsontable data where users may leave
-optional columns empty.
+Remove completely empty columns
 }
 \keyword{internal}

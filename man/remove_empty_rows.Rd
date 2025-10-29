@@ -13,8 +13,6 @@ remove_empty_rows(data)
 A tibble with empty rows removed
 }
 \description{
-Removes rows where all values are NA or empty strings. This is useful
-for cleaning uploaded CSV files or handsontable data where users may leave
-trailing empty rows.
+Remove completely empty rows
 }
 \keyword{internal}
