@@ -1,0 +1,9 @@
+{
+  "input": {
+    "predict_mod-thresh": "5",
+    "predict_mod-threshType": "Concentration"
+  },
+  "output": {
+    "predict_mod-has_predict": true
+  }
+}
