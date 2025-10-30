@@ -17,11 +17,20 @@
 app_server <- function(input, output, session) {
   # --- Translations
   current_lang <- reactive({
-    ifelse(
-      input$english > input$french | input$english == input$french,
-      "english",
-      "french"
+    # Determine which language was clicked most recently
+    clicks <- c(
+      english = input$english %||% 0,
+      french = input$french %||% 0,
+      spanish = input$spanish %||% 0,
+      japanese = input$japanese %||% 0
     )
+
+    # Return the language with the highest click count
+    # Default to english if all are 0
+    if (all(clicks == 0)) {
+      return("english")
+    }
+    names(which.max(clicks))
   })
 
   # Set up shinyhelper with language-specific help files
@@ -29,7 +38,9 @@ app_server <- function(input, output, session) {
     lang_dir <- switch(
       current_lang(),
       "english" = "en",
-      "french" = "fr"
+      "french" = "fr",
+      "spanish" = "es",
+      "japanese" = "ja"
     )
     shinyhelper::observe_helpers(
       help_dir = system.file(
@@ -71,12 +82,24 @@ app_server <- function(input, output, session) {
 
   # --- Number formatting
   big_mark <- reactive({
-    ifelse(current_lang() == "french", " ", ",")
+    switch(
+      current_lang(),
+      "french" = " ",
+      "spanish" = ".",
+      "japanese" = ",",
+      ","  # Default for English
+    )
   }) %>%
     bindEvent(current_lang())
 
   decimal_mark <- reactive({
-    ifelse(current_lang() == "french", ",", ".")
+    switch(
+      current_lang(),
+      "french" = ",",
+      "spanish" = ",",
+      "japanese" = ".",
+      "."  # Default for English
+    )
   }) %>%
     bindEvent(current_lang())
 
@@ -134,36 +157,55 @@ app_server <- function(input, output, session) {
       "shinyssdtools version:",
       utils::packageVersion("shinyssdtools")
     )
-    if (lang == "english") {
-      return({
-        tagList(
-          p(ver),
-          p(sver),
-          includeHTML(
-            system.file("extdata/about-en.html", package = "shinyssdtools")
-          )
-        )
-      })
-    } else {
-      return({
-        tagList(
-          p(ver),
-          p(sver),
-          includeHTML(
-            system.file("extdata/about-fr.html", package = "shinyssdtools")
-          )
-        )
-      })
+
+    file_suffix <- switch(
+      lang,
+      "english" = "en",
+      "french" = "fr",
+      "spanish" = "es",
+      "japanese" = "ja",
+      "en"  # Default to English
+    )
+
+    file_path <- system.file(
+      package = "shinyssdtools",
+      paste0("extdata/about-", file_suffix, ".html")
+    )
+
+    # Fall back to English if translation doesn't exist
+    if (!file.exists(file_path) || file_path == "") {
+      file_path <- system.file(package = "shinyssdtools", "extdata/about-en.html")
     }
-  })
+
+    tagList(
+      p(ver),
+      p(sver),
+      includeHTML(file_path)
+    )
+  }) %>%
+    bindEvent(current_lang())
 
   output$ui_userguide <- renderUI({
     lang <- current_lang()
-    if (lang == "english") {
-      return(includeHTML(
-        system.file(package = "shinyssdtools", "extdata/user-en.html")
-      ))
+    file_suffix <- switch(
+      lang,
+      "english" = "en",
+      "french" = "fr",
+      "spanish" = "es",
+      "japanese" = "ja",
+      "en"  # Default to English
+    )
+    file_path <- system.file(
+      package = "shinyssdtools",
+      paste0("extdata/user-", file_suffix, ".html")
+    )
+
+    # Fall back to English if translation doesn't exist
+    if (!file.exists(file_path) || file_path == "") {
+      file_path <- system.file(package = "shinyssdtools", "extdata/user-en.html")
     }
-    includeHTML(system.file(package = "shinyssdtools", "extdata/user-fr.html"))
-  })
+
+    includeHTML(file_path)
+  }) %>%
+    bindEvent(current_lang())
 }
