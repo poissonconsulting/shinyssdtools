@@ -134,14 +134,16 @@ has_not_all_identical <- function(x) {
 
 #' Estimate bootstrap computation time
 #' @param nboot Integer number of bootstrap samples
-#' @param lang Character string: "english" or "french" for language
+#' @param lang Character string language code: "english", "french", "spanish", or "japanese"
 #' @return Character string with formatted time estimate
 #' @keywords internal
 estimate_time <- function(nboot, lang) {
   preset_df <- data.frame(
     n = c(500, 1000, 5000, 10000),
     english = c("10 seconds", "20 seconds", "2 minutes", "5 minutes"),
-    french = c("10 secondes", "20 secondes", "2 minutes", "5 minutes")
+    french = c("10 secondes", "20 secondes", "2 minutes", "5 minutes"),
+    spanish = c("10 segundos", "20 segundos", "2 minutos", "5 minutos"),
+    japanese = c("10秒", "20秒", "2分", "5分")
   )
 
   if (nboot %in% preset_df$n) {
@@ -153,18 +155,22 @@ estimate_time <- function(nboot, lang) {
 
   if (time_sec < 60) {
     time_num <- round(time_sec)
-    time_str <- if (lang == "french") {
-      paste(time_num, ifelse(time_num <= 1, "seconde", "secondes"))
-    } else {
-      paste(time_num, ifelse(time_num <= 1, "second", "seconds"))
-    }
+    time_str <- switch(
+      lang,
+      "french" = paste(time_num, ifelse(time_num <= 1, "seconde", "secondes")),
+      "spanish" = paste(time_num, ifelse(time_num <= 1, "segundo", "segundos")),
+      "japanese" = paste0(time_num, "秒"),
+      paste(time_num, ifelse(time_num <= 1, "second", "seconds"))  # Default English
+    )
   } else {
     time_num <- round(time_sec / 60, 1)
-    time_str <- if (lang == "french") {
-      paste(time_num, ifelse(time_num <= 1, "minute", "minutes"))
-    } else {
-      paste(time_num, ifelse(time_num <= 1, "minute", "minutes"))
-    }
+    time_str <- switch(
+      lang,
+      "french" = paste(time_num, ifelse(time_num <= 1, "minute", "minutes")),
+      "spanish" = paste(time_num, ifelse(time_num <= 1, "minuto", "minutos")),
+      "japanese" = paste0(time_num, "分"),
+      paste(time_num, ifelse(time_num <= 1, "minute", "minutes"))  # Default English
+    )
   }
 
   time_str

@@ -48,13 +48,14 @@ static_label_input <- function(
 }
 
 #' Generate DataTables options with language support
-#' @param lang Character string language code: "english" or "french" (default: "english")
+#' @param lang Character string language code: "english", "french", "spanish", or "japanese" (default: "english")
 #' @return List of DataTables options including pageLength, language translations, and column definitions
 #' @keywords internal
 dt_options <- function(lang = "english") {
   # Language-specific translations
-  lang_options <- if (lang == "french") {
-    list(
+  lang_options <- switch(
+    lang,
+    "french" = list(
       search = "Rechercher :",
       lengthMenu = "Afficher _MENU_ entrées",
       info = "Affichage de _START_ à _END_ sur _TOTAL_ entrées",
@@ -70,8 +71,42 @@ dt_options <- function(lang = "english") {
       processing = "Traitement en cours...",
       loadingRecords = "Chargement des enregistrements...",
       emptyTable = "Aucune donnée disponible dans le tableau"
-    )
-  } else {
+    ),
+    "spanish" = list(
+      search = "Buscar datos:",
+      lengthMenu = "Mostrar _MENU_ entradas",
+      info = "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+      infoEmpty = "No hay datos disponibles",
+      infoFiltered = "(filtrado de _MAX_ entradas totales)",
+      zeroRecords = "No se encontraron registros coincidentes",
+      paginate = list(
+        first = "Primero",
+        last = "Último",
+        `next` = "Siguiente",
+        previous = "Anterior"
+      ),
+      processing = "Procesando...",
+      loadingRecords = "Cargando registros...",
+      emptyTable = "No hay datos disponibles en la tabla"
+    ),
+    "japanese" = list(
+      search = "データを検索:",
+      lengthMenu = "_MENU_ 件表示",
+      info = "_TOTAL_ 件中 _START_ から _END_ まで表示",
+      infoEmpty = "データがありません",
+      infoFiltered = "(全 _MAX_ 件からフィルタリング)",
+      zeroRecords = "一致するレコードが見つかりません",
+      paginate = list(
+        first = "最初",
+        last = "最後",
+        `next` = "次",
+        previous = "前"
+      ),
+      processing = "処理中...",
+      loadingRecords = "レコードを読み込み中...",
+      emptyTable = "テーブルにデータがありません"
+    ),
+    # Default English
     list(
       search = "Search data:",
       lengthMenu = "Show _MENU_ entries",
@@ -89,7 +124,7 @@ dt_options <- function(lang = "english") {
       loadingRecords = "Loading records...",
       emptyTable = "No data available in table"
     )
-  }
+  )
 
   list(
     # Pagination and display

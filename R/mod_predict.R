@@ -434,10 +434,11 @@ mod_predict_server <- function(
 
     observe({
       trans <- translations()
-      frac <- tr("ui_3thresh", trans)
+      conc_label <- tr("ui_3conc", trans)
+      frac_label <- tr("ui_3thresh", trans)
       choices <- c(
-        "Concentration" = "Concentration",
-        setNames("Fraction", frac)
+        setNames("Concentration", conc_label),
+        setNames("Fraction", frac_label)
       )
       updateRadioButtons(
         session,
@@ -467,10 +468,13 @@ mod_predict_server <- function(
 
     observe({
       current <- lang()
-      choices <- c("500", "1,000", "5,000", "10,000")
-      if (current == "french") {
-        choices <- c("500", "1 000", "5 000", "10 000")
-      }
+      choices <- switch(
+        current,
+        "french" = c("500", "1 000", "5 000", "10 000"),
+        "spanish" = c("500", "1.000", "5.000", "10.000"),
+        "japanese" = c("500", "1,000", "5,000", "10,000"),
+        c("500", "1,000", "5,000", "10,000")  # Default for English
+      )
       updateSelectizeInput(
         session,
         "bootSamp",
@@ -676,11 +680,13 @@ mod_predict_server <- function(
         silent_plot(gp)
       },
       alt = reactive({
-        if (lang() == "french") {
-          "Graphique de distribution de sensibilité des espèces moyennée par modèle avec concentration dangereuse prédite ou pourcentage d'espèces affectées. Montre la courbe SSD ajustée avec les points de données observés et les intervalles de confiance optionnels."
-        } else {
+        switch(
+          lang(),
+          "french" = "Graphique de distribution de sensibilité des espèces moyennée par modèle avec concentration dangereuse prédite ou pourcentage d'espèces affectées. Montre la courbe SSD ajustée avec les points de données observés et les intervalles de confiance optionnels.",
+          "spanish" = "Gráfico de distribución de sensibilidad de especies promediado por modelo con concentración peligrosa predicha o porcentaje de especies afectadas. Muestra la curva SSD ajustada con puntos de datos observados e intervalos de confianza opcionales.",
+          "japanese" = "予測されたハザード濃度または影響を受けた種のパーセンテージを含むモデル平均種感受性分布プロット。観測データポイントとオプションの信頼区間を含む適合SSD曲線を示します。",
           "Model-averaged Species Sensitivity Distribution plot with predicted hazard concentration or percent of species affected. Shows the fitted SSD curve with observed data points and optional confidence intervals."
-        }
+        )
       })
     )
 

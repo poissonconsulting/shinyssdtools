@@ -21,11 +21,18 @@
 pak::pak("universals")
 pak::pak("chk")
 
-# build user guide/about
+# build user guide/about for all languages
 rmarkdown::render("inst/extdata/user-en.md", output_format = "html_fragment")
 rmarkdown::render("inst/extdata/user-fr.md", output_format = "html_fragment")
+rmarkdown::render("inst/extdata/user-es.md", output_format = "html_fragment")
+rmarkdown::render("inst/extdata/user-ja.md", output_format = "html_fragment")
 rmarkdown::render("inst/extdata/about-en.md", output_format = "html_fragment")
 rmarkdown::render("inst/extdata/about-fr.md", output_format = "html_fragment")
+rmarkdown::render("inst/extdata/about-es.md", output_format = "html_fragment")
+rmarkdown::render("inst/extdata/about-ja.md", output_format = "html_fragment")
+
+# build helpfiles from user guides (single source of truth)
+source("scripts/build-helpfiles.R")
 
 # deploy to poissonconsulting test site
 rsconnect::deployApp(
