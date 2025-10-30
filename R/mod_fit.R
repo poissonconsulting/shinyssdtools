@@ -254,7 +254,7 @@ mod_fit_server <- function(
         input$rescale,
         data_mod$data()
       ) %>%
-      bindEvent(fit_trigger()) # Only bind to our explicit trigger
+      bindEvent(fit_trigger())
 
     # Dynamic icon for update button
     output$update_icon <- renderUI({
