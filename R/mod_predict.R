@@ -163,7 +163,10 @@ mod_predict_ui <- function(id) {
               selected = FALSE,
               radioButtons(
                 ns("ribbonStyle"),
-                label = span(`data-translate` = "ui_3ribbonstyle", "Estimate and CI style"),
+                label = span(
+                  `data-translate` = "ui_3ribbonstyle",
+                  "Estimate and CI style"
+                ),
                 choices = c(
                   "Black filled ribbon" = "TRUE",
                   "Red/green lines" = "FALSE"
@@ -636,7 +639,11 @@ mod_predict_server <- function(
 
     # output renders ----------------------------------------------------------
     output$estConc <- renderText({
-      thresh_rv$conc
+      format(
+        thresh_rv$conc,
+        big.mark = big_mark(),
+        decimal.mark = decimal_mark()
+      )
     })
 
     output$estPerc <- renderText({
@@ -644,7 +651,11 @@ mod_predict_server <- function(
     })
 
     output$estConc2 <- renderText({
-      thresh_rv$conc
+      format(
+        thresh_rv$conc,
+        big.mark = big_mark(),
+        decimal.mark = decimal_mark()
+      )
     })
 
     output$estPerc2 <- renderText({
@@ -683,7 +694,11 @@ mod_predict_server <- function(
     })
 
     output$hcConc <- renderText({
-      thresh_rv$conc
+      format(
+        thresh_rv$conc,
+        big.mark = big_mark(),
+        decimal.mark = decimal_mark()
+      )
     })
 
     output$clTable <- DT::renderDataTable({
@@ -774,7 +789,10 @@ mod_predict_server <- function(
           ci = TRUE
         )
       } else {
-        stats::predict(fit, proportion = unique(c(1:99, thresh_rv$percent)) / 100)
+        stats::predict(
+          fit,
+          proportion = unique(c(1:99, thresh_rv$percent)) / 100
+        )
       }
     }) %>%
       bindCache(
