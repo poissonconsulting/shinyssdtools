@@ -206,12 +206,19 @@ app_ui <- function() {
       ),
       nav_spacer(),
       nav_menu(
-        title = "Language",
+        title = span(`data-translate` = "ui_navlang", "Language"),
+        align = "right",
         nav_item(
           actionLink(inputId = "english", label = "English")
         ),
         nav_item(
           actionLink(inputId = "french", label = "Français")
+        ),
+        nav_item(
+          actionLink(inputId = "spanish", label = "Español")
+        ),
+        nav_item(
+          actionLink(inputId = "japanese", label = "日本語")
         )
       )
     )
