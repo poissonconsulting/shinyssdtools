@@ -27,18 +27,21 @@ test_translations$trans <- test_translations[["english"]]
 test_data <- clean_ssd_data(boron.data)
 data_mod <- mock_data_module(data = test_data)
 
-# check required inputs -----------------------------------------------------
+# Module args used across all tests
+fit_args <- list(
+  translations = reactive(test_translations),
+  lang = reactive("english"),
+  data_mod = data_mod,
+  big_mark = reactive(","),
+  decimal_mark = reactive("."),
+  main_nav = reactive("fit")
+)
+
+# Fit Reactive Tests ----------------------------------------------------------
 test_that("mod_fit_server produces valid fit object with boron data", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       # Set required inputs
       session$setInputs(
@@ -62,14 +65,7 @@ test_that("mod_fit_server produces valid fit object with boron data", {
 test_that("mod_fit_server has_fit is TRUE after successful fit", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       session$setInputs(
         selectConc = "Conc",
@@ -90,14 +86,7 @@ test_that("mod_fit_server has_fit is TRUE after successful fit", {
 test_that("gof_table produces valid table after fit", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       session$setInputs(
         selectConc = "Conc",
@@ -124,14 +113,7 @@ test_that("gof_table produces valid table after fit", {
 test_that("fit_plot generates valid ggplot object", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       session$setInputs(
         selectConc = "Conc",
@@ -156,14 +138,7 @@ test_that("fit_plot generates valid ggplot object", {
 test_that("fit_plot includes custom title when provided", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       session$setInputs(
         selectConc = "Conc",
@@ -189,14 +164,7 @@ test_that("fit_plot includes custom title when provided", {
 test_that("fit_plot omits title when empty string", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       session$setInputs(
         selectConc = "Conc",
@@ -223,14 +191,7 @@ test_that("fit_plot omits title when empty string", {
 test_that("fit respects selected distributions", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       # Fit with single distribution
       session$setInputs(
@@ -254,14 +215,7 @@ test_that("fit respects selected distributions", {
 test_that("mod_fit_server returns all expected reactive values", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       session$setInputs(
         selectConc = "Conc",
@@ -299,18 +253,49 @@ test_that("mod_fit_server returns all expected reactive values", {
   )
 })
 
+# Rescale Tests ---------------------------------------------------------------
+# rescale affects parameter estimates (tidy()) output not ssd_gof or hc estimates
+test_that("fit_dist changes when rescale is toggled", {
+  testServer(
+    mod_fit_server,
+    args = fit_args,
+    {
+      # First fit without rescaling
+      session$setInputs(
+        selectConc = "Conc",
+        selectDist = c("lnorm", "gamma"),
+        rescale = FALSE,
+        updateFit = 1
+      )
+      session$flushReact()
+
+      returned <- session$returned
+      fit_no_rescale <- returned$fit_dist()
+
+      # Extract parameter estimates
+      params_no_rescale <- ssdtools::tidy(fit_no_rescale)$est
+
+      # Now fit with rescaling
+      session$setInputs(
+        rescale = TRUE,
+        updateFit = 2
+      )
+      session$flushReact()
+
+      fit_rescaled <- returned$fit_dist()
+      params_rescaled <- ssdtools::tidy(fit_rescaled)$est
+
+      # Fits should be different when rescale changes
+      expect_false(identical(params_no_rescale, params_rescaled))
+    }
+  )
+})
+
 # Validation Tests ------------------------------------------------------------
 test_that("validation fails if concentration column not selected", {
   testServer(
     mod_fit_server,
-    args = list(
-      translations = reactive(test_translations),
-      lang = reactive("english"),
-      data_mod = data_mod,
-      big_mark = reactive(","),
-      decimal_mark = reactive("."),
-      main_nav = reactive("fit")
-    ),
+    args = fit_args,
     {
       session$setInputs(
         selectConc = "Species",
