@@ -129,8 +129,10 @@ mock_data_module <- function(data = NULL,
 #'
 #' @param fit A fitdists object (if NULL, creates a default boron fit)
 #' @param title Character string for plot title (default: "")
+#' @param conc_column Character string for concentration column name (default: "Conc")
+#' @param units Character string for units (default: "")
 #' @return A list mimicking fit module outputs
-mock_fit_module <- function(fit = NULL, title = "") {
+mock_fit_module <- function(fit = NULL, title = "", conc_column = "Conc", units = "") {
   if (is.null(fit)) {
     # Create simple mock data for fitting
     mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
@@ -143,8 +145,11 @@ mock_fit_module <- function(fit = NULL, title = "") {
   list(
     fit_dist = shiny::reactive(fit),
     has_fit = shiny::reactive(!is.null(fit)),
-    title = shiny::reactive(title),
-    dist_sum = shiny::reactive(ssdtools::ssd_gof(fit))
+    fit_plot = shiny::reactive(NULL),
+    gof_table = shiny::reactive(ssdtools::ssd_gof(fit)),
+    conc_column = shiny::reactive(conc_column),
+    units = shiny::reactive(units),
+    title = shiny::reactive(title)
   )
 }
 
