@@ -15,19 +15,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# testServer Tests for Fit Module
-# =================================
-# Tests for reactive logic in mod_fit_server using testServer
-
-# Setup translations
 test_translations <- translations
 test_translations$trans <- test_translations[["english"]]
 
-# Use actual boron data
 test_data <- clean_ssd_data(boron.data)
 data_mod <- mock_data_module(data = test_data)
 
-# Module args used across all tests
 fit_args <- list(
   translations = reactive(test_translations),
   lang = reactive("english"),
@@ -37,13 +30,11 @@ fit_args <- list(
   main_nav = reactive("fit")
 )
 
-# Fit Reactive Tests ----------------------------------------------------------
 test_that("fit obect is valid", {
   testServer(
     mod_fit_server,
     args = fit_args,
     {
-      # Set required inputs
       session$setInputs(
         selectConc = "Conc",
         selectDist = c("lnorm", "gamma"),
@@ -52,7 +43,6 @@ test_that("fit obect is valid", {
       )
       session$flushReact()
 
-      # Check fit object from module return values
       returned <- session$returned
       fit <- returned$fit_dist()
       expect_s3_class(fit, "fitdists")
@@ -99,17 +89,14 @@ test_that("gof table is valid", {
       returned <- session$returned
       gof <- returned$gof_table()
       expect_true(is.data.frame(gof))
-      expect_equal(nrow(gof), 2) # Two distributions
+      expect_equal(nrow(gof), 2)
       expect_snapshot_data(gof, "gof-table")
 
-      # Check for expected columns
       expect_true("aicc" %in% names(gof))
       expect_true("bic" %in% names(gof))
     }
   )
 })
-
-# Plot Generation Tests -------------------------------------------------------
 
 test_that("fit plot is valid", {
   testServer(
@@ -189,14 +176,11 @@ test_that("fit plot includes custom title", {
   )
 })
 
-# Distribution Selection Tests ------------------------------------------------
-
 test_that("fit respects selected distributions", {
   testServer(
     mod_fit_server,
     args = fit_args,
     {
-      # Fit with single distribution
       session$setInputs(
         selectConc = "Conc",
         selectDist = c("gamma"),
@@ -212,8 +196,6 @@ test_that("fit respects selected distributions", {
     }
   )
 })
-
-# Module Return Values Tests --------------------------------------------------
 
 test_that("server reutrns all expected values", {
   testServer(
@@ -235,7 +217,6 @@ test_that("server reutrns all expected values", {
 
       returned <- session$returned
 
-      # Check all return values exist
       expect_true(is.reactive(returned$fit_dist))
       expect_true(is.reactive(returned$fit_plot))
       expect_true(is.reactive(returned$gof_table))
@@ -246,7 +227,6 @@ test_that("server reutrns all expected values", {
       expect_true(is.reactive(returned$rescale))
       expect_true(is.reactive(returned$title))
 
-      # Check they return expected values
       expect_equal(returned$conc_column(), "Conc")
       expect_equal(returned$units(), "mg/L")
       expect_equal(returned$dists(), c("lnorm", "gamma"))
@@ -256,14 +236,12 @@ test_that("server reutrns all expected values", {
   )
 })
 
-# Rescale Tests ---------------------------------------------------------------
 # rescale affects parameter estimates (tidy()) output not ssd_gof or hc estimates
 test_that("param ests change when rescale toggled", {
   testServer(
     mod_fit_server,
     args = fit_args,
     {
-      # First fit without rescaling
       session$setInputs(
         selectConc = "Conc",
         selectDist = c("lnorm", "gamma"),
@@ -274,11 +252,8 @@ test_that("param ests change when rescale toggled", {
 
       returned <- session$returned
       fit_no_rescale <- returned$fit_dist()
-
-      # Extract parameter estimates
       params_no_rescale <- ssdtools::tidy(fit_no_rescale)$est
 
-      # Now fit with rescaling
       session$setInputs(
         rescale = TRUE,
         updateFit = 2
@@ -288,13 +263,11 @@ test_that("param ests change when rescale toggled", {
       fit_rescaled <- returned$fit_dist()
       params_rescaled <- ssdtools::tidy(fit_rescaled)$est
 
-      # Fits should be different when rescale changes
       expect_false(identical(params_no_rescale, params_rescaled))
     }
   )
 })
 
-# Validation Tests ------------------------------------------------------------
 test_that("validation fails if wrong conc col", {
   testServer(
     mod_fit_server,
