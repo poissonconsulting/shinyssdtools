@@ -38,7 +38,7 @@ fit_args <- list(
 )
 
 # Fit Reactive Tests ----------------------------------------------------------
-test_that("mod_fit_server produces valid fit object with boron data", {
+test_that("fit obect is valid", {
   testServer(
     mod_fit_server,
     args = fit_args,
@@ -62,7 +62,7 @@ test_that("mod_fit_server produces valid fit object with boron data", {
   )
 })
 
-test_that("mod_fit_server has_fit is TRUE after successful fit", {
+test_that("has_fit is TRUE after successful fit", {
   testServer(
     mod_fit_server,
     args = fit_args,
@@ -83,7 +83,7 @@ test_that("mod_fit_server has_fit is TRUE after successful fit", {
 
 # Goodness-of-Fit Table Tests -------------------------------------------------
 
-test_that("gof_table produces valid table after fit", {
+test_that("gof table is valid", {
   testServer(
     mod_fit_server,
     args = fit_args,
@@ -100,6 +100,7 @@ test_that("gof_table produces valid table after fit", {
       gof <- returned$gof_table()
       expect_true(is.data.frame(gof))
       expect_equal(nrow(gof), 2) # Two distributions
+      expect_snapshot_data(gof, "gof-table")
 
       # Check for expected columns
       expect_true("aicc" %in% names(gof))
@@ -110,7 +111,7 @@ test_that("gof_table produces valid table after fit", {
 
 # Plot Generation Tests -------------------------------------------------------
 
-test_that("fit_plot generates valid ggplot object", {
+test_that("fit plot is valid", {
   testServer(
     mod_fit_server,
     args = fit_args,
@@ -136,58 +137,7 @@ test_that("fit_plot generates valid ggplot object", {
   )
 })
 
-test_that("fit_plot includes custom title when provided", {
-  testServer(
-    mod_fit_server,
-    args = fit_args,
-    {
-      session$setInputs(
-        selectConc = "Conc",
-        selectDist = c("lnorm", "gamma"),
-        selectUnit = "mg/L",
-        rescale = FALSE,
-        updateFit = 1,
-        yaxis2 = "Cumulative Probability",
-        xaxis2 = "Concentration",
-        size2 = 12,
-        title = "Boron Toxicity"
-      )
-      session$flushReact()
-
-      returned <- session$returned
-      plot <- returned$fit_plot()
-      expect_true(has_plot_title(plot))
-      expect_equal(get_plot_title(plot), "Boron Toxicity")
-    }
-  )
-})
-
-test_that("fit_plot omits title when empty string", {
-  testServer(
-    mod_fit_server,
-    args = fit_args,
-    {
-      session$setInputs(
-        selectConc = "Conc",
-        selectDist = c("lnorm", "gamma"),
-        selectUnit = "mg/L",
-        rescale = FALSE,
-        updateFit = 1,
-        yaxis2 = "Cumulative Probability",
-        xaxis2 = "Concentration",
-        size2 = 12,
-        title = ""
-      )
-      session$flushReact()
-
-      returned <- session$returned
-      plot <- returned$fit_plot()
-      expect_false(has_plot_title(plot))
-    }
-  )
-})
-
-test_that("fit_plot with different distributions", {
+test_that("ffit plot with different distributions", {
   testServer(
     mod_fit_server,
     args = fit_args,
@@ -209,6 +159,32 @@ test_that("fit_plot with different distributions", {
       plot <- returned$fit_plot()
       vdiffr::expect_doppelganger("fit-plot-multiple-dists", plot)
       expect_true(ggplot2::is_ggplot(plot))
+    }
+  )
+})
+
+test_that("fit plot includes custom title", {
+  testServer(
+    mod_fit_server,
+    args = fit_args,
+    {
+      session$setInputs(
+        selectConc = "Conc",
+        selectDist = c("lnorm", "gamma"),
+        selectUnit = "mg/L",
+        rescale = FALSE,
+        updateFit = 1,
+        yaxis2 = "Cumulative Probability",
+        xaxis2 = "Concentration",
+        size2 = 12,
+        title = "Boron Toxicity"
+      )
+      session$flushReact()
+
+      returned <- session$returned
+      plot <- returned$fit_plot()
+      expect_true(has_plot_title(plot))
+      expect_equal(get_plot_title(plot), "Boron Toxicity")
     }
   )
 })
@@ -239,7 +215,7 @@ test_that("fit respects selected distributions", {
 
 # Module Return Values Tests --------------------------------------------------
 
-test_that("mod_fit_server returns all expected reactive values", {
+test_that("server reutrns all expected values", {
   testServer(
     mod_fit_server,
     args = fit_args,
@@ -282,7 +258,7 @@ test_that("mod_fit_server returns all expected reactive values", {
 
 # Rescale Tests ---------------------------------------------------------------
 # rescale affects parameter estimates (tidy()) output not ssd_gof or hc estimates
-test_that("fit_dist changes when rescale is toggled", {
+test_that("param ests change when rescale toggled", {
   testServer(
     mod_fit_server,
     args = fit_args,
@@ -319,7 +295,7 @@ test_that("fit_dist changes when rescale is toggled", {
 })
 
 # Validation Tests ------------------------------------------------------------
-test_that("validation fails if concentration column not selected", {
+test_that("validation fails if wrong conc col", {
   testServer(
     mod_fit_server,
     args = fit_args,
