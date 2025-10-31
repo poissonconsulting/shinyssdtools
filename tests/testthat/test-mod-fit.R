@@ -130,6 +130,7 @@ test_that("fit_plot generates valid ggplot object", {
 
       returned <- session$returned
       plot <- returned$fit_plot()
+      vdiffr::expect_doppelganger("fit-plot-default", plot)
       expect_true(ggplot2::is_ggplot(plot))
     }
   )
