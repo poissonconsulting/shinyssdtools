@@ -272,6 +272,36 @@ wait_for_predict <- function(app, timeout = 10000) {
   invisible(app)
 }
 
+#' Set bootstrap samples in selectizeInput using JavaScript
+#'
+#' The bootSamp selectizeInput has create=TRUE but set_inputs() doesn't handle
+#' custom values properly. This helper uses JavaScript to add and select a custom value.
+#'
+#' @param app An AppDriver instance
+#' @param value Character string or numeric value for bootstrap samples
+#' @param module_id Module namespace prefix (default: "predict_mod")
+#'
+#' @examples
+#' \dontrun{
+#' app <- AppDriver$new()
+#' set_bootstrap_samples(app, "5")
+#' app$wait_for_idle()
+#' }
+set_bootstrap_samples <- function(app, value, module_id = "predict_mod") {
+  value <- as.character(value)
+  input_id <- paste0(module_id, "-bootSamp")
+
+  js_code <- sprintf("
+    $('#%s')[0].selectize.clear();
+    $('#%s')[0].selectize.addOption({value: '%s', text: '%s'});
+    $('#%s')[0].selectize.setValue('%s');
+    $('#%s')[0].selectize.trigger('change');
+  ", input_id, input_id, value, value, input_id, value, input_id)
+
+  app$run_js(js_code)
+  invisible(app)
+}
+
 # Data Comparison Helpers -----------------------------------------------------
 
 #' Compare two data frames with tolerance for numeric differences
