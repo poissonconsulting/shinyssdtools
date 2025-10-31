@@ -187,6 +187,32 @@ test_that("fit_plot omits title when empty string", {
   )
 })
 
+test_that("fit_plot with different distributions", {
+  testServer(
+    mod_fit_server,
+    args = fit_args,
+    {
+      session$setInputs(
+        selectConc = "Conc",
+        selectDist = c("lnorm", "gamma", "lgumbel", "weibull"),
+        selectUnit = "",
+        rescale = FALSE,
+        updateFit = 1,
+        yaxis2 = "Cumulative Probability",
+        xaxis2 = "Concentration",
+        size2 = 12,
+        title = ""
+      )
+      session$flushReact()
+
+      returned <- session$returned
+      plot <- returned$fit_plot()
+      vdiffr::expect_doppelganger("fit-plot-multiple-dists", plot)
+      expect_true(ggplot2::is_ggplot(plot))
+    }
+  )
+})
+
 # Distribution Selection Tests ------------------------------------------------
 
 test_that("fit respects selected distributions", {

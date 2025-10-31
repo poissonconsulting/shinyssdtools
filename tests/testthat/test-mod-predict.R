@@ -426,7 +426,48 @@ test_that("model_average_plot returns ggplot object", {
       returned <- session$returned
       plot <- returned$model_average_plot()
 
-      # Check it's a ggplot
+      vdiffr::expect_doppelganger("predict-plot-default", plot)
+      expect_true(ggplot2::is_ggplot(plot))
+    }
+  )
+})
+
+test_that("model_average_plot with different threshold", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      suppressWarnings({
+        session$setInputs(
+          threshType = "Concentration",
+          thresh = "1",
+          includeCi = FALSE,
+          title = "",
+          xaxis = "Concentration",
+          yaxis = "Percent",
+          selectColour = "-none-",
+          selectLabel = "-none-",
+          selectShape = "-none-",
+          checkHc = TRUE,
+          adjustLabel = 1,
+          xlog = TRUE,
+          xbreaks = c(1, 10, 100),
+          xMin = NULL,
+          xMax = NULL,
+          selectPalette = "Set1",
+          legendColour = "Colour",
+          legendShape = "Shape",
+          size3 = 12,
+          sizeLabel3 = 3,
+          ribbonStyle = "TRUE"
+        )
+      })
+      session$flushReact()
+
+      returned <- session$returned
+      plot <- returned$model_average_plot()
+
+      vdiffr::expect_doppelganger("predict-plot-thresh-1", plot)
       expect_true(ggplot2::is_ggplot(plot))
     }
   )
@@ -435,6 +476,7 @@ test_that("model_average_plot returns ggplot object", {
 # Confidence Interval / Bootstrap Tests ---------------------------------------
 
 test_that("clicking Get CL generates confidence interval table", {
+  set_test_seed()
   testServer(
     mod_predict_server,
     args = predict_args,
@@ -467,6 +509,7 @@ test_that("clicking Get CL generates confidence interval table", {
 
 # get cl clikced changes predictions -------------------------------------
 test_that("mod_predict_server predictions include lcl/ucl when Get CL clicked", {
+  set_test_seed()
   testServer(
     mod_predict_server,
     args = predict_args,
@@ -495,6 +538,7 @@ test_that("mod_predict_server predictions include lcl/ucl when Get CL clicked", 
 })
 
 test_that("model_average_plot includes confidence intervals after Get CL", {
+  set_test_seed()
   testServer(
     mod_predict_server,
     args = predict_args,
@@ -541,11 +585,59 @@ test_that("model_average_plot includes confidence intervals after Get CL", {
       # Plot should now have confidence intervals
       # Check for ribbon or line layers indicating CI
       expect_true(has_confidence_intervals(plot_after))
+      vdiffr::expect_doppelganger("predict-plot-with-ci", plot_after)
+    }
+  )
+})
+
+test_that("model_average_plot with line style CI", {
+  set_test_seed()
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      suppressWarnings({
+        session$setInputs(
+          threshType = "Concentration",
+          thresh = "5",
+          includeCi = TRUE,
+          bootSamp = "5",
+          title = "",
+          xaxis = "Concentration",
+          yaxis = "Percent",
+          selectColour = "-none-",
+          selectLabel = "-none-",
+          selectShape = "-none-",
+          checkHc = TRUE,
+          adjustLabel = 1,
+          xlog = TRUE,
+          xbreaks = c(1, 10, 100),
+          xMin = NULL,
+          xMax = NULL,
+          selectPalette = "Set1",
+          legendColour = "Colour",
+          legendShape = "Shape",
+          size3 = 12,
+          sizeLabel3 = 3,
+          ribbonStyle = "FALSE"
+        )
+        session$flushReact()
+
+        session$setInputs(getCl = 1)
+        session$flushReact()
+      })
+
+      returned <- session$returned
+      plot <- returned$model_average_plot()
+
+      vdiffr::expect_doppelganger("predict-plot-with-ci-lines", plot)
+      expect_true(ggplot2::is_ggplot(plot))
     }
   )
 })
 
 test_that("changing bootstrap samples updates CL table nboot", {
+  set_test_seed()
   testServer(
     mod_predict_server,
     args = predict_args,
