@@ -45,7 +45,7 @@ save_csv <- function(x) {
 #' expect_snapshot_data(gof_table, "boron_gof_table")
 #' }
 expect_snapshot_data <- function(x, name) {
-  testthat::skip_on_os("windows")  # Line ending differences
+  testthat::skip_on_os("windows") # Line ending differences
   path <- save_csv(x)
   testthat::expect_snapshot_file(path, paste0(name, ".csv"))
 }
@@ -111,8 +111,7 @@ expect_snapshot_fit <- function(fit, name) {
 #' @param data A data frame (default: boron.data)
 #' @param toxicant_name Character string for toxicant name (default: "")
 #' @return A list mimicking data module outputs
-mock_data_module <- function(data = NULL,
-                             toxicant_name = "") {
+mock_data_module <- function(data = NULL, toxicant_name = "") {
   if (is.null(data)) {
     data <- data.frame(Conc = c(1, 2, 3), Group = c("A", "B", "C"))
   }
@@ -132,7 +131,12 @@ mock_data_module <- function(data = NULL,
 #' @param conc_column Character string for concentration column name (default: "Conc")
 #' @param units Character string for units (default: "")
 #' @return A list mimicking fit module outputs
-mock_fit_module <- function(fit = NULL, title = "", conc_column = "Conc", units = "") {
+mock_fit_module <- function(
+  fit = NULL,
+  title = "",
+  conc_column = "Conc",
+  units = ""
+) {
   if (is.null(fit)) {
     # Create simple mock data for fitting
     mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
@@ -177,7 +181,7 @@ get_plot_title <- function(plot) {
 #' @return Logical indicating whether plot has CI layer
 has_confidence_intervals <- function(plot) {
   layers <- sapply(plot$layers, function(x) class(x$geom)[1])
-  any(layers %in% c("GeomRibbon", "GeomLine"))
+  any(layers %in% c("GeomXribbon"))
 }
 
 # Seed Management Helpers -----------------------------------------------------

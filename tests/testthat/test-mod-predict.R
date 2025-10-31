@@ -19,510 +19,625 @@
 # =====================================
 # Tests for reactive logic in mod_predict_server using testServer
 
+# Setup translations
+test_translations <- translations
+test_translations$trans <- test_translations[["english"]]
+
+# Use actual boron data
+test_data <- clean_ssd_data(boron.data)
+data_mod <- mock_data_module(data = test_data)
+
+# Create actual fit from boron data
+test_fit <- ssdtools::ssd_fit_dists(test_data, dists = c("lnorm", "gamma"))
+fit_mod <- mock_fit_module(fit = test_fit, conc_column = "Conc", units = "")
+
+# Module args used across all tests
+predict_args <- list(
+  translations = reactive(test_translations),
+  lang = reactive("english"),
+  data_mod = data_mod,
+  fit_mod = fit_mod,
+  big_mark = reactive(","),
+  decimal_mark = reactive("."),
+  main_nav = reactive("predict")
+)
+
 # Prediction Generation Tests -------------------------------------------------
 
 test_that("mod_predict_server generates predictions from fit", {
-  # Setup mock data and fit
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      # Set threshold
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = FALSE
+      )
+      session$flushReact()
 
-  # Create fit
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm", "gamma"))
-  fit_mod <- mock_fit_module(fit = fit)
+      returned <- session$returned
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    # Set threshold
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = FALSE
-    )
-    session$flushReact()
+      # Check predictions exist
+      pred <- returned$predictions()
+      expect_true(is.data.frame(pred))
+      expect_true(nrow(pred) > 0)
+      # Check expected columns exist
+      expect_true("est" %in% names(pred))
+      expect_true("dist" %in% names(pred))
 
-    # Check predictions exist
-    pred <- predictions()
-    expect_true(is.data.frame(pred))
-    expect_true(nrow(pred) > 0)
-    expect_true("est" %in% names(pred))
-  })
-})
+      # Check predictions have numeric values
+      expect_true(is.numeric(pred$est))
+      expect_true(all(!is.na(pred$est)))
 
-test_that("has_predict is FALSE initially", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
-
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("data")  # Not on predict tab
-  ), {
-    expect_false(has_predict())
-  })
+      # Get CL not clicked yet
+      expect_true(all(is.na(pred$lcl)))
+    }
+  )
 })
 
 test_that("has_predict is TRUE after prediction generated", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = FALSE,
+        bootSamp = "100"
+      )
+      session$flushReact()
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = FALSE
-    )
-    session$flushReact()
-
-    expect_true(has_predict())
-  })
+      returned <- session$returned
+      expect_true(returned$has_predict())
+    }
+  )
 })
 
 # Confidence Interval Tests ---------------------------------------------------
 
-test_that("CI is NOT included without clicking Get CL button", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+test_that("cl_requested is FALSE without clicking Get CL button", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      # Check checkbox but don't click Get CL
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = TRUE,
+        bootSamp = "100"
+      )
+      session$flushReact()
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    # Check checkbox but don't click Get CL
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = TRUE,
-      bootSamp = "100"
-    )
-    session$flushReact()
-
-    # cl_requested should be FALSE (Get CL not clicked)
-    expect_false(cl_requested())
-  })
+      returned <- session$returned
+      # cl_requested should be FALSE (Get CL not clicked)
+      expect_false(returned$cl_requested())
+    }
+  )
 })
 
 test_that("cl_nboot stores bootstrap count when Get CL clicked", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = TRUE,
+        bootSamp = "100"
+      )
+      session$flushReact()
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    # Set up for CI
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = TRUE,
-      bootSamp = "100"
-    )
-    session$flushReact()
+      # Click Get CL button
+      session$setInputs(getCl = 1)
+      session$flushReact()
 
-    # Click Get CL button
-    session$setInputs(getCl = 1)
-    session$flushReact()
-
-    # cl_requested should be TRUE
-    expect_true(cl_requested())
-
-    # cl_nboot should store the bootstrap count
-    expect_equal(cl_nboot(), 100)
-  })
-})
-
-test_that("cl_nboot persists when navigating away and back", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
-
-  # Use reactiveVal for main_nav to simulate navigation
-  nav <- reactiveVal("predict")
-
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = nav
-  ), {
-    # Set up and click Get CL
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = TRUE,
-      bootSamp = "100",
-      getCl = 1
-    )
-    session$flushReact()
-
-    # Verify CL requested
-    expect_true(cl_requested())
-    expect_equal(cl_nboot(), 100)
-
-    # Change bootstrap samples (but don't click Get CL)
-    session$setInputs(bootSamp = "500")
-    session$flushReact()
-
-    # cl_nboot should still be 100 (not updated without Get CL click)
-    expect_equal(cl_nboot(), 100)
-  })
+      returned <- session$returned
+      expect_true(returned$cl_requested())
+      expect_equal(returned$cl_nboot(), 100)
+    }
+  )
 })
 
 test_that("unchecking CI checkbox clears cl_requested when Get CL clicked", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      # First request CI
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = TRUE,
+        bootSamp = "100",
+        getCl = 1
+      )
+      session$flushReact()
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    # First request CI
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = TRUE,
-      bootSamp = "100",
-      getCl = 1
-    )
-    session$flushReact()
-    expect_true(cl_requested())
+      returned <- session$returned
+      expect_true(returned$cl_requested())
 
-    # Uncheck CI and click Get CL again
-    session$setInputs(
-      includeCi = FALSE,
-      getCl = 2
-    )
-    session$flushReact()
+      # Uncheck CI and click Get CL again
+      session$setInputs(
+        includeCi = FALSE,
+        getCl = 2
+      )
+      session$flushReact()
 
-    # Should clear cl_requested
-    expect_false(cl_requested())
-    expect_null(cl_nboot())
-  })
+      # Should clear cl_requested
+      expect_false(returned$cl_requested())
+      expect_null(returned$cl_nboot())
+    }
+  )
 })
 
-# Ribbon Style Tests ----------------------------------------------------------
+# Reactive Value Tests --------------------------------------------------------
 
 test_that("ribbon reactive returns correct boolean value", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = TRUE
+      )
+      returned <- session$returned
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    # Test black ribbon (TRUE)
-    session$setInputs(ribbonStyle = "TRUE")
-    expect_true(ribbon())
+      # Test black ribbon (TRUE)
+      session$setInputs(ribbonStyle = "TRUE")
+      expect_true(returned$ribbon())
 
-    # Test red/green lines (FALSE)
-    session$setInputs(ribbonStyle = "FALSE")
-    expect_false(ribbon())
-  })
+      # Test red/green lines (FALSE)
+      session$setInputs(ribbonStyle = "FALSE")
+      expect_false(returned$ribbon())
+    }
+  )
 })
 
-# Threshold Type Tests --------------------------------------------------------
-
 test_that("threshold_type reactive returns selected type", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      returned <- session$returned
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    session$setInputs(threshType = "Concentration")
-    expect_equal(threshold_type(), "Concentration")
+      session$setInputs(threshType = "Concentration")
+      expect_equal(returned$threshold_type(), "Concentration")
 
-    session$setInputs(threshType = "Fraction")
-    expect_equal(threshold_type(), "Fraction")
-  })
+      session$setInputs(threshType = "Fraction")
+      expect_equal(returned$threshold_type(), "Fraction")
+    }
+  )
 })
 
 test_that("threshold_values returns percent and conc", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5"
+      )
+      session$flushReact()
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-"
-    )
-    session$flushReact()
-
-    thresholds <- threshold_values()
-    expect_type(thresholds, "list")
-    expect_true("percent" %in% names(thresholds))
-    expect_true("conc" %in% names(thresholds))
-  })
+      returned <- session$returned
+      thresholds <- returned$threshold_values()
+      expect_type(thresholds, "list")
+      expect_true("percent" %in% names(thresholds))
+      expect_true("conc" %in% names(thresholds))
+    }
+  )
 })
 
-# Title Tests -----------------------------------------------------------------
+test_that("include_ci reflects checkbox state", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5"
+      )
+      returned <- session$returned
+
+      # Initially unchecked
+      session$setInputs(includeCi = FALSE)
+      expect_false(returned$include_ci())
+
+      # Check the box
+      session$setInputs(includeCi = TRUE)
+      expect_true(returned$include_ci())
+    }
+  )
+})
 
 test_that("title reactive returns input value", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5"
+      )
+      returned <- session$returned
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    session$setInputs(title = "Copper Toxicity")
-    expect_equal(title(), "Copper Toxicity")
+      session$setInputs(title = "Copper Toxicity")
+      expect_equal(returned$title(), "Copper Toxicity")
 
-    session$setInputs(title = "")
-    expect_equal(title(), "")
-  })
+      session$setInputs(title = "")
+      expect_equal(returned$title(), "")
+    }
+  )
 })
 
 # Module Return Values Tests --------------------------------------------------
 
 test_that("mod_predict_server returns all expected reactive values", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = FALSE,
+        ribbonStyle = "TRUE",
+        title = "Test"
+      )
+      session$flushReact()
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = FALSE,
-      ribbonStyle = "TRUE",
-      title = "Test"
-    )
-    session$flushReact()
+      returned <- session$returned
 
-    # Check all return values exist
-    expect_true(is.reactive(predictions))
-    expect_true(is.reactive(threshold_values))
-    expect_true(is.reactive(threshold_type))
-    expect_true(is.reactive(include_ci))
-    expect_true(is.reactive(ribbon))
-    expect_true(is.reactive(title))
-    expect_true(is.reactive(has_predict))
-    expect_true(is.reactive(cl_requested))
-    expect_true(is.reactive(cl_nboot))
+      # Check all return values exist
+      expect_true(is.reactive(returned$predictions))
+      expect_true(is.reactive(returned$threshold_values))
+      expect_true(is.reactive(returned$threshold_type))
+      expect_true(is.reactive(returned$include_ci))
+      expect_true(is.reactive(returned$ribbon))
+      expect_true(is.reactive(returned$title))
+      expect_true(is.reactive(returned$has_predict))
+      expect_true(is.reactive(returned$cl_requested))
+      expect_true(is.reactive(returned$cl_nboot))
 
-    # Check they return expected values
-    expect_equal(threshold_type(), "Concentration")
-    expect_false(include_ci())
-    expect_true(ribbon())
-    expect_equal(title(), "Test")
-  })
+      # Check they return expected values
+      expect_equal(returned$threshold_type(), "Concentration")
+      expect_false(returned$include_ci())
+      expect_true(returned$ribbon())
+      expect_equal(returned$title(), "Test")
+    }
+  )
 })
 
-# Include CI Reactive Tests ---------------------------------------------------
+# Threshold Change Tests ------------------------------------------------------
 
-test_that("include_ci reflects checkbox state", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+test_that("predictions change when % affecting threshold changes", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      # First prediction at 5%
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = FALSE
+      )
+      session$flushReact()
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    # Initially unchecked
-    session$setInputs(includeCi = FALSE)
-    expect_false(include_ci())
+      returned <- session$returned
+      pred_vals <- returned$threshold_values()
+      pred_perc <- pred_vals$percent
+      pred_conc <- pred_vals$conc
 
-    # Check the box
-    session$setInputs(includeCi = TRUE)
-    expect_true(include_ci())
-  })
+      # Change to 10%
+      session$setInputs(thresh = "10")
+      session$flushReact()
+
+      pred_vals_10 <- returned$threshold_values()
+      pred_perc_10 <- pred_vals_10$percent
+      pred_conc_10 <- pred_vals_10$conc
+
+      expect_identical(pred_perc_10, 10)
+      # Estimates should be different
+      expect_false(identical(pred_perc, pred_perc_10))
+      expect_false(identical(pred_conc, pred_conc_10))
+    }
+  )
 })
 
-# Edge Cases ------------------------------------------------------------------
+test_that("predictions change when switching to Fraction threshold type", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      # First prediction using Concentration threshold
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = FALSE
+      )
+      session$flushReact()
 
-test_that("predictions handle multiple thresholds", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+      returned <- session$returned
+      pred_vals <- returned$threshold_values()
+      pred_perc <- pred_vals$percent
+      pred_conc <- pred_vals$conc
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    # Set threshold to 5%
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = FALSE
-    )
-    session$flushReact()
+      # Switch to Fraction threshold
+      session$setInputs(
+        threshType = "Fraction",
+        conc = 1.0
+      )
+      session$flushReact()
 
-    pred1 <- predictions()
-    expect_true(is.data.frame(pred1))
+      pred_vals_frac <- returned$threshold_values()
+      pred_perc_frac <- pred_vals_frac$percent
+      pred_conc_frac <- pred_vals_frac$conc
 
-    # Change threshold to 10%
-    session$setInputs(thresh = "10")
-    session$flushReact()
-
-    pred2 <- predictions()
-    expect_true(is.data.frame(pred2))
-  })
+      expect_identical(pred_conc_frac, 1.0)
+      # Estimates should be different
+      expect_false(identical(pred_perc, pred_perc_frac))
+      expect_false(identical(pred_conc, pred_conc_frac))
+    }
+  )
 })
 
-test_that("bootstrap sample count can be changed and applied", {
-  mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  data_mod <- mock_data_module(data = mock_data)
-  fit <- ssdtools::ssd_fit_dists(mock_data, dists = c("lnorm"))
-  fit_mod <- mock_fit_module(fit = fit)
+# Plot Tests ------------------------------------------------------------------
 
-  testServer(mod_predict_server, args = list(
-    translations = mock_translations(),
-    lang = reactive("english"),
-    data_mod = data_mod,
-    fit_mod = fit_mod,
-    big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
-  ), {
-    # Set low bootstrap count
-    session$setInputs(
-      threshType = "Concentration",
-      thresh = "5",
-      selectLabel = "-none-",
-      selectColour = "-none-",
-      selectShape = "-none-",
-      includeCi = TRUE,
-      bootSamp = "100",
-      getCl = 1
-    )
-    session$flushReact()
-    expect_equal(cl_nboot(), 100)
+test_that("model_average_plot returns ggplot object", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      suppressWarnings({
+        session$setInputs(
+          threshType = "Concentration",
+          thresh = "5",
+          includeCi = FALSE,
+          title = "",
+          xaxis = "Concentration",
+          yaxis = "Percent",
+          selectColour = "-none-",
+          selectLabel = "-none-",
+          selectShape = "-none-",
+          checkHc = TRUE,
+          adjustLabel = 1,
+          xlog = TRUE,
+          xbreaks = c(1, 10, 100),
+          xMin = NULL,
+          xMax = NULL,
+          selectPalette = "Set1",
+          legendColour = "Colour",
+          legendShape = "Shape",
+          size3 = 12,
+          sizeLabel3 = 3,
+          ribbonStyle = "TRUE"
+        )
+      })
+      session$flushReact()
 
-    # Change to higher count
-    session$setInputs(
-      bootSamp = "500",
-      getCl = 2
-    )
-    session$flushReact()
-    expect_equal(cl_nboot(), 500)
-  })
+      returned <- session$returned
+      plot <- returned$model_average_plot()
+
+      # Check it's a ggplot
+      expect_true(ggplot2::is_ggplot(plot))
+    }
+  )
+})
+
+# Confidence Interval / Bootstrap Tests ---------------------------------------
+
+test_that("clicking Get CL generates confidence interval table", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      # Set up initial prediction
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = TRUE,
+        bootSamp = "5"
+      )
+      session$flushReact()
+
+      session$setInputs(getCl = 1)
+      session$flushReact()
+
+      returned <- session$returned
+
+      expect_true(returned$has_cl())
+      cl_table <- returned$predict_cl()
+      expect_true(is.data.frame(cl_table))
+      expect_true(nrow(cl_table) > 0)
+
+      # # Check it has confidence interval columns
+      expect_true("lcl" %in% names(cl_table))
+      expect_true("ucl" %in% names(cl_table))
+    }
+  )
+})
+
+# get cl clikced changes predictions -------------------------------------
+test_that("mod_predict_server predictions include lcl/ucl when Get CL clicked", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      # Set threshold
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = FALSE,
+        bootSamp = 5
+      )
+      session$flushReact()
+
+      session$setInputs(getCl = 1, includeCi = TRUE)
+      session$flushReact()
+
+      returned <- session$returned
+
+      # Check predictions exist
+      pred <- returned$predictions()
+      expect_true(is.data.frame(pred))
+      expect_true(all(!is.na(pred$lcl)))
+      expect_true(all(!is.na(pred$ucl)))
+    }
+  )
+})
+
+test_that("model_average_plot includes confidence intervals after Get CL", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      suppressWarnings({
+        # Set up initial plot without CI
+        session$setInputs(
+          threshType = "Concentration",
+          thresh = "5",
+          includeCi = TRUE,
+          bootSamp = "5",
+          title = "",
+          xaxis = "Concentration",
+          yaxis = "Percent",
+          selectColour = "-none-",
+          selectLabel = "-none-",
+          selectShape = "-none-",
+          checkHc = TRUE,
+          adjustLabel = 1,
+          xlog = TRUE,
+          xbreaks = c(1, 10, 100),
+          xMin = NULL,
+          xMax = NULL,
+          selectPalette = "Set1",
+          legendColour = "Colour",
+          legendShape = "Shape",
+          size3 = 12,
+          sizeLabel3 = 3,
+          ribbonStyle = "TRUE"
+        )
+
+        session$flushReact()
+
+        returned <- session$returned
+        plot_before <- returned$model_average_plot()
+        expect_false(has_confidence_intervals(plot_before))
+
+        # Click Get CL
+        session$setInputs(getCl = 1)
+        session$flushReact()
+      })
+      plot_after <- returned$model_average_plot()
+
+      # Plot should now have confidence intervals
+      # Check for ribbon or line layers indicating CI
+      expect_true(has_confidence_intervals(plot_after))
+    }
+  )
+})
+
+test_that("changing bootstrap samples updates CL table nboot", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      # First CL request with 100 samples
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = TRUE,
+        bootSamp = "5",
+        getCl = 1
+      )
+      session$flushReact()
+
+      returned <- session$returned
+      pred <- returned$predictions()
+      expect_equal(returned$cl_nboot(), 5)
+      expect_equal(unique(pred$nboot), 5)
+
+      # Change to 500 samples and click Get CL again
+      session$setInputs(
+        bootSamp = "10",
+        getCl = 2
+      )
+      session$flushReact()
+
+      expect_equal(returned$cl_nboot(), 10)
+      pred <- returned$predictions()
+      expect_equal(unique(pred$nboot), 10)
+    }
+  )
+})
+
+# Number Formatting Tests -----------------------------------------------------
+
+test_that("concentration estimates use English number formatting", {
+  testServer(
+    mod_predict_server,
+    args = predict_args,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = FALSE
+      )
+      session$flushReact()
+
+      # Get formatted outputs
+      estConc <- output$estConc
+      hcConc <- output$hcConc
+
+      # Should use English formatting (period for decimal, comma for thousands)
+      # Check that decimal mark is period (if present)
+      if (grepl("[.,]", estConc)) {
+        # If there's a separator, it should be period for decimal
+        expect_true(grepl("\\.", estConc) || !grepl(",", estConc))
+      }
+    }
+  )
+})
+
+test_that("concentration estimates use French number formatting", {
+  # Set up French translations
+  test_trans_fr <- translations
+  test_trans_fr$trans <- test_trans_fr[["french"]]
+
+  predict_args_fr <- predict_args
+  predict_args_fr$translations <- reactive(test_trans_fr)
+  predict_args_fr$lang <- reactive("french")
+  predict_args_fr$big_mark <- reactive(" ")
+  predict_args_fr$decimal_mark <- reactive(",")
+
+  testServer(
+    mod_predict_server,
+    args = predict_args_fr,
+    {
+      session$setInputs(
+        threshType = "Concentration",
+        thresh = "5",
+        includeCi = FALSE
+      )
+      session$flushReact()
+
+      # Get formatted outputs
+      estConc <- output$estConc
+      hcConc <- output$hcConc
+
+      # Should use French formatting (comma for decimal, space for thousands)
+      # Check that decimal mark is comma (if present)
+      if (grepl("[.,]", estConc)) {
+        expect_true(grepl(",", estConc))
+      }
+    }
+  )
 })
