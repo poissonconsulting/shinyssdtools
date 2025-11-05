@@ -218,6 +218,9 @@ mod_report_server <- function(
         color = color_secondary
       )
 
+      # Ensure waiter always hides, even on error
+      on.exit(waiter::waiter_hide(), add = TRUE)
+
       trans <- translations()
       temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans))
       file.copy(
@@ -231,17 +234,20 @@ mod_report_server <- function(
       temp_html <- tempfile(fileext = ".html")
       params <- params_list()
 
+      # Create render environment and explicitly assign params
+      render_env <- new.env(parent = globalenv())
+      assign("params", params, envir = render_env)
+
       rmarkdown::render(
         temp_report,
         output_format = "html_document",
         output_file = temp_html,
         params = params,
-        envir = new.env(parent = globalenv()),
+        envir = render_env,
         encoding = "utf-8"
       )
 
       html_content <- readLines(temp_html, warn = FALSE)
-      waiter::waiter_hide()
 
       paste(html_content, collapse = "\n")
     }) %>%
@@ -293,12 +299,15 @@ mod_report_server <- function(
           temp_report
         )
         params <- params_list()
+        render_env <- new.env(parent = globalenv())
+        assign("params", params, envir = render_env)
+
         rmarkdown::render(
           temp_report,
           output_format = "pdf_document",
           output_file = file,
           params = params,
-          envir = new.env(parent = globalenv()),
+          envir = render_env,
           encoding = "utf-8"
         )
       }
