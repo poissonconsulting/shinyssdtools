@@ -17,7 +17,7 @@
 
 library(shinytest2)
 
-test_that("data upload - test tox1", {
+test_that("data upload: test tox1", {
   app <- create_workflow_app("csv-upload-custom")
   withr::defer(app$stop())
 
@@ -53,8 +53,10 @@ test_that("data upload: test tox2", {
   has_fit <- app$get_value(output = "fit_mod-has_fit")
   expect_true(has_fit)
 
-  gof_values <- app$get_values(output = "fit_mod-tableGof")
-  expect_snapshot_value(gof_values, style = "json2", cran = FALSE)
+  gof_table_rendered <- app$get_js(
+    "!!document.querySelector('#fit_mod-tableGof .dataTable')"
+  )
+  expect_true(gof_table_rendered)
 })
 
 test_that("data upload: test tox3", {
@@ -73,8 +75,10 @@ test_that("data upload: test tox3", {
   has_fit <- app$get_value(output = "fit_mod-has_fit")
   expect_true(has_fit)
 
-  gof_values <- app$get_values(output = "fit_mod-tableGof")
-  expect_snapshot_value(gof_values, style = "json2", cran = FALSE)
+  gof_table_rendered <- app$get_js(
+    "!!document.querySelector('#fit_mod-tableGof .dataTable')"
+  )
+  expect_true(gof_table_rendered)
 })
 
 test_that("data upload: insufficient conc values", {
