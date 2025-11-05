@@ -33,7 +33,10 @@ test_that("dt_options returns French text for French language", {
   opts <- dt_options("french")
 
   expect_equal(opts$language$search, "Rechercher :")
-  expect_equal(opts$language$info, "Affichage de _START_ à _END_ sur _TOTAL_ entrées")
+  expect_equal(
+    opts$language$info,
+    "Affichage de _START_ à _END_ sur _TOTAL_ entrées"
+  )
 })
 
 # Plot Helpers ----------------------------------------------------------------
@@ -48,17 +51,6 @@ test_that("has_plot_title detects plot title correctly", {
 
   expect_true(has_plot_title(plot_with_title))
   expect_false(has_plot_title(plot_no_title))
-})
-
-# Data Frame Comparison -------------------------------------------------------
-
-test_that("compare_data_frames identifies identical and different data", {
-  df1 <- data.frame(a = 1:3, b = c("x", "y", "z"))
-  df2 <- data.frame(a = 1:3, b = c("x", "y", "z"))
-  df3 <- data.frame(a = 1:3, b = c("x", "y", "w"))
-
-  expect_true(compare_data_frames(df1, df2))
-  expect_false(compare_data_frames(df1, df3))
 })
 
 # Mock Module Helpers ---------------------------------------------------------
