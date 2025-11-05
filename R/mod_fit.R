@@ -479,9 +479,11 @@ mod_fit_server <- function(
 
     # return values ------------------------------------------------------------
     has_fit <- reactive({
-      !is.null(fit_dist()) && !inherits(fit_dist(), "try-error")
+      iv$is_valid() &&
+        !is.null(fit_dist()) &&
+        !inherits(fit_dist(), "try-error")
     }) %>%
-      bindEvent(fit_dist())
+      bindEvent(fit_dist(), iv$is_valid())
 
     output$has_fit <- has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
