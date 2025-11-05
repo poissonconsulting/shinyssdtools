@@ -291,15 +291,49 @@ set_bootstrap_samples <- function(app, value, module_id = "predict_mod") {
   value <- as.character(value)
   input_id <- paste0(module_id, "-bootSamp")
 
-  js_code <- sprintf("
+  js_code <- sprintf(
+    "
     $('#%s')[0].selectize.clear();
     $('#%s')[0].selectize.addOption({value: '%s', text: '%s'});
     $('#%s')[0].selectize.setValue('%s');
     $('#%s')[0].selectize.trigger('change');
-  ", input_id, input_id, value, value, input_id, value, input_id)
+  ",
+    input_id,
+    input_id,
+    value,
+    value,
+    input_id,
+    value,
+    input_id
+  )
 
   app$run_js(js_code)
   invisible(app)
+}
+
+#' Create AppDriver for workflow tests with standard settings
+#'
+#' @param name Character name for the test (used in snapshots)
+#' @return An AppDriver instance with deferred cleanup
+#'
+#' @examples
+#' \dontrun{
+#' test_that("workflow test", {
+#'   app <- create_workflow_app("test-name")
+#'   # Test code here
+#'   # app$stop() called automatically via defer
+#' })
+#' }
+create_workflow_app <- function(name) {
+  app <- shinytest2::AppDriver$new(
+    variant = shinytest2::platform_variant(),
+    name = name,
+    height = 1080,
+    width = 1920,
+    wait = TRUE,
+    timeout = 20000
+  )
+  app
 }
 
 # Data Comparison Helpers -----------------------------------------------------
