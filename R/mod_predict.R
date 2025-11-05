@@ -362,7 +362,7 @@ mod_predict_ui <- function(id) {
                   ui_download_popover_table(tab = "pred", ns = ns),
                   div(
                     class = "table-responsive",
-                    DT::dataTableOutput(ns("clTable"))
+                    DT::dataTableOutput(ns("tableCl"))
                   )
                 )
               )
@@ -473,7 +473,7 @@ mod_predict_server <- function(
         "french" = c("500", "1 000", "5 000", "10 000"),
         "spanish" = c("500", "1.000", "5.000", "10.000"),
         "japanese" = c("500", "1,000", "5,000", "10,000"),
-        c("500", "1,000", "5,000", "10,000")  # Default for English
+        c("500", "1,000", "5,000", "10,000") # Default for English
       )
       updateSelectizeInput(
         session,
@@ -707,7 +707,7 @@ mod_predict_server <- function(
       )
     })
 
-    output$clTable <- DT::renderDataTable({
+    output$tableCl <- DT::renderDataTable({
       DT::datatable(table_cl(), options = list(dom = "t"))
     })
 
