@@ -7,7 +7,7 @@
 dt_options(lang = "english")
 }
 \arguments{
-\item{lang}{Character string language code: "english" or "french" (default: "english")}
+\item{lang}{Character string language code: "english", "french", "spanish", or "japanese" (default: "english")}
 }
 \value{
 List of DataTables options including pageLength, language translations, and column definitions

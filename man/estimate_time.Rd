@@ -9,7 +9,7 @@ estimate_time(nboot, lang)
 \arguments{
 \item{nboot}{Integer number of bootstrap samples}
 
-\item{lang}{Character string: "english" or "french" for language}
+\item{lang}{Character string language code: "english", "french", "spanish", or "japanese"}
 }
 \value{
 Character string with formatted time estimate
