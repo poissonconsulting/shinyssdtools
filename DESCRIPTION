@@ -49,7 +49,8 @@ Suggests:
     rsconnect,
     testthat (>= 3.0.0),
     ssddata,
-    shinytest2
+    shinytest2,
+    vdiffr
 Encoding: UTF-8
 Language: en-US
 LazyData: true
