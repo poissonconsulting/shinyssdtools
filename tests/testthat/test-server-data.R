@@ -22,7 +22,7 @@
 # Helper to create mock translations
 
 # Demo Data Tests -------------------------------------------------------------
-test_translations <- translations
+test_translations <- shinyssdtools:::translations
 test_translations$trans <- test_translations[["english"]]
 
 # basic demo data functionality works ------------------------------------
