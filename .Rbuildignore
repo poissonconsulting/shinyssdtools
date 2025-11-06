@@ -18,6 +18,7 @@
 ^app\.R$
 ^paper$
 ^.vscode$
+^\.claude$
 ^compliance.yaml$
 ^\.github$
 ^scripts$
