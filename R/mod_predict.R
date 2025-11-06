@@ -437,8 +437,8 @@ mod_predict_server <- function(
       conc_label <- tr("ui_3conc", trans)
       frac_label <- tr("ui_3thresh", trans)
       choices <- c(
-        setNames("Concentration", conc_label),
-        setNames("Fraction", frac_label)
+        stats::setNames("Concentration", conc_label),
+        stats::setNames("Fraction", frac_label)
       )
       updateRadioButtons(
         session,
@@ -454,8 +454,8 @@ mod_predict_server <- function(
       black_ribbon <- tr("ui_3ribbonblack", trans)
       lines <- tr("ui_3ribbonlines", trans)
       choices <- c(
-        setNames("TRUE", black_ribbon),
-        setNames("FALSE", lines)
+        stats::setNames("TRUE", black_ribbon),
+        stats::setNames("FALSE", lines)
       )
       updateRadioButtons(
         session,

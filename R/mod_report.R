@@ -135,7 +135,7 @@ mod_report_server <- function(
       fit <- fit_mod$fit_dist()
       req(fit)
       nboot <- clean_nboot(input$bootSamp)
-      avehc <- ssd_hc(
+      avehc <- ssdtools::ssd_hc(
         fit,
         proportion = c(0.01, 0.05, 0.1, 0.2),
         ci = TRUE,
@@ -143,8 +143,8 @@ mod_report_server <- function(
         min_pboot = 0.8
       )
       avehc |>
-        dplyr::mutate(HCx = proportion * 100, PCx = (1 - proportion) * 100) |>
-        dplyr::select(HCx, PCx, est, se, lcl, ucl, nboot, pboot)
+        dplyr::mutate(HCx = .data$proportion * 100, PCx = (1 - .data$proportion) * 100) |>
+        dplyr::select(.data$HCx, .data$PCx, .data$est, .data$se, .data$lcl, .data$ucl, .data$nboot, .data$pboot)
     })
 
     observe({
