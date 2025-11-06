@@ -22,3 +22,7 @@
 ^\.github$
 ^scripts$
 ^TESTING\.md$
+^CLAUDE\.md$
+^CLAUDE-TESTING\.md$
+^CLAUDE-TRANSLATIONS\.md$
+^README\.html$
