@@ -15,7 +15,22 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-library(testthat)
-library(shinyssdtools)
+# Make internal functions available for testing by explicitly
+# importing them from the package namespace into the test environment
+.ns <- asNamespace("shinyssdtools")
 
-test_check("shinyssdtools")
+# List of internal functions that tests need access to
+internal_fns <- c(
+  "mod_data_server", "mod_fit_server", "mod_predict_server",
+  "clean_nboot", "append_unit", "guess_conc", "guess_sp",
+  "zero_range", "estimate_time", "tr", "safe_try",
+  "calculate_threshold_percent", "calculate_threshold_conc",
+  "format_r_code", "translations", "boron.data"
+)
+
+# Import each function into the test environment
+for (fn in internal_fns) {
+  if (exists(fn, envir = .ns, inherits = FALSE)) {
+    assign(fn, get(fn, envir = .ns), envir = .GlobalEnv)
+  }
+}

@@ -295,7 +295,7 @@ mod_data_server <- function(id, translations, lang) {
         data = names_data,
         clean_data = clean_data,
         data_cols = reactive({
-          names(data_mod$clean_data())
+          names(clean_data())
         }),
         has_data = has_data,
         toxicant_name = reactive({
