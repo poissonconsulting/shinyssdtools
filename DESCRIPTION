@@ -26,13 +26,16 @@ Depends:
     R (>= 3.5),
     ssdtools (>= 1.0.1)
 Imports:
+    bsicons,
     bslib,
     dplyr,
     DT,
     ggplot2,
     glue,
+    jsonlite,
     knitr,
     magrittr,
+    rclipboard,
     readr,
     rhandsontable,
     rlang,
@@ -41,9 +44,10 @@ Imports:
     shinyhelper,
     shinyjs,
     shinyvalidate,
-    shinyWidgets,
     stats,
-    waiter
+    styler,
+    waiter,
+    writexl
 Suggests: 
     covr,
     RColorBrewer,
@@ -51,7 +55,8 @@ Suggests:
     testthat (>= 3.0.0),
     ssddata,
     shinytest2,
-    vdiffr
+    vdiffr,
+    withr
 Encoding: UTF-8
 Language: en-US
 LazyData: true
