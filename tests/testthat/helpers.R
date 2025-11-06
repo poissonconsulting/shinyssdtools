@@ -326,6 +326,7 @@ set_bootstrap_samples <- function(app, value, module_id = "predict_mod") {
 #' }
 create_workflow_app <- function(name) {
   app <- shinytest2::AppDriver$new(
+    app_dir = system.file("app", package = "shinyssdtools"),
     variant = shinytest2::platform_variant(),
     name = name,
     height = 1080,
