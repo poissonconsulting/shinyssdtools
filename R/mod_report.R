@@ -218,7 +218,6 @@ mod_report_server <- function(
         color = color_secondary
       )
 
-      # Ensure waiter always hides, even on error
       on.exit(waiter::waiter_hide(), add = TRUE)
 
       trans <- translations()
@@ -238,13 +237,16 @@ mod_report_server <- function(
       render_env <- new.env(parent = globalenv())
       assign("params", params, envir = render_env)
 
-      rmarkdown::render(
-        temp_report,
-        output_format = "html_document",
-        output_file = temp_html,
-        params = params,
-        envir = render_env,
-        encoding = "utf-8"
+      suppressMessages(
+        rmarkdown::render(
+          temp_report,
+          output_format = "html_document",
+          output_file = temp_html,
+          params = params,
+          envir = render_env,
+          encoding = "utf-8",
+          quiet = TRUE
+        )
       )
 
       html_content <- readLines(temp_html, warn = FALSE)
