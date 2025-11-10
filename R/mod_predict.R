@@ -171,7 +171,8 @@ mod_predict_ui <- function(id) {
                   "Black filled ribbon" = "TRUE",
                   "Red/green lines" = "FALSE"
                 ),
-                selected = "TRUE"
+                selected = "TRUE",
+                inline = TRUE
               ),
               static_label_input(
                 ns("selectLabel"),

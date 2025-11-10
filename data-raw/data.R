@@ -470,24 +470,24 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3ribbonstyle",
-    english = "Estimate and CL style",
-    french = "Style d'estimation et bornes",
-    spanish = "Estilo de estimación y LC",
-    japanese = "推定値とCLのスタイル"
+    english = "Model averaged line and CL style",
+    french = "Style de ligne moyenne du modèle et bornes",
+    spanish = "Estilo de línea promediada del modelo y LC",
+    japanese = "モデル平均線とCLスタイル"
   ),
   dplyr::tibble(
     id = "ui_3ribbonblack",
-    english = "Black filled ribbon",
-    french = "Ruban noir rempli",
-    spanish = "Cinta rellena negra",
-    japanese = "黒塗りのリボン"
+    english = "Ribbon",
+    french = "Ruban",
+    spanish = "Cinta",
+    japanese = "リボン"
   ),
   dplyr::tibble(
     id = "ui_3ribbonlines",
-    english = "Red/green lines",
-    french = "Lignes rouges/vertes",
-    spanish = "Líneas rojas/verdes",
-    japanese = "赤/緑の線"
+    english = "Lines",
+    french = "Lignes",
+    spanish = "Líneas",
+    japanese = "線"
   ),
   dplyr::tibble(
     id = "ui_3pal",
