@@ -7,7 +7,7 @@ Puede encontrar más información sobre los métodos de ssdtools en [artículos 
 
 * Los datos deben proporcionarse para **solo un químico** a la vez.
 * Cada especie debe tener solo un valor de concentración.
-* Los datos deben tener **al menos una columna** que contenga **al menos 8 valores de concentración distintos, positivos y no faltantes**.
+* Los datos deben tener **al menos una columna** que contenga **al menos 6 valores de concentración positivos y no faltantes**.
 * Opcionalmente, se pueden incluir columnas de **especies y grupo**, que se utilizan para etiquetar y colorear la salida del gráfico, respectivamente.
 * Se aceptan columnas adicionales, pero no son utilizadas por ninguna función.
 

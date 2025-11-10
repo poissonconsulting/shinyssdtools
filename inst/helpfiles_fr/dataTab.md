@@ -2,9 +2,9 @@
 
 
 * Les données doivent être fournies pour **une substance chimique** à la fois.
-* Une seule valeur doit être entrée par espèce. 
-* L'ensemble des données doit contenir **au moins une colonne** comportant au **minimum 8 concentrations distinctes,positives et sans valeur manquante**.
-* Des colonnes pour **les espèces et les groupes** taxonomiques peuvent également être ajoutées. Des étiquettes et des couleurs sont alors disponibles pour permettre leur identification dans le graphique. 
+* Une seule valeur doit être entrée par espèce.
+* L'ensemble des données doit contenir **au moins une colonne** comportant au **minimum 6 concentrations positives et sans valeur manquante**.
+* Des colonnes pour **les espèces et les groupes** taxonomiques peuvent également être ajoutées. Des étiquettes et des couleurs sont alors disponibles pour permettre leur identification dans le graphique.
 * Des colonnes additionnelles sont possibles mais elles ne sont reliées à aucune fonction. 
 
 <center>
