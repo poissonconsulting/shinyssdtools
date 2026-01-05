@@ -46,9 +46,10 @@ Finally, preview the data provided in the table on the right hand side of the ta
 The fitted distributions plot includes the model average estimates. 
 Note that if two or more models have overlapping fits then support for this model shape will be over inflated in the model averaged parameters.  
 Please see the article [here](https://bcgov.github.io/ssdtools/articles/distributions.html) for more information.  
-The outputs may take a moment to update.
-3. Format the plot using inputs in the sidebar and **download plot and goodness of fit table** as png and csv files, respectively. 
-Select units to display them in the x-axis title. 
+Click `Update fit` to update the outputs after changing selected distributions or data rescaling option. 
+3. **Select whether to rescale data**
+This specifies whether to leave the concentration values unchanged (unchecked) or to rescale concentration values by dividing by the geometric mean of the minimum and maximum positive finite values. Rescaling provides better numerical stability in cases where distributions are failing to fit. The estimates and goodness-of-fit statistics are unaffected. 
+4. Format the plot using inputs in the sidebar and **download plot and goodness of fit table** as png and csv files, respectively. 
 
 Additional information about the **goodness of fit table**:
 The columns in the goodness of fit table are the distribution (dist), the Anderson-Darling statistic (ad), the Kolmogorov-Smirnov statistic (ks), the Cramer-von Mises statistic (cvm), Akaike’s Information Criterion (aic), Akaike’s Information Criterion corrected for sample size (aicc), Bayesian Information Criterion (bic), the AICc difference (delta) and the AICc based Akaike weight (weight). 

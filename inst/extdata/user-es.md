@@ -46,8 +46,10 @@ Finalmente, obtenga una vista previa de los datos proporcionados en la tabla en 
 El gráfico de distribuciones ajustadas incluye las estimaciones promedio del modelo.
 Tenga en cuenta que si dos o más modelos tienen ajustes superpuestos, el soporte para esta forma de modelo estará sobreinflado en los parámetros promediados del modelo.
 Consulte el artículo [aquí](https://bcgov.github.io/ssdtools/articles/distributions.html) para obtener más información.
-Las salidas pueden tardar un momento en actualizarse.
-3. Formatee el gráfico usando las entradas en la barra lateral y **descargue el gráfico y la tabla de bondad de ajuste** como archivos png y csv, respectivamente.
+Haga clic en `Actualizar Ajuste` para actualizar las salidas después de cambiar las distribuciones seleccionadas o la opción de reescalado de datos.
+3. **Seleccionar si reescalar los datos**
+Esto especifica si dejar los valores de concentración sin cambios (sin marcar) o reescalar los valores de concentración dividiendo por la media geométrica de los valores finitos positivos mínimos y máximos. El reescalado proporciona una mejor estabilidad numérica en los casos donde las distribuciones no logran ajustarse. Las estimaciones y las estadísticas de bondad de ajuste no se ven afectadas.
+4. Formatee el gráfico usando las entradas en la barra lateral y **descargue el gráfico y la tabla de bondad de ajuste** como archivos png y csv, respectivamente.
 Seleccione unidades para mostrarlas en el título del eje x.
 
 Información adicional sobre la **tabla de bondad de ajuste**:

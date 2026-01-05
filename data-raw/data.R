@@ -470,10 +470,10 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3ribbonstyle",
-    english = "Model averaged line and CL style",
-    french = "Style de ligne moyenne du modèle et bornes",
-    spanish = "Estilo de línea promediada del modelo y LC",
-    japanese = "モデル平均線とCLスタイル"
+    english = "Model averaged estimate and CL style",
+    french = "Style de l'estimation moyenne du modèle et bornes",
+    spanish = "Estilo de estimación promediada del modelo y LC",
+    japanese = "モデル平均推定値とCLスタイル"
   ),
   dplyr::tibble(
     id = "ui_3ribbonblack",
