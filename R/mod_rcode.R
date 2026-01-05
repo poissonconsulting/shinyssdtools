@@ -268,7 +268,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  left = '", fit_mod$conc_column() %>% make.names(), "',"),
         paste0("  dists = ", dists_str, ","),
         paste0("  silent = TRUE,"),
-        paste0("  reweight = FALSE,"),
         paste0("  rescale = ", fit_mod$rescale()),
         ")",
         "",
