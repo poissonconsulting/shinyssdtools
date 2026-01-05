@@ -23,9 +23,15 @@
 
 #' Save a data frame or tibble to a temporary CSV file
 #'
+#' Rounds numeric columns to 8 decimal places to prevent minor floating-point
+#' differences from causing snapshot test failures.
+#'
 #' @param x A data frame or tibble
 #' @return Character path to the temporary CSV file
 save_csv <- function(x) {
+  # Round numeric columns to prevent floating-point snapshot differences
+  x <- dplyr::mutate(x, dplyr::across(where(is.numeric), ~ round(.x, 8)))
+
   path <- tempfile(fileext = ".csv")
   readr::write_csv(x, path)
   path
