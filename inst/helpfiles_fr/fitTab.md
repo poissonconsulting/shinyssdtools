@@ -6,9 +6,10 @@ L'application tente de deviner quelle est la colonne contenant les valeurs de co
 Cela peut toutefois nécessiter une correction. 
 2. **Sélectionner (ou désélectionner) les distributions à ajuster aux données.** Le graphique des distributions ajustées comprend les estimations moyennes du modèle. 
 Il est à noter que s'il y a un chevauchement dans l'ajustement de deux ou plusieurs fonctions de distribution, il y a aura alors une exagération de la forme de cet ajustement dans l'inférence multimodèle. Consultez [cet article](https://bcgov.github.io/ssdtools/articles/distributions.html) pour plus d'information.  
-La fonction peut prendre quelques secondes pour se mettre à jour. 
-3. Mettre en forme le tracé du graphique à l'aide des entrées de la barre latérale et **télécharger le graphique et le tableau de l'évaluation de la qualité de l'ajustement des courbes de distribution** sous forme de fichiers .png et .csv respectivement. 
-Sélectionner les unités pour les afficher dans le titre de l'axe des x.
+Cliquez sur Mettre à jour l'ajustement pour mettre à jour les résultats après avoir modifié les distributions sélectionnées ou l'option de redimensionnement des données.
+3. **Sélectionner si les données doivent être redimensionnées**
+Ceci spécifie s'il faut laisser les valeurs de concentration inchangées (non coché) ou redimensionner les valeurs de concentration en divisant par la moyenne géométrique des valeurs finies positives minimales et maximales. Le redimensionnement offre une meilleure stabilité numérique dans les cas où les distributions ne parviennent pas à s'ajuster. Les estimations et les statistiques de qualité d'ajustement ne sont pas affectées.
+4. Mettre en forme le tracé du graphique à l'aide des entrées de la barre latérale et **télécharger le graphique et le tableau de l'évaluation de la qualité de l'ajustement des courbes de distribution** sous forme de fichiers .png et .csv respectivement. Sélectionner les unités à afficher sur l'axe des x du graphique. 
 
 Information additionnelle sur **le tableau de l'évaluation de la qualité de l'ajustement des courbes de distribution**:
 Les colonnes du tableau sont la distribution (dist), la statistique d'Anderson-Darling (ad), la statistique de Kolmogorov-Smirnov (ks), la statistique de Cramer-von-Mises (cmv), le critère d'information Akaike (aic), le critère d'information Akaike corrigé pour la taille de l'échantillon (aicc), le critère d'information Bayésien (bic), la différence AICc (delta) et le coefficient AICc basé sur le poids Akaike (weight). 
