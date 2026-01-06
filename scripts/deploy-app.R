@@ -20,6 +20,8 @@
 # get cran versions of poisson pkgs
 pak::pak("universals")
 pak::pak("chk")
+remotes::install_github("poissonconsulting/ssdtools@dev")
+renv::snapshot()
 
 # build user guide/about for all languages
 rmarkdown::render("inst/extdata/user-en.md", output_format = "html_fragment")
