@@ -7,7 +7,7 @@
 estimate_hp(x, conc)
 }
 \arguments{
-\item{x}{A fitdists object from ssd_fit_dists()}
+\item{x}{A fitdists object from ssd_fit_bcanz()}
 
 \item{conc}{Numeric concentration value}
 }

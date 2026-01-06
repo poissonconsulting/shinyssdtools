@@ -96,7 +96,7 @@ test_that("safe_try returns result on success or NULL on error", {
 
 test_that("calculate_threshold_percent and calculate_threshold_conc work correctly", {
   test_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-  fit <- ssdtools::ssd_fit_dists(test_data, dists = "lnorm", silent = TRUE)
+  fit <- ssdtools::ssd_fit_bcanz(test_data, dists = "lnorm", silent = TRUE)
 
   # Test basic percent calculation
   result_percent <- calculate_threshold_percent(fit, 10)

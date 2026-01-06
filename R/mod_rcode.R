@@ -263,7 +263,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       }
 
       c(
-        paste0("dist <- ssd_fit_dists("),
+        paste0("dist <- ssd_fit_bcanz("),
         paste0("  data,"),
         paste0("  left = '", fit_mod$conc_column() %>% make.names(), "',"),
         paste0("  dists = ", dists_str, ","),

@@ -264,7 +264,7 @@ zero_range <- function(x, tol = .Machine$double.eps^0.5) {
 }
 
 #' Estimate hazard concentration
-#' @param x A fitdists object from ssd_fit_dists()
+#' @param x A fitdists object from ssd_fit_bcanz()
 #' @param percent Numeric percent of species affected (0-100 scale)
 #' @return Numeric concentration estimate
 #' @keywords internal
@@ -273,7 +273,7 @@ estimate_hc <- function(x, percent) {
 }
 
 #' Estimate hazard percent
-#' @param x A fitdists object from ssd_fit_dists()
+#' @param x A fitdists object from ssd_fit_bcanz()
 #' @param conc Numeric concentration value
 #' @return Numeric proportion estimate (0-1 scale)
 #' @keywords internal
@@ -302,7 +302,7 @@ calculate_threshold_conc <- function(fit, thresh, digits = 3) {
 }
 
 #' Calculate hazard concentration with confidence intervals
-#' @param x A fitdists object from ssd_fit_dists()
+#' @param x A fitdists object from ssd_fit_bcanz()
 #' @param percent Numeric percent of species affected (0-100 scale)
 #' @param nboot Integer number of bootstrap samples for confidence intervals
 #' @return Data frame with columns: dist, est, se, lcl, ucl, wt
@@ -336,7 +336,7 @@ ssd_hc_ave <- function(x, percent, nboot) {
 }
 
 #' Calculate hazard percent with confidence intervals
-#' @param x A fitdists object from ssd_fit_dists()
+#' @param x A fitdists object from ssd_fit_bcanz()
 #' @param conc Numeric concentration value
 #' @param nboot Integer number of bootstrap samples for confidence intervals
 #' @return Data frame with columns: dist, est, se, lcl, ucl, wt

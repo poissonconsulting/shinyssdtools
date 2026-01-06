@@ -21,7 +21,7 @@ test_translations$trans <- test_translations[["english"]]
 test_data <- clean_ssd_data(boron.data)
 data_mod <- mock_data_module(data = test_data)
 
-test_fit <- ssdtools::ssd_fit_dists(test_data, dists = c("lnorm", "gamma"))
+test_fit <- ssdtools::ssd_fit_bcanz(test_data, dists = c("lnorm", "gamma"))
 fit_mod <- mock_fit_module(fit = test_fit, conc_column = "Conc", units = "")
 
 predict_args <- list(

@@ -16,7 +16,7 @@
 #    limitations under the License.
 
 #' @import shiny magrittr bslib shinyvalidate
-#' @importFrom ssdtools ssd_fit_dists
+#' @importFrom ssdtools ssd_fit_bcanz
 #' @importFrom knitr kable
 #' @importFrom rlang .data
 NULL

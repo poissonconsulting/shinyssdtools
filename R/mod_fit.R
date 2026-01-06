@@ -240,7 +240,7 @@ mod_fit_server <- function(
       dists <- input$selectDist
       rescale <- input$rescale
 
-      safe_try(ssdtools::ssd_fit_dists(
+      safe_try(ssdtools::ssd_fit_bcanz(
         data,
         left = conc,
         dists = dists,

@@ -16,7 +16,7 @@
 #    limitations under the License.
 
 #' Plot species sensitivity distributions
-#' @param x A fitdists object from ssd_fit_dists()
+#' @param x A fitdists object from ssd_fit_bcanz()
 #' @param ylab Character string for y-axis label
 #' @param xlab Character string for x-axis label
 #' @param text_size Numeric text size for plot elements
@@ -63,7 +63,7 @@ gp_xbreaks <- function(gp) {
 }
 
 #' Plot SSD predictions with confidence intervals
-#' @param x A fitdists object from ssd_fit_dists()
+#' @param x A fitdists object from ssd_fit_bcanz()
 #' @param pred Prediction data frame from predict()
 #' @param conc Character string column name for concentration values
 #' @param label Character string column name for point labels

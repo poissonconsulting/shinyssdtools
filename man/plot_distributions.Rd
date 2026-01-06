@@ -15,7 +15,7 @@ plot_distributions(
 )
 }
 \arguments{
-\item{x}{A fitdists object from ssd_fit_dists()}
+\item{x}{A fitdists object from ssd_fit_bcanz()}
 
 \item{ylab}{Character string for y-axis label}
 

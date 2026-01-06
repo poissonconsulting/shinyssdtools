@@ -77,7 +77,7 @@ save_rds <- function(x) {
 #'
 #' @examples
 #' \dontrun{
-#' fit <- ssd_fit_dists(data)
+#' fit <- ssd_fit_bcanz(data)
 #' expect_snapshot_rds(fit, "boron_fit_default")
 #' }
 expect_snapshot_rds <- function(x, name) {
@@ -90,12 +90,12 @@ expect_snapshot_rds <- function(x, name) {
 #' Specialized helper for ssdtools fitdists objects that extracts key components
 #' for comparison while ignoring unstable elements.
 #'
-#' @param fit A fitdists object from ssd_fit_dists()
+#' @param fit A fitdists object from ssd_fit_bcanz()
 #' @param name The name for the snapshot
 #'
 #' @examples
 #' \dontrun{
-#' fit <- ssd_fit_dists(boron.data, dists = c("gamma", "lnorm"))
+#' fit <- ssd_fit_bcanz(boron.data, dists = c("gamma", "lnorm"))
 #' expect_snapshot_fit(fit, "boron_fit_gamma_lnorm")
 #' }
 expect_snapshot_fit <- function(fit, name) {
@@ -146,7 +146,7 @@ mock_fit_module <- function(
   if (is.null(fit)) {
     # Create simple mock data for fitting
     mock_data <- data.frame(Conc = c(1, 2, 5, 10, 20, 50, 100))
-    fit <- ssdtools::ssd_fit_dists(
+    fit <- ssdtools::ssd_fit_bcanz(
       mock_data,
       dists = c("gamma", "lnorm")
     )

@@ -7,7 +7,7 @@
 estimate_hc(x, percent)
 }
 \arguments{
-\item{x}{A fitdists object from ssd_fit_dists()}
+\item{x}{A fitdists object from ssd_fit_bcanz()}
 
 \item{percent}{Numeric percent of species affected (0-100 scale)}
 }

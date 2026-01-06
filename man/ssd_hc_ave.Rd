@@ -7,7 +7,7 @@
 ssd_hc_ave(x, percent, nboot)
 }
 \arguments{
-\item{x}{A fitdists object from ssd_fit_dists()}
+\item{x}{A fitdists object from ssd_fit_bcanz()}
 
 \item{percent}{Numeric percent of species affected (0-100 scale)}
 

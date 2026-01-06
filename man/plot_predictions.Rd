@@ -33,7 +33,7 @@ plot_predictions(
 )
 }
 \arguments{
-\item{x}{A fitdists object from ssd_fit_dists()}
+\item{x}{A fitdists object from ssd_fit_bcanz()}
 
 \item{pred}{Prediction data frame from predict()}
 
