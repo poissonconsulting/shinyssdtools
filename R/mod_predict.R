@@ -399,6 +399,12 @@ mod_predict_server <- function(
     output$has_fit <- fit_mod$has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
 
+    # Waiter for prediction plot
+    waiter_pred_plot <- ui_waiter(id = "plotPred", ns = ns)
+
+    # Track render status for waiter
+    render_status <- reactiveValues(plot_ready = FALSE)
+
     # trigger for updating predictions - only occur when on predict tab
     predict_trigger <- reactiveVal(0)
 
@@ -432,6 +438,13 @@ mod_predict_server <- function(
       }
     }) %>%
       bindEvent(input$getCl)
+
+    # Show waiter when prediction starts
+    observe({
+      render_status$plot_ready <- FALSE
+      waiter_pred_plot$show()
+    }) %>%
+      bindEvent(predict_trigger())
 
     observe({
       trans <- translations()
@@ -678,7 +691,9 @@ mod_predict_server <- function(
     output$plotPred <- renderPlot(
       {
         gp <- plot_model_average()
-        silent_plot(gp)
+        result <- silent_plot(gp)
+        render_status$plot_ready <- TRUE
+        result
       },
       alt = reactive({
         switch(
@@ -690,6 +705,14 @@ mod_predict_server <- function(
         )
       })
     )
+
+    # Hide waiter when plot is ready
+    observe({
+      if (render_status$plot_ready) {
+        waiter_pred_plot$hide()
+      }
+    }) %>%
+      bindEvent(render_status$plot_ready)
 
     # Dynamic text outputs for HC/PC values
     output$hcPercent <- renderText({
@@ -768,16 +791,21 @@ mod_predict_server <- function(
     cl_requested <- reactiveVal(FALSE)
     cl_nboot <- reactiveVal(NULL)
 
+    # Store CL state when getCl is clicked (always persist, regardless of checkbox)
     observe({
-      if (input$includeCi) {
-        cl_requested(TRUE)
-        cl_nboot(clean_nboot(input$bootSamp))
-      } else {
-        cl_requested(FALSE)
-        cl_nboot(NULL)
-      }
+      cl_requested(TRUE)
+      cl_nboot(clean_nboot(input$bootSamp))
     }) %>%
       bindEvent(input$getCl)
+
+    # Trigger plot update when includeCi checkbox changes and CL has been generated
+    observe({
+      if (isolate(main_nav()) == "predict" && cl_requested()) {
+        current_val <- isolate(predict_trigger())
+        predict_trigger(current_val + 1)
+      }
+    }) %>%
+      bindEvent(input$includeCi, ignoreInit = TRUE)
 
     predict_hc <- reactive({
       req(predict_trigger() > 0)
@@ -807,7 +835,8 @@ mod_predict_server <- function(
         thresh_rv$conc,
         fit_mod$fit_dist(),
         cl_requested(),
-        cl_nboot()
+        cl_nboot(),
+        input$includeCi
       ) %>%
       bindEvent(predict_trigger())
 
@@ -872,6 +901,11 @@ mod_predict_server <- function(
       req(input$adjustLabel)
       req(conc)
       req(dat)
+      req(pred)
+
+      # Derive CI flag from pred data (check if CI columns exist)
+      # This prevents double rendering by not depending on cl_requested() directly
+      has_ci <- all(c("lcl", "ucl") %in% names(pred))
 
       colour <- if (input$selectColour == "-none-") {
         NULL
@@ -939,7 +973,7 @@ mod_predict_server <- function(
         conc_value = thresh_rv$conc,
         big.mark = big_mark(),
         decimal.mark = decimal_mark(),
-        ci = input$includeCi && cl_requested(),
+        ci = has_ci && input$includeCi,
         ribbon = as.logical(input$ribbonStyle)
       ))
 
