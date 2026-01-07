@@ -3563,7 +3563,7 @@
     },
     "ssdtools": {
       "Package": "ssdtools",
-      "Version": "2.5.0.9004",
+      "Version": "2.5.0.9005",
       "Source": "GitHub",
       "Title": "Species Sensitivity Distributions",
       "Authors@R": "c( person(\"Joe\", \"Thorley\", , \"joe@poissonconsulting.ca\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0002-7683-4592\")), person(\"Rebecca\", \"Fisher\", , \"R.Fisher@aims.gov.au\", role = \"aut\"), person(\"David\", \"Fox\", , \"david.fox@environmetrics.net.au\", role = \"aut\"), person(\"Carl\", \"Schwarz\", role = \"aut\"), person(\"Angeline\", \"Tillmanns\", role = \"ctb\"), person(\"Seb\", \"Dalgarno\", , \"seb@poissonconsulting.ca\", role = \"ctb\", comment = c(ORCID = \"0000-0002-3658-4517\")), person(\"Kathleen\", \"McTavish\", role = \"ctb\"), person(\"Heather\", \"Thompson\", role = \"ctb\"), person(\"Doug\", \"Spry\", role = \"ctb\"), person(\"Rick\", \"van Dam\", role = \"ctb\"), person(\"Graham\", \"Batley\", role = \"ctb\"), person(\"Ali\", \"Azizishirazi\", role = \"ctb\"), person(\"Nadine\", \"Hussein\", , \"nadine@poissonconsulting.ca\", role = \"ctb\", comment = c(ORCID = \"0000-0003-4470-8361\")), person(\"Sarah\", \"Lyons\", , \"sarah@poissonconsulting.ca\", role = \"ctb\", comment = c(ORCID = \"0000-0002-6745-6796\")), person(\"Duncan\", \"Kennedy\", , \"duncan@poissonconsulting.ca\", role = \"ctb\", comment = c(ORCID = \"0009-0001-4880-5751\")), person(\"Stephanie\", \"Hazlitt\", role = \"ctb\"), person(\"Hadley\", \"Wickham\", role = \"ctb\"), person(\"Sergio\", \"Ibarra Espinosa\", role = \"ctb\"), person(\"Andy\", \"Teucher\", role = \"ctb\"), person(\"Emilie\", \"Doussantousse\", role = \"ctb\"), person(\"Nan-Hung\", \"Hsieh\", role = \"ctb\"), person(\"Florencia\", \"D'Andrea\", role = \"ctb\"), person(\"Eduard\", \"Szöcs\", role = \"ctb\", comment = c(ORCID = \"0000-0001-5376-1194\")), person(\"Province of British Columbia\", role = c(\"fnd\", \"cph\")), person(\"Environment and Climate Change Canada\", role = c(\"fnd\", \"cph\")), person(\"Australian Government Department of Climate Change, Energy, the Environment and Water\", role = c(\"fnd\", \"cph\")) )",
@@ -3640,7 +3640,7 @@
       "RemoteRepo": "ssdtools",
       "RemoteUsername": "poissonconsulting",
       "RemoteRef": "dev",
-      "RemoteSha": "1f7cee98c7a250dfcd34fc2131baea348cb1ac4a",
+      "RemoteSha": "a1ddc63bce5e223f550a31b10d0eff14d7fb38ab",
       "NeedsCompilation": "yes",
       "Author": "Joe Thorley [aut, cre] (ORCID: <https://orcid.org/0000-0002-7683-4592>), Rebecca Fisher [aut], David Fox [aut], Carl Schwarz [aut], Angeline Tillmanns [ctb], Seb Dalgarno [ctb] (ORCID: <https://orcid.org/0000-0002-3658-4517>), Kathleen McTavish [ctb], Heather Thompson [ctb], Doug Spry [ctb], Rick van Dam [ctb], Graham Batley [ctb], Ali Azizishirazi [ctb], Nadine Hussein [ctb] (ORCID: <https://orcid.org/0000-0003-4470-8361>), Sarah Lyons [ctb] (ORCID: <https://orcid.org/0000-0002-6745-6796>), Duncan Kennedy [ctb] (ORCID: <https://orcid.org/0009-0001-4880-5751>), Stephanie Hazlitt [ctb], Hadley Wickham [ctb], Sergio Ibarra Espinosa [ctb], Andy Teucher [ctb], Emilie Doussantousse [ctb], Nan-Hung Hsieh [ctb], Florencia D'Andrea [ctb], Eduard Szöcs [ctb] (ORCID: <https://orcid.org/0000-0001-5376-1194>), Province of British Columbia [fnd, cph], Environment and Climate Change Canada [fnd, cph], Australian Government Department of Climate Change, Energy, the Environment and Water [fnd, cph]",
       "Maintainer": "Joe Thorley <joe@poissonconsulting.ca>"
