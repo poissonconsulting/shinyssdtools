@@ -1,4 +1,4 @@
-// Dismiss popovers when clicking outside
+ // Dismiss popovers when clicking outside
 $(document).ready(function() {
   $(document).on('click', function(e) {
     // Check if click is outside popover and its trigger button

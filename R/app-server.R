@@ -105,8 +105,11 @@ app_server <- function(input, output, session) {
 
   # Module Server Calls -----------------------------------------------------
 
+  # Shared toxicant name across modules
+  shared_toxicant_name <- reactiveVal("")
+
   # Call module servers with shared values
-  data_mod <- mod_data_server("data_mod", trans, current_lang)
+  data_mod <- mod_data_server("data_mod", trans, current_lang, shared_toxicant_name)
   fit_mod <- mod_fit_server(
     "fit_mod",
     trans,
@@ -136,7 +139,8 @@ app_server <- function(input, output, session) {
     current_lang,
     data_mod,
     fit_mod,
-    predict_mod
+    predict_mod,
+    shared_toxicant_name
   )
   rcode_mod <- mod_rcode_server(
     "rcode_mod",
