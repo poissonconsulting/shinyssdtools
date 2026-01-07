@@ -269,7 +269,7 @@ zero_range <- function(x, tol = .Machine$double.eps^0.5) {
 #' @return Numeric concentration estimate
 #' @keywords internal
 estimate_hc <- function(x, percent) {
-  ssdtools::ssd_hc(x, proportion = percent / 100)$est
+  ssdtools::ssd_hc_bcanz(x, proportion = percent / 100)$est
 }
 
 #' Estimate hazard percent
@@ -278,7 +278,7 @@ estimate_hc <- function(x, percent) {
 #' @return Numeric proportion estimate (0-1 scale)
 #' @keywords internal
 estimate_hp <- function(x, conc) {
-  ssdtools::ssd_hp(x, conc = conc, proportion = TRUE)$est
+  ssdtools::ssd_hp_bcanz(x, conc = conc, proportion = TRUE)$est
 }
 
 #' Calculate threshold percent from concentration with rounding
@@ -308,7 +308,7 @@ calculate_threshold_conc <- function(fit, thresh, digits = 3) {
 #' @return Data frame with columns: dist, est, se, lcl, ucl, wt
 #' @keywords internal
 ssd_hc_ave <- function(x, percent, nboot) {
-  dist <- ssdtools::ssd_hc(
+  dist <- ssdtools::ssd_hc_bcanz(
     x,
     proportion = percent / 100,
     ci = TRUE,
@@ -321,7 +321,7 @@ ssd_hc_ave <- function(x, percent, nboot) {
     ave <- dist
     ave$dist <- "average"
   } else {
-    ave <- ssdtools::ssd_hc(
+    ave <- ssdtools::ssd_hc_bcanz(
       x,
       proportion = percent / 100,
       ci = TRUE,
@@ -342,7 +342,7 @@ ssd_hc_ave <- function(x, percent, nboot) {
 #' @return Data frame with columns: dist, est, se, lcl, ucl, wt
 #' @keywords internal
 ssd_hp_ave <- function(x, conc, nboot) {
-  dist <- ssdtools::ssd_hp(
+  dist <- ssdtools::ssd_hp_bcanz(
     x,
     conc = conc,
     ci = TRUE,
@@ -356,7 +356,7 @@ ssd_hp_ave <- function(x, conc, nboot) {
     ave <- dist
     ave$dist <- "average"
   } else {
-    ave <- ssdtools::ssd_hp(
+    ave <- ssdtools::ssd_hp_bcanz(
       x,
       conc = conc,
       ci = TRUE,
