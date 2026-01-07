@@ -307,7 +307,7 @@ test_that("model ave plot includes CL", {
         session$setInputs(
           threshType = "Concentration",
           thresh = "5",
-          includeCi = TRUE,
+          includeCi = FALSE,
           bootSamp = "5",
           title = "",
           xaxis = "Concentration",
@@ -335,13 +335,22 @@ test_that("model ave plot includes CL", {
         plot_before <- returned$model_average_plot()
         expect_false(has_confidence_intervals(plot_before))
 
+        # Generate CL data
         session$setInputs(getCl = 1)
         session$flushReact()
-      })
-      plot_after <- returned$model_average_plot()
 
-      expect_true(has_confidence_intervals(plot_after))
-      vdiffr::expect_doppelganger("predict-plot-with-ci", plot_after)
+        # CL generated but not included on plot yet
+        plot_after_cl <- returned$model_average_plot()
+        expect_false(has_confidence_intervals(plot_after_cl))
+
+        # Toggle checkbox to include CL on plot
+        session$setInputs(includeCi = TRUE)
+        session$flushReact()
+      })
+      plot_with_ci <- returned$model_average_plot()
+
+      expect_true(has_confidence_intervals(plot_with_ci))
+      vdiffr::expect_doppelganger("predict-plot-with-ci", plot_with_ci)
     }
   )
 })
@@ -554,35 +563,6 @@ test_that("cl_nboot stores bootstrap count when Get CL clicked", {
       returned <- session$returned
       expect_true(returned$cl_requested())
       expect_equal(returned$cl_nboot(), 100)
-    }
-  )
-})
-
-test_that("unchecking CI checkbox clears cl_requested when Get CL clicked", {
-  testServer(
-    mod_predict_server,
-    args = predict_args,
-    {
-      session$setInputs(
-        threshType = "Concentration",
-        thresh = "5",
-        includeCi = TRUE,
-        bootSamp = "100",
-        getCl = 1
-      )
-      session$flushReact()
-
-      returned <- session$returned
-      expect_true(returned$cl_requested())
-
-      session$setInputs(
-        includeCi = FALSE,
-        getCl = 2
-      )
-      session$flushReact()
-
-      expect_false(returned$cl_requested())
-      expect_null(returned$cl_nboot())
     }
   )
 })
