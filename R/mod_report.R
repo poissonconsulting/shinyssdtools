@@ -86,7 +86,8 @@ mod_report_ui <- function(id) {
                 tags$iframe(
                   srcdoc = "",
                   id = ns("htmlPreview"),
-                  style = "width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px; background: white;"
+                  style = "width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px; background: white;",
+                  sandbox = "allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
                 )
               )
             )
@@ -261,8 +262,12 @@ mod_report_server <- function(
       )
 
       html_content <- readLines(temp_html, warn = FALSE)
+      html_string <- paste(html_content, collapse = "\n")
 
-      paste(html_content, collapse = "\n")
+      # Add target="_blank" to all links to open them in new tab instead of within iframe
+      html_string <- gsub('<a href=', '<a target="_blank" href=', html_string, fixed = TRUE)
+
+      html_string
     }) %>%
       bindEvent(input$generateReport)
 
