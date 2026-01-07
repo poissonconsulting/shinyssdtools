@@ -97,7 +97,8 @@ This triggers the `deploy-app.yml` GitHub action.
 
 The code is released under the Apache License 2.0
 
-Copyright 2021 Province of British Columbia
+Copyright 2015-2025 Province of British Columbia, 2021 Environment and Climate Change Canada, 2023-2025 Australian Government Department of Climate Change,
+Energy, the Environment and Water
 
 Licensed under the Apache License, Version 2.0 (the "LICENSE");
 you may not use this file except in compliance with the License.
