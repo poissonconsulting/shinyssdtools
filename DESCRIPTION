@@ -35,6 +35,7 @@ Imports:
     jsonlite,
     knitr,
     magrittr,
+    pkgload,
     rclipboard,
     readr,
     rhandsontable,
