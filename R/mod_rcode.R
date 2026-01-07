@@ -451,7 +451,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
              dplyr::arrange(dplyr::desc(wt))"
         )
       } else {
-        form <- "ssd_hc"
+        form <- "ssd_hc_bcanz"
         arg <- "proportion"
         thresh <- threshold_vals$percent / 100
         c(
