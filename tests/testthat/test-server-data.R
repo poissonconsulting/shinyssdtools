@@ -41,6 +41,7 @@ test_that("mod_data_server loads demo data when demo button clicked", {
       session$setInputs(demoData = 1)
       session$flushReact()
 
+      print(has_data())
       expect_true(has_data())
 
       # Check data structure
@@ -117,6 +118,7 @@ test_that("demo data has French column names when language is French", {
       session$flushReact()
 
       data <- clean_data()
+      print(data)
       expect_true(is.data.frame(data))
       expect_equal(
         names(data),

@@ -135,26 +135,26 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
     active_source <- reactiveVal("none")
 
     # Update toxicant input when shared value changes from another module
-    observe({
-      req(!is.null(shared_toxicant_name))
-      toxicant_name <- shared_toxicant_name()
-      if (!is.null(toxicant_name) && toxicant_name != "" &&
-          toxicant_name != input$toxicant) {
-        updateTextInput(
-          session,
-          "toxicant",
-          value = toxicant_name
-        )
-      }
-    }) %>%
-      bindEvent(shared_toxicant_name())
+    if (!is.null(shared_toxicant_name)) {
+      observe({
+        toxicant_name <- shared_toxicant_name()
+        if (!is.null(toxicant_name) && toxicant_name != "" &&
+            toxicant_name != input$toxicant) {
+          updateTextInput(
+            session,
+            "toxicant",
+            value = toxicant_name
+          )
+        }
+      }) %>%
+        bindEvent(shared_toxicant_name())
 
-    # Update shared value when this module's input changes
-    observe({
-      req(!is.null(shared_toxicant_name))
-      shared_toxicant_name(input$toxicant)
-    }) %>%
-      bindEvent(input$toxicant)
+      # Update shared value when this module's input changes
+      observe({
+        shared_toxicant_name(input$toxicant)
+      }) %>%
+        bindEvent(input$toxicant)
+    }
 
     demo_data <- reactive({
       df <- boron.data

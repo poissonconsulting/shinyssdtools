@@ -178,26 +178,26 @@ mod_report_server <- function(
       bindEvent(lang(), predict_mod$nboot())
 
     # Update toxicant input when shared value changes from another module
-    observe({
-      req(!is.null(shared_toxicant_name))
-      toxicant_name <- shared_toxicant_name()
-      if (!is.null(toxicant_name) && toxicant_name != "" &&
-          toxicant_name != input$toxicant) {
-        updateTextInput(
-          session,
-          "toxicant",
-          value = toxicant_name
-        )
-      }
-    }) %>%
-      bindEvent(shared_toxicant_name())
+    if (!is.null(shared_toxicant_name)) {
+      observe({
+        toxicant_name <- shared_toxicant_name()
+        if (!is.null(toxicant_name) && toxicant_name != "" &&
+            toxicant_name != input$toxicant) {
+          updateTextInput(
+            session,
+            "toxicant",
+            value = toxicant_name
+          )
+        }
+      }) %>%
+        bindEvent(shared_toxicant_name())
 
-    # Update shared value when this module's input changes
-    observe({
-      req(!is.null(shared_toxicant_name))
-      shared_toxicant_name(input$toxicant)
-    }) %>%
-      bindEvent(input$toxicant)
+      # Update shared value when this module's input changes
+      observe({
+        shared_toxicant_name(input$toxicant)
+      }) %>%
+        bindEvent(input$toxicant)
+    }
 
     params_list <- reactive({
       req(predict_mod$has_predict())
