@@ -262,6 +262,15 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         plot_code <- c(plot_code, paste0("  ggtitle('", title, "')"))
       }
 
+      save_plot <- c(
+        paste0("ggsave("),
+        paste0("  'fit_dist_plot.png',"),
+        paste0("  width = ", get_width2(), ","),
+        paste0("  height = ", get_height2(), ","),
+        paste0("  dpi = ", get_dpi2()),
+        ")"
+      )
+
       c(
         paste0("dist <- ssd_fit_bcanz("),
         paste0("  data,"),
@@ -272,23 +281,11 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         ")",
         "",
         plot_code,
+        save_plot,
         "",
         "ssd_gof(dist, wt = TRUE) %>%",
         "    dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
              dplyr::arrange(dplyr::desc(wt))"
-      )
-    }
-
-    generate_save_fit_code <- function() {
-      req(fit_mod$has_fit())
-
-      c(
-        paste0("ggsave("),
-        paste0("  'fit_dist_plot.png',"),
-        paste0("  width = ", get_width2(), ","),
-        paste0("  height = ", get_height2(), ","),
-        paste0("  dpi = ", get_dpi2()),
-        ")"
       )
     }
 
@@ -484,7 +481,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       code_sections$head <- try(generate_head_code(), silent = TRUE)
       code_sections$data <- try(generate_data_code(), silent = TRUE)
       code_sections$fit <- try(generate_fit_code(), silent = TRUE)
-      code_sections$save_fit <- try(generate_save_fit_code(), silent = TRUE)
       code_sections$pred_plot <- try(generate_pred_plot_code(), silent = TRUE)
       code_sections$save_pred <- try(generate_save_pred_code(), silent = TRUE)
       code_sections$pred_cl <- try(generate_pred_cl_code(), silent = TRUE)
