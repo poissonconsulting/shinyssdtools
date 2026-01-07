@@ -424,7 +424,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       nboot_clean <- clean_nboot(predict_mod$nboot()) %>% as.integer()
 
       if (predict_mod$threshold_type() != "Concentration") {
-        form <- "ssd_hp"
+        form <- "ssd_hp_bcanz"
         arg <- "conc"
         thresh <- threshold_vals$conc
         c(
@@ -451,7 +451,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
              dplyr::arrange(dplyr::desc(wt))"
         )
       } else {
-        form <- "ssd_hc"
+        form <- "ssd_hc_bcanz"
         arg <- "proportion"
         thresh <- threshold_vals$percent / 100
         c(

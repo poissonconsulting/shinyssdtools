@@ -135,7 +135,7 @@ mod_report_server <- function(
       fit <- fit_mod$fit_dist()
       req(fit)
       nboot <- clean_nboot(input$bootSamp)
-      avehc <- ssdtools::ssd_hc(
+      avehc <- ssdtools::ssd_hc_bcanz(
         fit,
         proportion = c(0.01, 0.05, 0.1, 0.2),
         ci = TRUE,
