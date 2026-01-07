@@ -25,6 +25,9 @@ app_ui <- function() {
     # Include custom JavaScript for translations
     tags$script(src = "translation.js"),
 
+    # Include custom JavaScript for popover dismiss behavior
+    tags$script(src = "popover-dismiss.js"),
+
     # Add custom CSS handler for notifications
     tags$script(HTML(
       "
