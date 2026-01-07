@@ -159,13 +159,13 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
     demo_data <- reactive({
       df <- boron.data
       trans <- translations()
-      conc <- tr("ui_1htconc", trans)
       spp <- tr("ui_1htspp", trans)
+      conc <- tr("ui_1htconc", trans)
       grp <- tr("ui_1htgrp", trans)
-      chm <- tr("ui_1htchm", trans)
-      unt <- tr("ui_1htunt", trans)
 
-      colnames(df) <- c(chm, spp, conc, grp, unt)
+      # Keep only Species, Conc, and Group columns
+      df <- df[, c("Species", "Conc", "Group")]
+      colnames(df) <- c(spp, conc, grp)
       df
     }) %>%
       bindEvent(translations(), input$demoData)

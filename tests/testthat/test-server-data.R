@@ -48,7 +48,7 @@ test_that("mod_data_server loads demo data when demo button clicked", {
       data <- clean_data()
       expect_true(is.data.frame(data))
       expect_true(nrow(data) == nrow(boron.data))
-      expect_identical(names(data), names(boron.data))
+      expect_equal(names(data), c("Species", "Conc", "Group"))
     }
   )
 })
@@ -122,7 +122,7 @@ test_that("demo data has French column names when language is French", {
       expect_true(is.data.frame(data))
       expect_equal(
         names(data),
-        c("Produit Chimique", "Espèce", "Conc", "Groupe", "Unités")
+        c("Espèce", "Conc", "Groupe")
       )
     }
   )

@@ -967,20 +967,6 @@ translations <- dplyr::bind_rows(
     japanese = "グループ"
   ),
   dplyr::tibble(
-    id = "ui_1htchm",
-    english = "Chemical",
-    french = "Produit Chimique",
-    spanish = "Químico",
-    japanese = "化学物質"
-  ),
-  dplyr::tibble(
-    id = "ui_1htunt",
-    english = "Units",
-    french = "Unités",
-    spanish = "Unidades",
-    japanese = "単位"
-  ),
-  dplyr::tibble(
     id = "ui_bcanz_file",
     english = "bcanz_report.Rmd",
     french = "bcanz_report_fr.Rmd",
