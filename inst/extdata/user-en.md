@@ -9,7 +9,7 @@ More information on ssdtools methods can be found in [articles on the website](h
 * Each species should have only one concentration value.
 * Data must have **at least one column** containing **at least 6 positive, non-missing concentration values**.
 * Optionally, **species and group** columns can be included, which are used to label and color plot output, respectively.
-* Any additional columns are accepted but are not used by any functions.
+* Any additional columns are accepted but are only used by plotting functions.
 
 
 <center>
