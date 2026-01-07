@@ -100,11 +100,21 @@ mod_data_ui <- function(id) {
       ),
       card(
         class = card_shadow,
-        card_header(span(
-          `data-translate` = "ui_1preview",
-          "Preview chosen dataset"
-        )),
-        card_body(DT::DTOutput(ns("viewUpload")))
+        card_header(
+          class = "d-flex justify-content-between align-items-center",
+          span(
+            `data-translate` = "ui_1preview",
+            "Preview chosen dataset"
+          )
+        ),
+        card_body(
+          padding = 25,
+          ui_download_popover_table(tab = "data", ns = ns),
+          div(
+            class = "table-responsive",
+            DT::DTOutput(ns("viewUpload"))
+          )
+        )
       ),
       card(
         class = paste("mt-3", card_shadow),
@@ -289,6 +299,25 @@ mod_data_server <- function(id, translations, lang) {
           border = '1px solid #ddd'
         )
     })
+
+    # Download handlers
+    output$dataDlCsv <- downloadHandler(
+      filename = function() {
+        "ssdtools_data.csv"
+      },
+      content = function(file) {
+        readr::write_csv(dplyr::as_tibble(current_data()), file)
+      }
+    )
+
+    output$dataDlXlsx <- downloadHandler(
+      filename = function() {
+        "ssdtools_data.xlsx"
+      },
+      content = function(file) {
+        writexl::write_xlsx(dplyr::as_tibble(current_data()), file)
+      }
+    )
 
     return(
       list(
