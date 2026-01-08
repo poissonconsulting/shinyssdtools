@@ -65,7 +65,7 @@ extract_section <- function(file_path, section_heading, output_heading) {
 }
 
 #' Build helpfiles for a specific language
-#' @param lang Language code: "en", "fr", "es", or "ja"
+#' @param lang Language code: "en", "fr", or "es"
 build_helpfiles_for_language <- function(lang) {
   user_guide_path <- file.path("inst/extdata", paste0("user-", lang, ".md"))
   helpfiles_dir <- file.path("inst", paste0("helpfiles_", lang))
@@ -108,23 +108,23 @@ build_helpfiles_for_language <- function(lang) {
     ),
     "fr" = list(
       dataTab = list(
-        section = "Étape 1: Fournir les données",
-        output = "Fournir les données"
+        section = "\u00c9tape 1: Fournir les donn\u00e9es",
+        output = "Fournir les donn\u00e9es"
       ),
       fitTab = list(
-        section = "Étape 2: Ajustement des distributions",
+        section = "\u00c9tape 2: Ajustement des distributions",
         output = "Ajustement des distributions"
       ),
       predictTab = list(
-        section = "Étape 3: Estimation de la concentration présentant un risque ou du pourcentage d'espèces affectées",
-        output = "Estimation de la concentration présentant un risque"
+        section = "\u00c9tape 3: Estimation de la concentration pr\u00e9sentant un risque ou du pourcentage d'esp\u00e8ces affect\u00e9es",
+        output = "Estimation de la concentration pr\u00e9sentant un risque"
       ),
       reportTab = list(
-        section = "Étape 4: Obtenir le BCANZ rapport",
+        section = "\u00c9tape 4: Obtenir le BCANZ rapport",
         output = "Obtenir le BCANZ rapport"
       ),
       rcodeTab = list(
-        section = "Étape 5: Obtenir le code R",
+        section = "\u00c9tape 5: Obtenir le code R",
         output = "Obtenir le code R"
       )
     ),
@@ -138,38 +138,16 @@ build_helpfiles_for_language <- function(lang) {
         output = "Ajustar distribuciones"
       ),
       predictTab = list(
-        section = "Paso 3: Predecir concentración de peligro o porcentaje de especies afectadas",
-        output = "Estimar concentración de peligro"
+        section = "Paso 3: Predecir concentraci\u00f3n de peligro o porcentaje de especies afectadas",
+        output = "Estimar concentraci\u00f3n de peligro"
       ),
       reportTab = list(
         section = "Paso 4: Obtener informe BCANZ",
         output = "Obtener informe BCANZ"
       ),
       rcodeTab = list(
-        section = "Paso 5: Obtener código R",
-        output = "Obtener código R"
-      )
-    ),
-    "ja" = list(
-      dataTab = list(
-        section = "ステップ1: データの提供",
-        output = "データの提供"
-      ),
-      fitTab = list(
-        section = "ステップ2: 分布の適合",
-        output = "分布の適合"
-      ),
-      predictTab = list(
-        section = "ステップ3: ハザード濃度または影響を受けた種のパーセンテージの予測",
-        output = "ハザード濃度の推定"
-      ),
-      reportTab = list(
-        section = "ステップ4: BCANZレポートの取得",
-        output = "BCANZレポートの取得"
-      ),
-      rcodeTab = list(
-        section = "ステップ5: Rコードの取得",
-        output = "Rコードの取得"
+        section = "Paso 5: Obtener c\u00f3digo R",
+        output = "Obtener c\u00f3digo R"
       )
     )
   )
@@ -200,7 +178,7 @@ build_helpfiles_for_language <- function(lang) {
 message("Building helpfiles from user guides...")
 message("=", paste(rep("=", 50), collapse = ""))
 
-for (lang in c("en", "fr", "es", "ja")) {
+for (lang in c("en", "fr", "es")) {
   message(sprintf("\nBuilding helpfiles for language: %s", lang))
   build_helpfiles_for_language(lang)
 }

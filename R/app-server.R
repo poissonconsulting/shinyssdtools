@@ -21,8 +21,7 @@ app_server <- function(input, output, session) {
     clicks <- c(
       english = input$english %||% 0,
       french = input$french %||% 0,
-      spanish = input$spanish %||% 0,
-      japanese = input$japanese %||% 0
+      spanish = input$spanish %||% 0
     )
 
     # Return the language with the highest click count
@@ -39,8 +38,7 @@ app_server <- function(input, output, session) {
       current_lang(),
       "english" = "en",
       "french" = "fr",
-      "spanish" = "es",
-      "japanese" = "ja"
+      "spanish" = "es"
     )
     shinyhelper::observe_helpers(
       help_dir = system.file(
@@ -86,7 +84,6 @@ app_server <- function(input, output, session) {
       current_lang(),
       "french" = " ",
       "spanish" = ".",
-      "japanese" = ",",
       ","  # Default for English
     )
   }) %>%
@@ -97,7 +94,6 @@ app_server <- function(input, output, session) {
       current_lang(),
       "french" = ",",
       "spanish" = ",",
-      "japanese" = ".",
       "."  # Default for English
     )
   }) %>%
@@ -167,7 +163,6 @@ app_server <- function(input, output, session) {
       "english" = "en",
       "french" = "fr",
       "spanish" = "es",
-      "japanese" = "ja",
       "en"  # Default to English
     )
 
@@ -196,7 +191,6 @@ app_server <- function(input, output, session) {
       "english" = "en",
       "french" = "fr",
       "spanish" = "es",
-      "japanese" = "ja",
       "en"  # Default to English
     )
     file_path <- system.file(

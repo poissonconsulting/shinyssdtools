@@ -215,14 +215,11 @@ app_ui <- function() {
           actionLink(inputId = "english", label = "English")
         ),
         nav_item(
-          actionLink(inputId = "french", label = "Français")
+          actionLink(inputId = "french", label = "Fran\u00e7ais")
         )
-        # Spanish and Japanese disabled
+        # Spanish disabled
         # nav_item(
-        #   actionLink(inputId = "spanish", label = "Español")
-        # ),
-        # nav_item(
-        #   actionLink(inputId = "japanese", label = "日本語")
+        #   actionLink(inputId = "spanish", label = "Espa\u00f1ol")
         # )
       )
     )

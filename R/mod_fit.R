@@ -381,9 +381,8 @@ mod_fit_server <- function(
       alt = reactive({
         switch(
           lang(),
-          "french" = "Graphique de distribution de sensibilité des espèces montrant les courbes de distribution ajustées superposées aux données de concentration observées pour chaque espèce. L'axe des x indique les valeurs de concentration et l'axe des y indique la proportion des espèces affectées.",
-          "spanish" = "Gráfico de distribución de sensibilidad de especies que muestra curvas de distribución ajustadas superpuestas a los datos de concentración de especies observados. El eje x muestra los valores de concentración y el eje y muestra la proporción de especies afectadas.",
-          "japanese" = "観測された種の濃度データに重ねて適合した分布曲線を示す種感受性分布プロット。X軸は濃度値を示し、Y軸は影響を受けた種の割合を示します。",
+          "french" = "Graphique de distribution de sensibilit\u00e9 des esp\u00e8ces montrant les courbes de distribution ajust\u00e9es superpos\u00e9es aux donn\u00e9es de concentration observ\u00e9es pour chaque esp\u00e8ce. L'axe des x indique les valeurs de concentration et l'axe des y indique la proportion des esp\u00e8ces affect\u00e9es.",
+          "spanish" = "Gr\u00e1fico de distribuci\u00f3n de sensibilidad de especies que muestra curvas de distribuci\u00f3n ajustadas superpuestas a los datos de concentraci\u00f3n de especies observados. El eje x muestra los valores de concentraci\u00f3n y el eje y muestra la proporci\u00f3n de especies afectadas.",
           "Species Sensitivity Distribution plot showing fitted distribution curves overlaid on observed species concentration data. The x-axis shows concentration values and the y-axis shows the proportion of species affected."
         )
       })

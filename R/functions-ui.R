@@ -48,7 +48,7 @@ static_label_input <- function(
 }
 
 #' Generate DataTables options with language support
-#' @param lang Character string language code: "english", "french", "spanish", or "japanese" (default: "english")
+#' @param lang Character string language code: "english", "french", or "spanish" (default: "english")
 #' @return List of DataTables options including pageLength, language translations, and column definitions
 #' @keywords internal
 dt_options <- function(lang = "english") {
@@ -57,20 +57,20 @@ dt_options <- function(lang = "english") {
     lang,
     "french" = list(
       search = "Rechercher :",
-      lengthMenu = "Afficher _MENU_ entrées",
-      info = "Affichage de _START_ à _END_ sur _TOTAL_ entrées",
-      infoEmpty = "Aucune donnée disponible",
-      infoFiltered = "(filtré à partir de _MAX_ entrées au total)",
-      zeroRecords = "Aucun enregistrement correspondant trouvé",
+      lengthMenu = "Afficher _MENU_ entr\u00e9es",
+      info = "Affichage de _START_ \u00e0 _END_ sur _TOTAL_ entr\u00e9es",
+      infoEmpty = "Aucune donn\u00e9e disponible",
+      infoFiltered = "(filtr\u00e9 \u00e0 partir de _MAX_ entr\u00e9es au total)",
+      zeroRecords = "Aucun enregistrement correspondant trouv\u00e9",
       paginate = list(
         first = "Premier",
         last = "Dernier",
         `next` = "Suivant",
-        previous = "Précédent"
+        previous = "Pr\u00e9c\u00e9dent"
       ),
       processing = "Traitement en cours...",
       loadingRecords = "Chargement des enregistrements...",
-      emptyTable = "Aucune donnée disponible dans le tableau"
+      emptyTable = "Aucune donn\u00e9e disponible dans le tableau"
     ),
     "spanish" = list(
       search = "Buscar datos:",
@@ -81,30 +81,13 @@ dt_options <- function(lang = "english") {
       zeroRecords = "No se encontraron registros coincidentes",
       paginate = list(
         first = "Primero",
-        last = "Último",
+        last = "\u00daltimo",
         `next` = "Siguiente",
         previous = "Anterior"
       ),
       processing = "Procesando...",
       loadingRecords = "Cargando registros...",
       emptyTable = "No hay datos disponibles en la tabla"
-    ),
-    "japanese" = list(
-      search = "データを検索:",
-      lengthMenu = "_MENU_ 件表示",
-      info = "_TOTAL_ 件中 _START_ から _END_ まで表示",
-      infoEmpty = "データがありません",
-      infoFiltered = "(全 _MAX_ 件からフィルタリング)",
-      zeroRecords = "一致するレコードが見つかりません",
-      paginate = list(
-        first = "最初",
-        last = "最後",
-        `next` = "次",
-        previous = "前"
-      ),
-      processing = "処理中...",
-      loadingRecords = "レコードを読み込み中...",
-      emptyTable = "テーブルにデータがありません"
     ),
     # Default English
     list(
