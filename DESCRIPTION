@@ -33,6 +33,7 @@ Imports:
     ggplot2,
     glue,
     jsonlite,
+    kableExtra,
     knitr,
     magrittr,
     pkgload,
