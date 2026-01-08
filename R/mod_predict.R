@@ -92,18 +92,17 @@ mod_predict_ui <- function(id) {
                 ),
                 selected = 5
               ),
-              selectizeInput(
-                ns("threshPc"),
-                label = span(
-                  `data-translate` = "ui_3protecting",
-                  "protecting % species"
+              div(
+                tags$label(
+                  span(
+                    `data-translate` = "ui_3protecting",
+                    "protecting % species"
+                  )
                 ),
-                choices = c(99, 95, 90, 80),
-                options = list(
-                  create = TRUE,
-                  createFilter = "^[1-9][0-9]?$|^99$"
-                ),
-                selected = 95
+                div(
+                  style = "padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa; min-height: 38px; display: flex; align-items: center; margin-top: 7px;",
+                  textOutput(ns("threshPc"), inline = TRUE)
+                )
               )
             )
           ),
@@ -735,30 +734,18 @@ mod_predict_server <- function(
       DT::datatable(table_cl(), options = list(dom = "t"))
     })
 
-    # update thresh RVs --------------------------------------------------------
-    observe({
-      thresh_pc <- 100 - as.numeric(input$thresh)
-      choices <- unique(c(99, 95, 90, 80, thresh_pc))
-      updateSelectizeInput(
-        session,
-        "threshPc",
-        choices = choices,
-        selected = isolate(thresh_pc)
-      )
-    }) %>%
-      bindEvent(input$thresh)
-
-    observe({
-      thresh <- 100 - as.numeric(input$threshPc)
-      choices <- c(1, 5, 10, 20, thresh)
-      updateSelectizeInput(
-        session,
-        "thresh",
-        choices = choices,
-        selected = isolate(thresh)
-      )
-    }) %>%
-      bindEvent(input$threshPc)
+    # Display protecting % as read-only calculated value
+    output$threshPc <- renderText({
+      thresh <- input$thresh
+      if (is.null(thresh) || thresh == "") {
+        return("")
+      }
+      thresh_num <- as.numeric(thresh)
+      if (is.na(thresh_num)) {
+        return("")
+      }
+      100 - thresh_num
+    })
 
     # Update threshold reactive values
     observe({
