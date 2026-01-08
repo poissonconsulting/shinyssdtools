@@ -65,7 +65,6 @@ mod_fit_ui <- function(id) {
               )
             ),
             checkboxInput(
-              # FIXME rescale options should be "no", "geomean" "odds"
               ns("rescale"),
               label = span(`data-translate` = "ui_2rescale", "Rescale"),
               value = FALSE
@@ -519,7 +518,16 @@ mod_fit_server <- function(
         title = reactive({
           input$title
         }),
-        has_fit = has_fit
+        has_fit = has_fit,
+        width = reactive({
+          input$width
+        }),
+        height = reactive({
+          input$height
+        }),
+        dpi = reactive({
+          input$dpi
+        })
       )
     )
   })

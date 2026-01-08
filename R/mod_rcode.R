@@ -124,29 +124,29 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       threshold_vals$percent / 100
     })
 
-    # Get plot dimensions - using default values since download dimensions not in UI
+    # Get plot dimensions from user inputs in download popovers
     get_width <- reactive({
-      6 # Default width for predict plots
+      predict_mod$width() %||% 6
     })
 
     get_width2 <- reactive({
-      6 # Default width for fit plots
+      fit_mod$width() %||% 6
     })
 
     get_height <- reactive({
-      4 # Default height for predict plots
+      predict_mod$height() %||% 4
     })
 
     get_height2 <- reactive({
-      4 # Default height for fit plots
+      fit_mod$height() %||% 4
     })
 
     get_dpi <- reactive({
-      300 # Default DPI for predict plots
+      predict_mod$dpi() %||% 300
     })
 
     get_dpi2 <- reactive({
-      300 # Default DPI for fit plots
+      fit_mod$dpi() %||% 300
     })
 
     # Code section outputs

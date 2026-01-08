@@ -1179,7 +1179,16 @@ mod_predict_server <- function(
         cl_requested = cl_requested,
         cl_nboot = cl_nboot,
         has_cl = has_cl,
-        has_predict = has_predict
+        has_predict = has_predict,
+        width = reactive({
+          input$width
+        }),
+        height = reactive({
+          input$height
+        }),
+        dpi = reactive({
+          input$dpi
+        })
       )
     )
   })
