@@ -76,7 +76,6 @@ mod_rcode_ui <- function(id) {
             uiOutput(ns("codeHead")),
             uiOutput(ns("codeData")),
             uiOutput(ns("codeFit")),
-            uiOutput(ns("codeSaveFit")),
             uiOutput(ns("codePredPlot")),
             uiOutput(ns("codeSavePred")),
             uiOutput(ns("codePredCl"))
@@ -172,13 +171,6 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
 
     output$codeFit <- renderUI({
       code_lines <- generate_fit_code()
-
-      formatted_code <- format_r_code(code_lines)
-      HTML(paste0("<pre>", formatted_code, "</pre>"))
-    })
-
-    output$codeSaveFit <- renderUI({
-      code_lines <- generate_save_fit_code()
 
       formatted_code <- format_r_code(code_lines)
       HTML(paste0("<pre>", formatted_code, "</pre>"))
