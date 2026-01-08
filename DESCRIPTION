@@ -23,7 +23,7 @@ License: Apache License | file LICENSE
 URL: https://github.com/bcgov/shinyssdtools
 BugReports: https://github.com/bcgov/shinyssdtools/issues
 Depends: 
-    R (>= 3.5),
+    R (>= 4.1.0),
     ssdtools (>= 1.0.1)
 Imports:
     bsicons,
