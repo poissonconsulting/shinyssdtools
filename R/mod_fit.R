@@ -357,6 +357,12 @@ mod_fit_server <- function(
       trans <- translations()
       gof <-
         ssdtools::ssd_gof(dist, wt = TRUE) %>%
+        # Remove at_bound and computable columns
+        dplyr::select(-at_bound, -computable) %>%
+        # Round different columns to different sig figs
+        dplyr::mutate(
+          dplyr::across(c(log_lik, aic, aicc, bic), ~ signif(.x, 4))
+        ) %>%
         dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
         dplyr::arrange(dplyr::desc(.data$wt))
       names(gof) <- gsub("weight", tr("ui_2weight", trans), names(gof))

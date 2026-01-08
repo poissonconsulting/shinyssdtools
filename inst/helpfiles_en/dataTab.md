@@ -6,7 +6,6 @@
 * Data must have **at least one column** containing **at least 6 positive, non-missing concentration values**.
 * Any additional columns such as **species** or **group** are accepted but are not only used by plotting functions if two or more unique values.
 
-
 <center>
 
 Concentration&nbsp;&nbsp; | Species&nbsp;&nbsp; | Group &nbsp;

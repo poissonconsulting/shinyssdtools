@@ -53,7 +53,7 @@ Esto especifica si dejar los valores de concentración sin cambios (sin marcar) 
 Seleccione unidades para mostrarlas en el título del eje x.
 
 Información adicional sobre la **tabla de bondad de ajuste**:
-Las columnas en la tabla de bondad de ajuste son la distribución (dist), la estadística de Anderson-Darling (ad), la estadística de Kolmogorov-Smirnov (ks), la estadística de Cramer-von Mises (cvm), el Criterio de Información de Akaike (aic), el Criterio de Información de Akaike corregido para el tamaño de la muestra (aicc), el Criterio de Información Bayesiana (bic), la diferencia de AICc (delta) y el peso de Akaike basado en AICc (weight).
+Las columnas en la tabla de bondad de ajuste son la distribución (dist), el número de parámetros (npars), el número de observaciones (nobs), la log-verosimilitud (log_lik), el Criterio de Información de Akaike (aic), el Criterio de Información de Akaike corregido para el tamaño de la muestra (aicc), las diferencias de los Criterios de Información (delta), las ponderaciones de los Criterios de Información (wt), el Criterio de Información Bayesiana (bic), la estadística de Anderson-Darling (ad), la estadística de Kolmogorov-Smirnov (ks), y la estadística de Cramer-von Mises (cvm).
 La predicción es la estimación promediada del modelo (usando aicc) del ajuste.
 La concentración de peligro porcentual es la concentración del químico que se predice que afectará ese porcentaje de las especies probadas.
 
