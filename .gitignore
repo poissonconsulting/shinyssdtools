@@ -2,6 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+CLAUDE.md
+CLAUDE-TESTING.md
+CLAUDE-TRANSLATIONS.md
 
 .DS_Store
 .Renviron
@@ -16,3 +19,5 @@ inst/docs/
 
 .vscode/
 
+.claude/settings.local.json
+tests/resources/
