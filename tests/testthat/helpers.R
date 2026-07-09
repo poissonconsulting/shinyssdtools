@@ -185,7 +185,11 @@ has_confidence_intervals <- function(plot) {
 #' })
 #' }
 set_test_seed <- function(seed = 12345) {
-  withr::local_seed(seed)
+  # Scope the seed to the calling test frame (not this helper's frame) so it
+  # remains in effect through testServer() bootstrap sampling. Without
+  # `.local_envir`, withr::local_seed() restores the RNG the moment this
+  # helper returns, leaving bootstrap snapshots non-reproducible.
+  withr::local_seed(seed, .local_envir = parent.frame())
 }
 
 # AppDriver Helpers -----------------------------------------------------------
