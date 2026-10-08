@@ -28,8 +28,11 @@ $(document).ready(function() {
       }
     });
     
-    // Update language-specific attributes
+    // Update language-specific attributes; <html lang> tells screen readers
+    // which language to read the page in.
     $('body').attr('data-language', language.toLowerCase());
+    const codes = { english: 'en', french: 'fr', spanish: 'es' };
+    document.documentElement.lang = codes[language] || 'en';
     
     console.log('Translations updated for language:', language);
   });

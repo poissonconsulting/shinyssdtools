@@ -27,8 +27,7 @@ predict_args <- list(
   data_mod = data_mod,
   fit_mod = fit_mod,
   big_mark = reactive(","),
-  decimal_mark = reactive("."),
-  main_nav = reactive("predict")
+  decimal_mark = reactive(".")
 )
 
 test_that("predictions are valid", {
@@ -203,8 +202,7 @@ test_that("xbreaks works when no column matches guess_sp (#103)", {
     data_mod = mock_data_module(data = taxon_data),
     fit_mod = mock_fit_module(fit = taxon_fit, conc_column = "Value"),
     big_mark = reactive(","),
-    decimal_mark = reactive("."),
-    main_nav = reactive("predict")
+    decimal_mark = reactive(".")
   )
 
   testServer(

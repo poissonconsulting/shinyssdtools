@@ -19,8 +19,17 @@ app_ui <- function() {
   tagList(
     # Dependencies
     shinyjs::useShinyjs(),
-    waiter::useWaiter(),
+    # Spinners on outputs while they recalculate; the pulse would flash at
+    # the top of the page on every input change.
+    useBusyIndicators(pulse = FALSE),
     rclipboard::rclipboardSetup(),
+
+    # Versioned by the file's modification time, so a browser fetches the
+    # stylesheet again when it changes rather than using a cached copy.
+    tags$head(tags$link(
+      rel = "stylesheet",
+      href = paste0("style.css?v=", styles_version())
+    )),
 
     # Include custom JavaScript for translations
     tags$script(src = "translation.js"),
@@ -40,40 +49,8 @@ app_ui <- function() {
     "
     )),
 
-    # Hide shiny errors
-    tags$style(
-      type = "text/css",
-      ".shiny-output-error { visibility: hidden; }",
-      ".shiny-output-error:before { visibility: hidden; }",
-      "/* Remove focus outline from help icons */",
-      ".bi-question-circle:focus { outline: none !important; border: none !important; box-shadow: none !important; }",
-      ".bi-question-circle { cursor: pointer; }",
-      ".initially-hidden {
-        display: none;
-      }"
-    ),
+    tags$style(type = "text/css", ".initially-hidden { display: none; }"),
 
-    # Language dropdown menu styling with theme colors
-    tags$style(
-      type = "text/css",
-      glue::glue("
-        .dropdown-menu {{
-          background-color: {color_secondary} !important;
-        }}
-        .dropdown-menu .bslib-nav-item a,
-        .dropdown-menu .action-button {{
-          color: #FFFFFF !important;
-          display: block;
-          padding: 0.5rem 1rem;
-        }}
-        .dropdown-menu .bslib-nav-item a:hover,
-        .dropdown-menu .action-button:hover {{
-          background-color: rgba(255, 255, 255, 0.1) !important;
-          color: #FFFFFF !important;
-          text-decoration: none;
-        }}
-      ")
-    ),
     tags$script(HTML(
       "
       $(document).on('shiny:connected', function() {
@@ -84,12 +61,8 @@ app_ui <- function() {
 
     page_navbar(
       title = "shinyssdtools",
-      theme = bs_theme(
-        primary = color_primary,
-        secondary = color_secondary,
-        success = color_primary,
-        info = color_primary
-      ),
+      theme = app_theme(),
+      lang = "en",
       navbar_options = navbar_options(bg = color_secondary, underline = TRUE),
       nav_panel(
         title = span(`data-translate` = "ui_navanalyse", "Analyse"),
@@ -105,58 +78,23 @@ app_ui <- function() {
               navset_underline(
                 id = "main_nav",
                 nav_panel(
-                  title = span(
-                    bsicons::bs_icon("table"),
-                    span(
-                      `data-translate` = "ui_nav1",
-                      style = "margin-left: 0.5rem;",
-                      "1. Data"
-                    )
-                  ),
+                  title = step_title("table", "ui_nav1", "1. Data", "data"),
                   value = "data"
                 ),
                 nav_panel(
-                  title = span(
-                    bsicons::bs_icon("graph-up"),
-                    span(
-                      `data-translate` = "ui_nav2",
-                      style = "margin-left: 0.5rem;",
-                      "2. Fit"
-                    )
-                  ),
+                  title = step_title("graph-up", "ui_nav2", "2. Fit", "fit"),
                   value = "fit"
                 ),
                 nav_panel(
-                  title = span(
-                    bsicons::bs_icon("calculator"),
-                    span(
-                      `data-translate` = "ui_nav3",
-                      style = "margin-left: 0.5rem;",
-                      "3. Predict"
-                    )
-                  ),
+                  title = step_title("calculator", "ui_nav3", "3. Predict", "predict"),
                   value = "predict"
                 ),
                 nav_panel(
-                  title = span(
-                    bsicons::bs_icon("file-bar-graph"),
-                    span(
-                      `data-translate` = "ui_nav4",
-                      style = "margin-left: 0.5rem;",
-                      "4. Report"
-                    )
-                  ),
+                  title = step_title("file-bar-graph", "ui_nav4", "4. Report", "report"),
                   value = "report"
                 ),
                 nav_panel(
-                  title = span(
-                    bsicons::bs_icon("code-slash"),
-                    span(
-                      `data-translate` = "ui_nav5",
-                      style = "margin-left: 0.5rem;",
-                      "R Code"
-                    )
-                  ),
+                  title = step_title("code-slash", "ui_nav5", "R Code", "rcode"),
                   value = "rcode"
                 )
               )
@@ -224,4 +162,44 @@ app_ui <- function() {
       )
     )
   )
+}
+
+# A step in the step navigation: its icon and name, and a marker that shows
+# once the step is done (a tick) or while it runs in the background (a
+# spinner). The markers are switched in the browser by the output
+# mark_<step>, set in app_server().
+step_title <- function(icon, translate_key, default_text, step) {
+  span(
+    class = "d-inline-flex align-items-center gap-2 w-100",
+    bsicons::bs_icon(icon, a11y = "deco"),
+    span(`data-translate` = translate_key, default_text),
+    if (step != "rcode") step_marker_switch(step)
+  )
+}
+
+step_marker_switch <- function(step) {
+  marker <- function(state, icon, translate_key, default_text) {
+    # conditionalPanel() as a span, so the marker sits inline with the name.
+    span(
+      `data-display-if` = sprintf("output.mark_%s === '%s'", step, state),
+      `data-ns-prefix` = "",
+      icon,
+      span(class = "visually-hidden", `data-translate` = translate_key, default_text)
+    )
+  }
+  span(
+    class = "ms-auto d-inline-flex",
+    marker(
+      "done",
+      bsicons::bs_icon("check-circle-fill", class = "text-success", a11y = "deco"),
+      "ui_step_done",
+      "complete"
+    ),
+    marker("busy", busy_icon(), "ui_step_busy", "running")
+  )
+}
+
+styles_version <- function() {
+  path <- system.file("app", "www", "style.css", package = "shinyssdtools")
+  as.integer(file.mtime(path))
 }

@@ -856,6 +856,96 @@ translations <- dplyr::bind_rows(
     english = "Update",
     french = "Mettre \u00e0 jour",
     spanish = "Actualizar"
+  ),
+  dplyr::tibble(
+    id = "ui_cancel",
+    english = "Cancel",
+    french = "Annuler",
+    spanish = "Cancelar"
+  ),
+  dplyr::tibble(
+    id = "ui_cl_running",
+    english = "Computing confidence limits",
+    french = "Calcul des limites de confiance",
+    spanish = "Calculando los l\u00edmites de confianza"
+  ),
+  dplyr::tibble(
+    id = "ui_cl_stale",
+    english = "The confidence limits are out of date",
+    french = "Les limites de confiance ne sont plus \u00e0 jour",
+    spanish = "Los l\u00edmites de confianza est\u00e1n desactualizados"
+  ),
+  dplyr::tibble(
+    id = "ui_cl_stale2",
+    english = "The fit or threshold has changed. Get CL again to update them.",
+    french = "L'ajustement ou le seuil a chang\u00e9. Recalculez les LC pour les mettre \u00e0 jour.",
+    spanish = "El ajuste o el umbral ha cambiado. Obtenga los LC de nuevo para actualizarlos."
+  ),
+  dplyr::tibble(
+    id = "ui_cl_failed",
+    english = "The confidence limits could not be computed",
+    french = "Les limites de confiance n'ont pas pu \u00eatre calcul\u00e9es",
+    spanish = "No se pudieron calcular los l\u00edmites de confianza"
+  ),
+  dplyr::tibble(
+    id = "ui_report_failed",
+    english = "The report could not be generated",
+    french = "Le rapport n'a pas pu \u00eatre g\u00e9n\u00e9r\u00e9",
+    spanish = "No se pudo generar el informe"
+  ),
+  dplyr::tibble(
+    id = "ui_continue_fit",
+    english = "Continue to fit",
+    french = "Continuer vers l'ajustement",
+    spanish = "Continuar al ajuste"
+  ),
+  dplyr::tibble(
+    id = "ui_continue_predict",
+    english = "Continue to predict",
+    french = "Continuer vers l'estimation",
+    spanish = "Continuar a la predicci\u00f3n"
+  ),
+  dplyr::tibble(
+    id = "ui_continue_report",
+    english = "Continue to report",
+    french = "Continuer vers le rapport",
+    spanish = "Continuar al informe"
+  ),
+  dplyr::tibble(
+    id = "ui_goto_data",
+    english = "Go to Data",
+    french = "Aller aux donn\u00e9es",
+    spanish = "Ir a Datos"
+  ),
+  dplyr::tibble(
+    id = "ui_goto_fit",
+    english = "Go to Fit",
+    french = "Aller \u00e0 l'ajustement",
+    spanish = "Ir a Ajuste"
+  ),
+  dplyr::tibble(
+    id = "ui_goto_predict",
+    english = "Go to Predict",
+    french = "Aller \u00e0 l'estimation",
+    spanish = "Ir a Predicci\u00f3n"
+  ),
+  dplyr::tibble(
+    id = "ui_fit_failed",
+    english = "The distributions could not be fitted",
+    french = "Les distributions n'ont pas pu \u00eatre ajust\u00e9es",
+    spanish = "No se pudieron ajustar las distribuciones"
+  ),
+  dplyr::tibble(
+    id = "ui_step_done",
+    english = "complete",
+    french = "termin\u00e9",
+    spanish = "completado"
+  ),
+  dplyr::tibble(
+    id = "ui_step_busy",
+    english = "running",
+    french = "en cours",
+    spanish = "en curso"
   )
 )
 

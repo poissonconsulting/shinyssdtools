@@ -56,16 +56,36 @@ mod_report_ui <- function(id) {
               choices = c("500", "1,000", "5,000", "10,000"),
               selected = "10,000"
             ),
-            actionButton(
-              ns("generateReport"),
-              label = tagList(
-                bsicons::bs_icon(
-                  "file-earmark-text",
-                  class = color_button_icon
-                ),
-                span(`data-translate` = "ui_getreport", "Get Report")
+            # Get Report shows until the model-averaged curve is bootstrapped;
+            # from then on the report renders by itself.
+            conditionalPanel(
+              condition = sprintf(
+                "!%s && %s",
+                paste_js("report_running", ns),
+                paste_js("needs_bootstrap", ns)
               ),
-              class = "btn-primary w-100"
+              button(
+                ns("generateReport"),
+                span(`data-translate` = "ui_getreport", "Get Report"),
+                icon = bsicons::bs_icon("file-earmark-text"),
+                class = "w-100"
+              ),
+              shiny::helpText(htmlOutput(ns("describeTime")))
+            ),
+            conditionalPanel(
+              condition = paste_js("report_running", ns),
+              notice(
+                icon = busy_icon(),
+                title = span(`data-translate` = "ui_4gentitle", "Generating report..."),
+                tone = "info",
+                action = button(
+                  ns("cancelReport"),
+                  span(`data-translate` = "ui_cancel", "Cancel"),
+                  icon = bsicons::bs_icon("x-lg"),
+                  variant = "outline",
+                  size = "sm"
+                )
+              )
             )
           )
         ),
@@ -97,10 +117,14 @@ mod_report_ui <- function(id) {
     ),
     conditionalPanel(
       condition = paste0("!output['", ns("has_predict"), "']"),
-      ui_dashbox(span(
-        `data-translate` = "ui_hintpredict",
-        "You have not successfully generated predictions yet. Run the 'Predict' tab first."
-      ))
+empty_state(
+        icon = bsicons::bs_icon("calculator"),
+        title = span(
+          `data-translate` = "ui_hintpredict",
+          "You have not successfully generated predictions yet. Run the 'Predict' tab first."
+        ),
+        action = step_button(ns("goPredict"), "ui_goto_predict", "Go to Predict", variant = "outline")
+      )
     )
   )
 }
@@ -113,41 +137,14 @@ mod_report_server <- function(
   data_mod,
   fit_mod,
   predict_mod,
-  shared_toxicant_name = NULL
+  shared_toxicant_name = NULL,
+  main_nav = reactive("report")
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     output$has_predict <- predict_mod$has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
-
-    waiting_screen_report <- reactive({
-      trans <- translations()
-      tagList(
-        waiter::spin_flower(),
-        tagList(
-          h3(tr("ui_4gentitle", trans)),
-          br(),
-          h4(tr("ui_4genbody", trans))
-        )
-      )
-    })
-
-    pred_cl <- reactive({
-      fit <- fit_mod$fit_dist()
-      req(fit)
-      nboot <- clean_nboot(input$bootSamp)
-      avehc <- ssdtools::ssd_hc_bcanz(
-        fit,
-        proportion = c(0.01, 0.05, 0.1, 0.2),
-        ci = TRUE,
-        nboot = nboot,
-        min_pboot = 0.8
-      )
-      avehc |>
-        dplyr::mutate(HCx = .data$proportion * 100, PCx = (1 - .data$proportion) * 100) |>
-        dplyr::select("HCx", "PCx", "est", "se", "lcl", "ucl", "nboot", "pboot")
-    })
 
     observe({
       current <- lang()
@@ -199,147 +196,181 @@ mod_report_server <- function(
         bindEvent(input$toxicant)
     }
 
+    # The report's parameters other than its confidence limits, which the
+    # report job adds.
     params_list <- reactive({
       req(predict_mod$has_predict())
       req(fit_mod$has_fit())
 
-      toxicant <- input$toxicant
-      data <- data_mod$clean_data()
-      dists <- fit_mod$dists()
-      fit_plot <- fit_mod$fit_plot()
-      gof_table <- fit_mod$gof_table()
-      model_average_plot <- predict_mod$model_average_plot()
-      pred <- pred_cl()
-
-      params <- list(
-        toxicant = toxicant,
-        data = data,
-        dists = dists,
-        fit_plot = fit_plot,
-        gof_table = gof_table,
-        model_average_plot = model_average_plot,
-        pred_cl = pred
+      list(
+        toxicant = input$toxicant,
+        data = data_mod$clean_data(),
+        dists = fit_mod$dists(),
+        fit_plot = fit_mod$fit_plot(),
+        gof_table = fit_mod$gof_table(),
+        model_average_plot = predict_mod$model_average_plot()
       )
-      params
     })
 
-    # Generate HTML report for preview
-    report_preview_html <- reactive({
-      waiter::waiter_show(
-        html = waiting_screen_report(),
-        color = color_secondary
+    # The report renders on a mirai daemon (task_runner()). Once the
+    # model-averaged curve of the fit has been bootstrapped with the report's
+    # number of samples (by Get CL or Get Report; predict_mod$curve_lookup()),
+    # the report renders by itself while the Report step is open, and again
+    # when its inputs change. Otherwise Get Report bootstraps the curve first.
+    report_runner <- task_runner()
+    report_request <- reactiveVal(NULL)
+    report_result <- reactiveVal(NULL)
+
+    report_nboot <- reactive(clean_nboot(req(input$bootSamp)))
+
+    report_inputs <- reactive({
+      list(
+        fit = req(fit_mod$fit_dist()),
+        nboot = report_nboot(),
+        params = params_list(),
+        template = tr("ui_bcanz_file", translations())
       )
+    })
 
-      on.exit(waiter::waiter_hide(), add = TRUE)
+    report_curve <- reactive({
+      predict_mod$curve_lookup(req(fit_mod$fit_dist()), report_nboot())
+    })
 
-      trans <- translations()
-      temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans))
-      file.copy(
-        system.file(
-          package = "shinyssdtools",
-          file.path("extdata", tr("ui_bcanz_file", trans))
-        ),
-        temp_report
-      )
-
-      temp_html <- tempfile(fileext = ".html")
-      params <- params_list()
-
-      # Create render environment and explicitly assign params
-      render_env <- new.env(parent = globalenv())
-      assign("params", params, envir = render_env)
-
-      suppressMessages(
-        rmarkdown::render(
-          temp_report,
-          output_format = "html_document",
-          output_file = temp_html,
-          params = params,
-          envir = render_env,
-          encoding = "utf-8",
-          quiet = TRUE
+    render <- function(inputs, pred) {
+      report_request(c(inputs, list(bootstrap = is.null(pred))))
+      report_runner$invoke(
+        report_job,
+        list(
+          fit = inputs$fit,
+          nboot = inputs$nboot,
+          pred = pred,
+          params = inputs$params,
+          template = inputs$template
         )
       )
+    }
 
-      html_content <- readLines(temp_html, warn = FALSE)
-      html_string <- paste(html_content, collapse = "\n")
-
-      # Add target="_blank" to all links to open them in new tab instead of within iframe
-      html_string <- gsub('<a href=', '<a target="_blank" href=', html_string, fixed = TRUE)
-
-      html_string
+    observe({
+      inputs <- report_inputs()
+      render(inputs, predict_mod$curve_lookup(inputs$fit, inputs$nboot))
     }) |>
       bindEvent(input$generateReport)
 
-    has_preview <- reactive({
-      !is.null(report_preview_html())
+    # Inputs that change together, such as a toxicant name as it is typed,
+    # render once.
+    settled_inputs <- debounce(report_inputs, 800)
+
+    observe({
+      req(main_nav() == "report")
+      inputs <- settled_inputs()
+      pred <- predict_mod$curve_lookup(inputs$fit, inputs$nboot)
+      request <- isolate(report_request())
+      already <- !is.null(request) &&
+        identical(inputs, request[names(inputs)]) &&
+        (isolate(report_runner$running()) || !is.null(isolate(report_result())))
+      if (!is.null(pred) && !already) render(inputs, pred)
+    })
+
+    observe(report_runner$cancel()) |>
+      bindEvent(input$cancelReport)
+
+    observe({
+      done <- report_runner$done()
+      if (!is.null(done$error)) {
+        showNotification(
+          div(
+            role = "alert",
+            div(class = "fw-semibold", tr("ui_report_failed", translations())),
+            div(done$error)
+          ),
+          type = "error",
+          duration = 10
+        )
+        return()
+      }
+      request <- report_request()
+      predict_mod$curve_store(request$fit, request$nboot, done$value$pred)
+      report_result(c(done$value, request[c("fit", "nboot", "params", "template")]))
     }) |>
-      bindEvent(report_preview_html())
+      bindEvent(report_runner$done())
+
+    # The report while it is of the current fit and number of samples; the
+    # downloads are of this report, so they always match the preview.
+    current_report <- reactive({
+      report <- report_result()
+      fit <- fit_mod$fit_dist()
+      if (!is.null(report) && identical(report$fit, fit) &&
+        identical(report$nboot, report_nboot())) {
+        report
+      }
+    })
+
+    output$report_running <- reactive(report_runner$running())
+    outputOptions(output, "report_running", suspendWhenHidden = FALSE)
+    output$needs_bootstrap <- reactive(is.null(report_curve()))
+    outputOptions(output, "needs_bootstrap", suspendWhenHidden = FALSE)
+
+    output$describeTime <- renderText({
+      HTML(
+        tr("ui_3cldesc3", translations()),
+        estimate_time(report_nboot(), lang()),
+        tr("ui_3cldesc4", translations())
+      )
+    })
+
+    # Links open in a new tab rather than within the preview's iframe.
+    report_preview_html <- reactive({
+      html <- req(current_report())$html
+      gsub("<a href=", "<a target=\"_blank\" href=", html, fixed = TRUE)
+    })
+
+    has_preview <- reactive(!is.null(current_report()))
 
     output$has_preview <- has_preview
     outputOptions(output, "has_preview", suspendWhenHidden = FALSE)
 
     # Update iframe content with HTML
     observe({
-      html_content <- report_preview_html()
-      if (!is.null(html_content)) {
-        # Use JavaScript to safely update iframe srcdoc
-        shinyjs::runjs(paste0(
-          "
-          var iframe = document.getElementById('",
-          ns("htmlPreview"),
-          "');
-          if (iframe) {
-            iframe.srcdoc = ",
-          jsonlite::toJSON(html_content),
-          ";
-          }
-        "
-        ))
-      }
+      shinyjs::runjs(paste0(
+        "var iframe = document.getElementById('",
+        ns("htmlPreview"),
+        "'); if (iframe) { iframe.srcdoc = ",
+        jsonlite::toJSON(report_preview_html()),
+        "; }"
+      ))
     }) |>
       bindEvent(report_preview_html())
 
-    # Generate fresh PDF for download
     output$reportDlPdf <- downloadHandler(
       filename = function() {
         trans <- translations()
         paste0(tr("ui_bcanz_filename", trans), ".pdf")
       },
       content = function(file) {
-        trans <- translations()
-        temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans))
-        file.copy(
-          system.file(
-            package = "shinyssdtools",
-            file.path("extdata", tr("ui_bcanz_file", trans))
-          ),
-          temp_report
-        )
-        params <- params_list()
-        render_env <- new.env(parent = globalenv())
-        assign("params", params, envir = render_env)
-
-        rmarkdown::render(
-          temp_report,
+        report <- req(current_report())
+        params <- report$params
+        params$pred_cl <- report$pred_cl
+        render_report(
+          report$template,
+          params,
           output_format = "pdf_document",
-          output_file = file,
-          params = params,
-          envir = render_env,
-          encoding = "utf-8"
+          output_file = file
         )
       }
     )
 
-    # Reuse HTML preview for download
     output$reportDlHtml <- downloadHandler(
       filename = function() {
         trans <- translations()
         paste0(tr("ui_bcanz_filename", trans), ".html")
       },
       content = function(file) {
-        writeLines(report_preview_html(), file)
+        writeLines(req(current_report())$html, file)
       }
     )
+
+    observe_step_button(input, "goPredict", "predict")
+
+    list(running = report_runner$running, has_preview = has_preview)
   })
 }

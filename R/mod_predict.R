@@ -100,7 +100,8 @@ mod_predict_ui <- function(id) {
                   )
                 ),
                 div(
-                  style = "padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa; min-height: 38px; display: flex; align-items: center; margin-top: 7px;",
+                  class = "form-control bg-body-tertiary mt-2",
+                  `aria-live` = "polite",
                   textOutput(ns("threshPc"), inline = TRUE)
                 )
               )
@@ -142,15 +143,52 @@ mod_predict_ui <- function(id) {
                 selected = "1000",
                 width = "190px"
               ),
-              actionButton(
-                ns("getCl"),
-                label = tagList(
-                  bsicons::bs_icon("calculator", class = color_button_icon),
-                  span(`data-translate` = "ui_3clbutton", "Get CL")
+              conditionalPanel(
+                condition = sprintf("!%s", paste_js("cl_running", ns)),
+                button(
+                  ns("getCl"),
+                  span(`data-translate` = "ui_3clbutton", "Get CL"),
+                  icon = bsicons::bs_icon("calculator"),
+                  variant = "soft",
+                  class = "w-100"
                 ),
-                class = "btn-primary w-100"
+                shiny::helpText(htmlOutput(ns("describeTime")))
               ),
-              shiny::helpText(htmlOutput(ns("describeTime"))),
+              conditionalPanel(
+                condition = paste_js("cl_running", ns),
+                notice(
+                  icon = busy_icon(),
+                  title = span(`data-translate` = "ui_cl_running", "Computing confidence limits"),
+                  htmlOutput(ns("describeCl")),
+                  tone = "info",
+                  action = button(
+                    ns("cancelCl"),
+                    span(`data-translate` = "ui_cancel", "Cancel"),
+                    icon = bsicons::bs_icon("x-lg"),
+                    variant = "outline",
+                    size = "sm"
+                  )
+                )
+              ),
+              conditionalPanel(
+                condition = sprintf(
+                  "%s && !%s",
+                  paste_js("cl_stale", ns),
+                  paste_js("cl_running", ns)
+                ),
+                notice(
+                  icon = bsicons::bs_icon("exclamation-triangle"),
+                  title = span(
+                    `data-translate` = "ui_cl_stale",
+                    "The confidence limits are out of date"
+                  ),
+                  span(
+                    `data-translate` = "ui_cl_stale2",
+                    "The fit or threshold has changed. Get CL again to update them."
+                  ),
+                  tone = "warning"
+                )
+              )
             ),
             # ui plot formatting -------------------------------------------------------
             bslib::accordion_panel(
@@ -294,6 +332,7 @@ mod_predict_ui <- function(id) {
           class = "p-3",
           conditionalPanel(
             condition = paste_js('has_predict', ns),
+            step_button(ns("continue"), "ui_continue_report", "Continue to report"),
             card(
               class = card_shadow,
               full_screen = TRUE,
@@ -373,10 +412,14 @@ mod_predict_ui <- function(id) {
     ),
     conditionalPanel(
       condition = paste0("!output['", ns("has_fit"), "']"),
-      ui_dashbox(span(
-        `data-translate` = "ui_hintfit",
-        "You have not successfully fit any distributions yet. Run the 'Fit' tab first."
-      ))
+empty_state(
+        icon = bsicons::bs_icon("graph-up"),
+        title = span(
+          `data-translate` = "ui_hintfit",
+          "You have not successfully fit any distributions yet. Run the 'Fit' tab first."
+        ),
+        action = step_button(ns("goFit"), "ui_goto_fit", "Go to Fit", variant = "outline")
+      )
     )
   )
 }
@@ -389,8 +432,7 @@ mod_predict_server <- function(
   data_mod,
   fit_mod,
   big_mark,
-  decimal_mark,
-  main_nav = reactive("predict")
+  decimal_mark
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -398,52 +440,6 @@ mod_predict_server <- function(
     output$has_fit <- fit_mod$has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
 
-    # Waiter for prediction plot
-    waiter_pred_plot <- ui_waiter(id = "plotPred", ns = ns)
-
-    # Track render status for waiter
-    render_status <- reactiveValues(plot_ready = FALSE)
-
-    # trigger for updating predictions - only occur when on predict tab
-    predict_trigger <- reactiveVal(0)
-
-    observe({
-      if (main_nav() == "predict") {
-        current_val <- isolate(predict_trigger())
-        predict_trigger(current_val + 1)
-      }
-    }) |>
-      bindEvent(main_nav())
-
-    # Also trigger when threshold values change
-    observe({
-      if (isolate(main_nav()) == "predict") {
-        current_val <- isolate(predict_trigger())
-        predict_trigger(current_val + 1)
-      }
-    }) |>
-      bindEvent(
-        thresh_rv$percent,
-        thresh_rv$conc,
-        ignoreNULL = FALSE,
-        ignoreInit = TRUE
-      )
-
-    # Trigger when getCl is clicked to update plot with CI
-    observe({
-      if (isolate(main_nav()) == "predict") {
-        current_val <- isolate(predict_trigger())
-        predict_trigger(current_val + 1)
-      }
-    }) |>
-      bindEvent(input$getCl)
-
-    # Show waiter when prediction starts
-    observe({
-      render_status$plot_ready <- FALSE
-      waiter_pred_plot$show()
-    }) |>
-      bindEvent(predict_trigger())
 
     observe({
       trans <- translations()
@@ -660,11 +656,20 @@ mod_predict_server <- function(
     outputOptions(output, "uiSelectShape", suspendWhenHidden = FALSE)
 
     # output renders ----------------------------------------------------------
+    # The model-averaged confidence limits after an estimate, once Get CL has
+    # computed them for the threshold.
+    estimate_limits <- function(scale = 1) {
+      cl_limits_text(cl_table_current(), scale, big_mark(), decimal_mark())
+    }
+
     output$estConc <- renderText({
-      format(
-        thresh_rv$conc,
-        big.mark = big_mark(),
-        decimal.mark = decimal_mark()
+      paste0(
+        format(
+          thresh_rv$conc,
+          big.mark = big_mark(),
+          decimal.mark = decimal_mark()
+        ),
+        estimate_limits()
       )
     })
 
@@ -681,7 +686,10 @@ mod_predict_server <- function(
     })
 
     output$estPerc2 <- renderText({
-      thresh_rv$percent
+      paste0(
+        format(thresh_rv$percent, decimal.mark = decimal_mark()),
+        estimate_limits(scale = 100)
+      )
     })
 
     output$describeTime <- renderText({
@@ -694,10 +702,7 @@ mod_predict_server <- function(
 
     output$plotPred <- renderPlot(
       {
-        gp <- plot_model_average()
-        result <- silent_plot(gp)
-        render_status$plot_ready <- TRUE
-        result
+        silent_plot(plot_model_average())
       },
       alt = reactive({
         switch(
@@ -709,14 +714,6 @@ mod_predict_server <- function(
       })
     )
 
-    # Hide waiter when plot is ready
-    observe({
-      if (render_status$plot_ready) {
-        waiter_pred_plot$hide()
-      }
-    }) |>
-      bindEvent(render_status$plot_ready)
-
     # Dynamic text outputs for HC/PC values
     output$hcPercent <- renderText({
       thresh_rv$percent
@@ -727,10 +724,13 @@ mod_predict_server <- function(
     })
 
     output$hcConc <- renderText({
-      format(
-        thresh_rv$conc,
-        big.mark = big_mark(),
-        decimal.mark = decimal_mark()
+      paste0(
+        format(
+          thresh_rv$conc,
+          big.mark = big_mark(),
+          decimal.mark = decimal_mark()
+        ),
+        estimate_limits()
       )
     })
 
@@ -790,58 +790,124 @@ mod_predict_server <- function(
       }
     })
 
-    # reactives ---------------------------------------------------------------
-    cl_requested <- reactiveVal(FALSE)
-    cl_nboot <- reactiveVal(NULL)
+    # confidence limits -------------------------------------------------------
+    # Get CL bootstraps on a mirai daemon (task_runner()), so the app stays
+    # responsive. One run covers the model-averaged curve at every whole
+    # percent (the plot's band and the report) and the table at the threshold
+    # and at 1, 5, 10 and 20% affected (cl_job()). A threshold change shows
+    # whichever of these still apply; a new fit discards them all.
+    #
+    # The model-averaged curve is cached by fit and number of samples and
+    # shared with the report, so neither Get CL nor Get Report bootstraps one
+    # the other has computed. Only the current fit's curves are kept.
+    curves <- reactiveVal(list())
+    curve_lookup <- function(fit, nboot, percent = NULL) {
+      for (curve in curves()) {
+        if (identical(curve$fit, fit) && identical(curve$nboot, nboot) &&
+          (is.null(percent) || has_percent(curve$pred, percent))) {
+          return(curve$pred)
+        }
+      }
+      NULL
+    }
+    curve_store <- function(fit, nboot, pred) {
+      kept <- Filter(function(curve) {
+        identical(curve$fit, fit) && !identical(curve$nboot, nboot)
+      }, isolate(curves()))
+      curves(c(kept, list(list(fit = fit, nboot = nboot, pred = pred))))
+    }
 
-    # Store CL state when getCl is clicked (always persist, regardless of checkbox)
+    cl_runner <- task_runner()
+    cl_request <- reactiveVal(NULL)
+    cl_result <- reactiveVal(NULL)
+
     observe({
-      cl_requested(TRUE)
-      cl_nboot(clean_nboot(input$bootSamp))
+      req(iv$is_valid(), fit_mod$fit_dist(), thresh_rv$percent)
+      request <- list(
+        fit = fit_mod$fit_dist(),
+        threshold_type = input$threshType,
+        percent = thresh_rv$percent,
+        conc = thresh_rv$conc,
+        nboot = clean_nboot(input$bootSamp)
+      )
+      cl_request(request)
+      request$pred <- curve_lookup(request$fit, request$nboot, request$percent)
+      cl_runner$invoke(cl_job, request)
     }) |>
       bindEvent(input$getCl)
 
-    # Trigger plot update when includeCi checkbox changes and CL has been generated
+    observe(cl_runner$cancel()) |>
+      bindEvent(input$cancelCl)
+
     observe({
-      if (isolate(main_nav()) == "predict" && cl_requested()) {
-        current_val <- isolate(predict_trigger())
-        predict_trigger(current_val + 1)
+      done <- cl_runner$done()
+      if (!is.null(done$error)) {
+        showNotification(
+          div(
+            role = "alert",
+            div(class = "fw-semibold", tr("ui_cl_failed", translations())),
+            div(done$error)
+          ),
+          type = "error",
+          duration = 10
+        )
+        return()
       }
+      request <- cl_request()
+      curve_store(request$fit, request$nboot, done$value$pred)
+      cl_result(c(
+        done$value,
+        list(fit = request$fit, nboot = request$nboot, conc = request$conc)
+      ))
     }) |>
-      bindEvent(input$includeCi, ignoreInit = TRUE)
+      bindEvent(cl_runner$done())
 
+    # The confidence limits of the current fit.
+    current_cl <- reactive({
+      cl <- cl_result()
+      if (!is.null(cl) && identical(cl$fit, fit_mod$fit_dist())) cl
+    })
+
+    # The plot's band, while the threshold is one of its percents (it always
+    # is for a hazard concentration, as the threshold is a whole percent).
+    cl_band <- reactive({
+      cl <- current_cl()
+      if (!is.null(cl) && has_percent(cl$pred, thresh_rv$percent)) {
+        cl$pred
+      }
+    })
+
+    # The table at the current threshold, or NULL when it needs Get CL again.
+    cl_table_current <- reactive({
+      cl <- current_cl()
+      req(input$threshType)
+      if (!is.null(cl)) {
+        cl_table(cl, input$threshType, thresh_rv$percent, thresh_rv$conc)
+      }
+    })
+
+    cl_requested <- reactive(!is.null(cl_band()))
+    cl_nboot <- reactive(current_cl()$nboot)
+
+    output$cl_running <- reactive(cl_runner$running())
+    outputOptions(output, "cl_running", suspendWhenHidden = FALSE)
+    output$cl_stale <- reactive(!is.null(cl_result()) && is.null(cl_table_current()))
+    outputOptions(output, "cl_stale", suspendWhenHidden = FALSE)
+
+    # Without current confidence limits, the predictions are the estimates
+    # alone, which need no bootstrap, so they follow the fit and threshold
+    # whichever step is open (the report uses them).
     predict_hc <- reactive({
-      req(predict_trigger() > 0)
-      req(main_nav() == "predict")
-
       fit <- fit_mod$fit_dist()
       req(fit)
       req(thresh_rv$percent)
 
-      # Include CI if checkbox is checked and getCl was clicked
-      if (input$includeCi && cl_requested() && !is.null(cl_nboot())) {
-        stats::predict(
-          fit,
-          proportion = unique(c(1:99, thresh_rv$percent)) / 100,
-          nboot = cl_nboot(),
-          ci = TRUE
-        )
-      } else {
-        stats::predict(
-          fit,
-          proportion = unique(c(1:99, thresh_rv$percent)) / 100
-        )
+      band <- cl_band()
+      if (isTRUE(input$includeCi) && !is.null(band)) {
+        return(band)
       }
-    }) |>
-      bindCache(
-        thresh_rv$percent,
-        thresh_rv$conc,
-        fit_mod$fit_dist(),
-        cl_requested(),
-        cl_nboot(),
-        input$includeCi
-      ) |>
-      bindEvent(predict_trigger())
+      stats::predict(fit, proportion = unique(c(1:99, thresh_rv$percent)) / 100)
+    })
 
     transformation <- reactive({
       trans <- "log10"
@@ -990,24 +1056,8 @@ mod_predict_server <- function(
     })
 
     table_cl <- reactive({
-      dist <- fit_mod$fit_dist()
-      waiter::waiter_show(html = waiting_screen_cl(), color = color_secondary)
-      nboot <- clean_nboot(input$bootSamp)
-      if (input$threshType != "Concentration") {
-        y <- ssd_hp_ave(dist, conc = thresh_rv$conc, nboot = nboot)
-      } else {
-        y <- ssd_hc_ave(dist, percent = thresh_rv$percent, nboot = nboot)
-      }
-      y$dists <- NULL
-      y$samples <- NULL
-      y <-
-        y |>
-        dplyr::arrange(dplyr::desc(.data$wt))
-      waiter::waiter_hide()
-      y
-    }) |>
-      bindCache(thresh_rv$percent, thresh_rv$conc, input$bootSamp) |>
-      bindEvent(input$getCl)
+      req(cl_table_current())
+    })
 
     describe_cl <- reactive({
       trans <- translations()
@@ -1057,13 +1107,13 @@ mod_predict_server <- function(
     output$has_predict <- has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
 
-    has_cl <- reactive({
-      !is.null(table_cl())
-    }) |>
-      bindEvent(table_cl())
+    has_cl <- reactive(!is.null(cl_table_current()))
 
     output$has_cl <- has_cl
     outputOptions(output, "has_cl", suspendWhenHidden = FALSE)
+
+    observe_step_button(input, "continue", "report")
+    observe_step_button(input, "goFit", "fit")
 
     # downloaders -------------------------------------------------------------
     output$predDlPlot <- downloadHandler(
@@ -1108,18 +1158,6 @@ mod_predict_server <- function(
         writexl::write_xlsx(dplyr::as_tibble(table_cl()), file)
       }
     )
-
-    waiting_screen_cl <- reactive({
-      trans <- translations()
-      tagList(
-        waiter::spin_flower(),
-        tagList(
-          h3(paste(tr("ui_3cl", trans), "...")),
-          br(),
-          describe_cl()
-        )
-      )
-    })
 
     return(
       list(
@@ -1194,8 +1232,11 @@ mod_predict_server <- function(
         ribbon = reactive({
           as.logical(input$ribbonStyle)
         }),
+        cl_running = cl_runner$running,
         cl_requested = cl_requested,
         cl_nboot = cl_nboot,
+        curve_lookup = curve_lookup,
+        curve_store = curve_store,
         has_cl = has_cl,
         has_predict = has_predict,
         width = reactive({

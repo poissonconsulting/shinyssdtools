@@ -75,7 +75,7 @@ mod_fit_ui <- function(id) {
                   uiOutput(ns("update_icon")),
                   span(`data-translate` = "ui_update_fit", "Update Fit")
                 ),
-                class = "btn-primary w-100"
+                class = "btn-light ssd-btn-soft w-100"
               )
             ),
             bslib::accordion(
@@ -121,8 +121,10 @@ mod_fit_ui <- function(id) {
         ),
         div(
           class = "p-3",
+          uiOutput(ns("fitError")),
           conditionalPanel(
             condition = paste_js('has_fit', ns),
+            step_button(ns("continue"), "ui_continue_predict", "Continue to predict"),
             card(
               class = card_shadow,
               full_screen = TRUE,
@@ -158,10 +160,14 @@ mod_fit_ui <- function(id) {
     ),
     conditionalPanel(
       condition = paste0("!output['", ns("has_data"), "']"),
-      ui_dashbox(span(
-        `data-translate` = "ui_hintdata",
-        "You have not added a dataset."
-      ))
+empty_state(
+        icon = bsicons::bs_icon("table"),
+        title = span(
+          `data-translate` = "ui_hintdata",
+          "You have not added a dataset."
+        ),
+        action = step_button(ns("goData"), "ui_goto_data", "Go to Data", variant = "outline")
+      )
     )
   )
 }
@@ -180,9 +186,6 @@ mod_fit_server <- function(
 
     output$has_data <- data_mod$has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
-
-    waiter_gof <- ui_waiter(id = "tableGof", ns = ns)
-    waiter_distplot <- ui_waiter(id = "plotDist", ns = ns)
 
     needs_update <- reactiveVal(FALSE)
 
@@ -221,7 +224,9 @@ mod_fit_server <- function(
     }) |>
       bindEvent(input$selectDist, input$rescale)
 
-    fit_dist <- reactive({
+    # The fit, or the error when no distribution could be fitted, so the error
+    # can be shown rather than an empty tab.
+    fit_result <- reactive({
       req(fit_trigger() > 0)
       req(main_nav() == "fit")
       req(data_mod$data())
@@ -229,36 +234,51 @@ mod_fit_server <- function(
       req(input$selectDist)
       req(iv$is_valid())
 
-      waiter_gof$show()
-      waiter_distplot$show()
-
       data <- data_mod$data()
       conc <- make.names(input$selectConc)
       dists <- input$selectDist
       rescale <- input$rescale
 
-      safe_try(ssdtools::ssd_fit_bcanz(
+      tryCatch(ssdtools::ssd_fit_bcanz(
         data,
         left = conc,
         dists = dists,
         silent = TRUE,
         rescale = rescale
-      ))
+      ), error = function(e) e)
     }) |>
+      # Sorted, so the same distributions in another order are the same fit,
+      # and the confidence limits and reports computed for it still apply.
       bindCache(
         input$selectConc,
-        input$selectDist,
+        sort(input$selectDist),
         input$rescale,
         data_mod$data()
       ) |>
       bindEvent(fit_trigger())
 
+    fit_dist <- reactive({
+      result <- fit_result()
+      if (!inherits(result, "error")) result
+    })
+
+    output$fitError <- renderUI({
+      result <- fit_result()
+      req(inherits(result, "error"))
+      notice(
+        icon = bsicons::bs_icon("x-circle"),
+        title = tr("ui_fit_failed", translations()),
+        conditionMessage(result),
+        tone = "danger"
+      )
+    })
+
     # Dynamic icon for update button
     output$update_icon <- renderUI({
       if (needs_update()) {
-        icon("refresh", class = paste(color_button_icon, "me-1"))
+        icon("refresh", class = "me-1")
       } else {
-        icon("check-circle", class = paste(color_button_icon, "me-1"))
+        icon("check-circle", class = "me-1")
       }
     }) |>
       bindEvent(needs_update())
@@ -373,20 +393,9 @@ mod_fit_server <- function(
       gof
     })
 
-    # render plot and table - waiter stops when plot and table ready
-    render_status <- reactiveValues(plot_ready = FALSE, table_ready = FALSE)
-
-    observe({
-      render_status$plot_ready <- FALSE
-      render_status$table_ready <- FALSE
-    }) |>
-      bindEvent(fit_dist())
-
     output$plotDist <- renderPlot(
       {
-        result <- plot_dist()
-        render_status$plot_ready <- TRUE
-        result
+        plot_dist()
       },
       alt = reactive({
         switch(
@@ -416,17 +425,8 @@ mod_fit_server <- function(
 
       result <- dt_weight_color_bar(result, gof, trans)
 
-      render_status$table_ready <- TRUE
       result
     })
-
-    observe({
-      if (render_status$plot_ready && render_status$table_ready) {
-        waiter_distplot$hide()
-        waiter_gof$hide()
-      }
-    }) |>
-      bindEvent(render_status$plot_ready, render_status$table_ready)
 
     # Notify when failed fits
     fit_fail <- reactive({
@@ -438,14 +438,10 @@ mod_fit_server <- function(
     output$fitFail <- renderText({
       failed <- fit_fail()
       req(failed != "")
-      HTML(paste0(
-        "<font color='grey'>",
-        paste(
-          failed,
-          tr("ui_hintfail", translations())
-        ),
-        "</font>"
-      ))
+      span(
+        class = "text-body-secondary",
+        paste(failed, tr("ui_hintfail", translations()))
+      )
     }) |>
       bindEvent(fit_fail())
 
@@ -492,6 +488,9 @@ mod_fit_server <- function(
         writexl::write_xlsx(dplyr::as_tibble(table_gof()), file)
       }
     )
+
+    observe_step_button(input, "continue", "predict")
+    observe_step_button(input, "goData", "data")
 
     # return values ------------------------------------------------------------
     has_fit <- reactive({

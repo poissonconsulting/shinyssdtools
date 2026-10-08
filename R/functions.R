@@ -239,14 +239,6 @@ inline <- function(x) {
   tags$div(style = "display:inline-block;", x)
 }
 
-#' Create grey hint text
-#' @param x Character string hint text
-#' @return HTML object with grey font color
-#' @keywords internal
-hint <- function(x) {
-  HTML(paste0("<font color='grey'>", x, "</font>"))
-}
-
 #' Check if values have zero range
 #' @param x Numeric vector
 #' @param tol Tolerance for comparison (default: sqrt of machine precision)
@@ -298,76 +290,6 @@ calculate_threshold_conc <- function(fit, thresh, digits = 3) {
   signif(estimate_hc(fit, thresh), digits)
 }
 
-#' Calculate hazard concentration with confidence intervals
-#' @param x A fitdists object from ssd_fit_bcanz()
-#' @param percent Numeric percent of species affected (0-100 scale)
-#' @param nboot Integer number of bootstrap samples for confidence intervals
-#' @return Data frame with columns: dist, est, se, lcl, ucl, wt
-#' @keywords internal
-ssd_hc_ave <- function(x, percent, nboot) {
-  dist <- ssdtools::ssd_hc_bcanz(
-    x,
-    proportion = percent / 100,
-    ci = TRUE,
-    average = FALSE,
-    nboot = nboot,
-    min_pboot = 0.8
-  )
-
-  if (length(x) == 1) {
-    ave <- dist
-    ave$dist <- "average"
-  } else {
-    ave <- ssdtools::ssd_hc_bcanz(
-      x,
-      proportion = percent / 100,
-      ci = TRUE,
-      average = TRUE,
-      nboot = nboot,
-      min_pboot = 0.8
-    )
-  }
-
-  dplyr::bind_rows(ave, dist) |>
-    dplyr::mutate_at(c("est", "se", "ucl", "lcl", "wt"), ~ signif(., 3))
-}
-
-#' Calculate hazard percent with confidence intervals
-#' @param x A fitdists object from ssd_fit_bcanz()
-#' @param conc Numeric concentration value
-#' @param nboot Integer number of bootstrap samples for confidence intervals
-#' @return Data frame with columns: dist, est, se, lcl, ucl, wt
-#' @keywords internal
-ssd_hp_ave <- function(x, conc, nboot) {
-  dist <- ssdtools::ssd_hp_bcanz(
-    x,
-    conc = conc,
-    ci = TRUE,
-    average = FALSE,
-    nboot = nboot,
-    min_pboot = 0.8,
-    proportion = TRUE
-  )
-
-  if (length(x) == 1) {
-    ave <- dist
-    ave$dist <- "average"
-  } else {
-    ave <- ssdtools::ssd_hp_bcanz(
-      x,
-      conc = conc,
-      ci = TRUE,
-      average = TRUE,
-      nboot = nboot,
-      min_pboot = 0.8,
-      proportion = TRUE
-    )
-  }
-
-  dplyr::bind_rows(ave, dist) |>
-    dplyr::mutate_at(c("est", "se", "ucl", "lcl", "wt"), ~ signif(., 3))
-}
-
 #' Format R code with proper styling
 #' @param code_lines Character vector of R code lines
 #' @return Single character string with formatted, styled code
@@ -389,4 +311,37 @@ format_r_code <- function(code_lines) {
   formatted_text <- gsub('"', "'", formatted_text)
 
   formatted_text
+}
+
+#' Render the BCANZ report
+#'
+#' Renders the report template in its own temporary directory, so concurrent
+#' sessions in one R process do not share intermediate files.
+#'
+#' @param template Character string file name of the report template in
+#'   `inst/extdata`.
+#' @param params Named list of report parameters.
+#' @param output_format Character string rmarkdown output format.
+#' @param output_file Character string path of the rendered file.
+#' @return The path of the rendered file, invisibly.
+#' @keywords internal
+render_report <- function(template, params, output_format, output_file) {
+  dir <- tempfile("report-")
+  dir.create(dir)
+  on.exit(unlink(dir, recursive = TRUE), add = TRUE)
+  path <- file.path(dir, template)
+  file.copy(system.file("extdata", template, package = "shinyssdtools"), path)
+
+  render_env <- new.env(parent = globalenv())
+  assign("params", params, envir = render_env)
+  suppressMessages(rmarkdown::render(
+    path,
+    output_format = output_format,
+    output_file = output_file,
+    params = params,
+    envir = render_env,
+    encoding = "utf-8",
+    quiet = TRUE
+  ))
+  invisible(output_file)
 }

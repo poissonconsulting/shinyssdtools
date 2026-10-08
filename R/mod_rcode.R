@@ -45,34 +45,7 @@ mod_rcode_ui <- function(id) {
         tagList(
           div(
             id = ns("code-container"),
-            class = "r-code-container",
-            style = "
-              background-color: #f8f9fa; 
-              color: #212529; 
-              padding: 1.5rem; 
-              border-radius: 8px; 
-              border: 1px solid #dee2e6;
-              font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace; 
-              font-size: 14px; 
-              line-height: 1.5;
-              max-height: 70vh;
-              overflow-y: auto;
-            ",
-            tags$style(HTML(
-              "
-              .r-code-container pre {
-                background: transparent !important;
-                border: none !important;
-                padding: 0 !important;
-                margin: 0.5rem 0 !important;
-                white-space: pre-wrap !important;
-                word-wrap: break-word !important;
-                font-family: inherit !important;
-                font-size: inherit !important;
-                color: inherit !important;
-              }
-            "
-            )),
+            class = "ssd-code bg-body-tertiary border rounded-3 p-4 font-monospace",
             uiOutput(ns("codeHead")),
             uiOutput(ns("codeData")),
             uiOutput(ns("codeFit")),
