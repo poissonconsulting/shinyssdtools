@@ -116,16 +116,22 @@ app_server <- function(input, output, session) {
     big_mark,
     decimal_mark
   )
-  report_mod <- mod_report_server(
-    "report_mod",
+  export_mod <- mod_export_server(
+    "export_mod",
     trans,
     current_lang,
     data_mod,
     fit_mod,
     predict_mod,
     shared_toxicant_name,
-    main_nav = reactive(input$main_nav)
+    main_nav = reactive(input$main_nav),
+    code = function() rcode_mod$code()
   )
+  # The generated script saves plots with the Export step's PNG settings.
+  for (setting in c("width", "height", "dpi")) {
+    fit_mod[[setting]] <- export_mod[[setting]]
+    predict_mod[[setting]] <- export_mod[[setting]]
+  }
   rcode_mod <- mod_rcode_server(
     "rcode_mod",
     trans,
@@ -134,7 +140,7 @@ app_server <- function(input, output, session) {
     predict_mod
   )
 
-  # The states of the step markers (step_marker_switch()): "done" once a step
+  # The states of the step markers (step_title()): "done" once a step
   # has a result, "busy" while it computes in the background, else "todo".
   step_state <- function(done, busy = function() FALSE) {
     reactive({
@@ -147,14 +153,10 @@ app_server <- function(input, output, session) {
   output$mark_data <- step_state(data_mod$has_data)
   output$mark_fit <- step_state(fit_mod$has_fit)
   output$mark_predict <- step_state(predict_mod$has_predict, predict_mod$cl_running)
-  output$mark_report <- step_state(report_mod$has_preview, report_mod$running)
-  for (step in c("data", "fit", "predict", "report")) {
+  output$mark_export <- step_state(export_mod$has_preview, export_mod$running)
+  for (step in c("data", "fit", "predict", "export")) {
     outputOptions(output, paste0("mark_", step), suspendWhenHidden = FALSE)
   }
-
-  output$ui_5format <- renderUI({
-    radioButtons("report_format", "Report format")
-  })
 
   output$ui_about <- renderUI({
     lang <- current_lang()

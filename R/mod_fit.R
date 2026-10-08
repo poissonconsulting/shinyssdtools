@@ -18,154 +18,119 @@
 # Fit Module UI
 mod_fit_ui <- function(id) {
   ns <- NS(id)
-  tagList(
-    conditionalPanel(
-      condition = paste_js('has_data', ns = ns),
-      layout_sidebar(
-        padding = "1rem",
-        gap = "1rem",
-        sidebar = sidebar(
-          width = 400,
-          style = "height: calc(100vh - 150px); overflow-y: auto; overflow-x: hidden;",
-          tagList(
-            div(
-              h5(span(`data-translate` = "ui_tabfit", "Fit distributions")),
-            ) |>
-              shinyhelper::helper(
-                type = "markdown",
-                content = "fitTab",
-                size = "l",
-                colour = color_primary,
-                buttonLabel = "OK"
-              ),
-            tags$label(
-              `for` = ns("selectConc"),
-              class = "control-label",
-              span(`data-translate` = "ui_2conc", "Concentration")
-            ),
-            selectInput(
-              ns("selectConc"),
-              label = NULL,
-              choices = NULL,
-              selected = NULL
-            ),
-            selectizeInput(
-              ns("selectDist"),
-              label = span(
-                `data-translate` = "ui_2dist",
-                "Select distributions to fit"
-              ),
-              multiple = TRUE,
-              choices = c(default.dists, extra.dists),
-              selected = default.dists,
-              options = list(
-                "plugins" = list("remove_button")
-              )
-            ),
-            checkboxInput(
-              ns("rescale"),
-              label = span(`data-translate` = "ui_2rescale", "Rescale"),
-              value = FALSE
-            ),
-            div(
-              class = "mt-3",
-              actionButton(
-                ns("updateFit"),
-                label = tagList(
-                  uiOutput(ns("update_icon")),
-                  span(`data-translate` = "ui_update_fit", "Update Fit")
-                ),
-                class = "btn-light ssd-btn-soft w-100"
-              )
-            ),
-            bslib::accordion(
-              open = FALSE,
-              bslib::accordion_panel(
-                title = span(
-                  `data-translate` = "ui_3plotopts",
-                  "Plot formatting options"
-                ),
-                value = "plot_format_fit",
-                selected = FALSE,
-                selectInput(
-                  ns("selectUnit"),
-                  label = span(`data-translate` = "ui_2unit", "Select units"),
-                  choices = units(),
-                  selected = units()[1]
-                ),
-                textInput(
-                  ns("xaxis2"),
-                  label = span(`data-translate` = "ui_3xlab", "X-axis label"),
-                  value = "Concentration"
-                ),
-                textInput(
-                  ns("yaxis2"),
-                  label = span(`data-translate` = "ui_3ylab", "Y-axis label"),
-                  value = "Species affected (%)"
-                ),
-                numericInput(
-                  ns("size2"),
-                  label = span(`data-translate` = "ui_size", "Text size"),
-                  value = 12,
-                  min = 1,
-                  max = 100
-                ),
-                textInput(
-                  ns("title"),
-                  value = "",
-                  label = span(`data-translate` = "ui_3title", "Title")
-                )
-              )
-            )
-          )
+
+  title <- span(`data-translate` = "ui_tabfit", "Fit distributions") |>
+    shinyhelper::helper(type = "markdown", content = "fitTab", size = "l", colour = color_primary, buttonLabel = "OK")
+
+  aside <- card(card_body(
+    tags$label(
+      `for` = ns("selectConc"),
+      class = "control-label",
+      span(`data-translate` = "ui_2conc", "Concentration")
+    ),
+    selectInput(ns("selectConc"), label = NULL, choices = NULL, selected = NULL, width = "100%"),
+    selectizeInput(
+      ns("selectDist"),
+      label = span(`data-translate` = "ui_2dist", "Select distributions to fit"),
+      multiple = TRUE,
+      choices = c(default.dists, extra.dists),
+      selected = default.dists,
+      options = list("plugins" = list("remove_button")),
+      width = "100%"
+    ),
+    checkboxInput(
+      ns("rescale"),
+      label = span(`data-translate` = "ui_2rescale", "Rescale"),
+      value = FALSE
+    ),
+    actionButton(
+      ns("updateFit"),
+      label = span(
+        class = "d-inline-flex align-items-center gap-2",
+        uiOutput(ns("update_icon"), inline = TRUE),
+        span(`data-translate` = "ui_update_fit", "Update Fit")
+      ),
+      class = "btn-light ssd-btn-soft w-100"
+    ),
+    accordion(
+      class = "mt-2",
+      open = FALSE,
+      accordion_panel(
+        title = span(`data-translate` = "ui_3plotopts", "Plot formatting options"),
+        value = "plot_format_fit",
+        icon = lucide("sliders-horizontal"),
+        selectInput(
+          ns("selectUnit"),
+          label = span(`data-translate` = "ui_2unit", "Select units"),
+          choices = units(),
+          selected = units()[1]
         ),
+        textInput(
+          ns("xaxis2"),
+          label = span(`data-translate` = "ui_3xlab", "X-axis label"),
+          value = "Concentration"
+        ),
+        textInput(
+          ns("yaxis2"),
+          label = span(`data-translate` = "ui_3ylab", "Y-axis label"),
+          value = "Species affected (%)"
+        ),
+        numericInput(
+          ns("size2"),
+          label = span(`data-translate` = "ui_size", "Text size"),
+          value = 12,
+          min = 1,
+          max = 100
+        ),
+        textInput(
+          ns("title"),
+          value = "",
+          label = span(`data-translate` = "ui_3title", "Title")
+        )
+      )
+    )
+  ))
+
+  main <- tagList(
+    page_header(
+      title,
+      conditionalPanel(
+        condition = paste_js("has_fit", ns),
+        step_button(ns("continue"), "ui_continue_predict", "Continue to predict")
+      )
+    ),
+    div(
+      class = "d-flex flex-column gap-4",
+      uiOutput(ns("fitError")),
+      conditionalPanel(
+        condition = paste_js("has_fit", ns),
         div(
-          class = "p-3",
-          uiOutput(ns("fitError")),
-          conditionalPanel(
-            condition = paste_js('has_fit', ns),
-            step_button(ns("continue"), "ui_continue_predict", "Continue to predict"),
-            card(
-              class = card_shadow,
-              full_screen = TRUE,
-              card_header(
-                class = "d-flex justify-content-between align-items-center",
-                span(`data-translate` = "ui_2plot", "Plot Fitted Distributions")
-              ),
-              card_body(
-                ui_download_popover(ns = ns),
-                htmlOutput(ns("fitFail")),
-                plotOutput(ns("plotDist"))
-              )
-            ),
-            card(
-              class = card_shadow,
-              full_screen = TRUE,
-              card_header(
-                class = "d-flex justify-content-between align-items-center",
-                span(`data-translate` = "ui_2table", "Goodness of Fit")
-              ),
-              card_body(
-                padding = 25,
-                ui_download_popover_table(ns = ns),
-                div(
-                  class = "table-responsive",
-                  DT::dataTableOutput(ns("tableGof"))
-                )
-              )
-            )
+          class = "d-flex flex-column gap-4",
+          panel(
+            span(`data-translate` = "ui_2plot", "Plot fitted distributions"),
+            htmlOutput(ns("fitFail")),
+            div(class = "ssd-figure", plotOutput(ns("plotDist")))
+          ),
+          panel(
+            span(`data-translate` = "ui_2table", "Goodness of Fit"),
+            reactable::reactableOutput(ns("tableGof"))
           )
         )
       )
+    )
+  )
+
+  tagList(
+    conditionalPanel(
+      condition = paste_js("has_data", ns),
+      step_layout(aside, main)
     ),
     conditionalPanel(
-      condition = paste0("!output['", ns("has_data"), "']"),
-empty_state(
-        icon = bsicons::bs_icon("table"),
-        title = span(
-          `data-translate` = "ui_hintdata",
-          "You have not added a dataset."
-        ),
+      condition = sprintf("!%s", paste_js("has_data", ns)),
+      page_header(title),
+      empty_state(
+        "table",
+        span(`data-translate` = "ui_hintdata", "You have not added a dataset."),
         action = step_button(ns("goData"), "ui_goto_data", "Go to Data", variant = "outline")
       )
     )
@@ -266,7 +231,7 @@ mod_fit_server <- function(
       result <- fit_result()
       req(inherits(result, "error"))
       notice(
-        icon = bsicons::bs_icon("x-circle"),
+        icon = "x-circle",
         title = tr("ui_fit_failed", translations()),
         conditionMessage(result),
         tone = "danger"
@@ -276,9 +241,9 @@ mod_fit_server <- function(
     # Dynamic icon for update button
     output$update_icon <- renderUI({
       if (needs_update()) {
-        icon("refresh", class = "me-1")
+        lucide("refresh-cw")
       } else {
-        icon("check-circle", class = "me-1")
+        lucide("check-circle-2")
       }
     }) |>
       bindEvent(needs_update())
@@ -407,25 +372,17 @@ mod_fit_server <- function(
       })
     )
 
-    output$tableGof <- DT::renderDataTable({
+    output$tableGof <- reactable::renderReactable({
       gof <- table_gof()
       trans <- translations()
-      header_tooltips <- gof_header_tooltips(trans, lang())
-
-      result <- DT::datatable(
-        gof,
-        options = list(
-          dom = "t",
-          processing = FALSE,
-          autoWidth = FALSE,
-          deferRender = TRUE,
-          headerCallback = dt_header_tooltip_callback(header_tooltips)
-        )
+      weight <- intersect(c("wt", "weight", tr("ui_2weight", trans)), names(gof))[1]
+      app_table(
+        as.data.frame(gof),
+        lang = lang(),
+        tooltips = gof_header_tooltips(trans, lang()),
+        weight = weight,
+        pagination = FALSE
       )
-
-      result <- dt_weight_color_bar(result, gof, trans)
-
-      result
     })
 
     # Notify when failed fits
@@ -444,50 +401,6 @@ mod_fit_server <- function(
       )
     }) |>
       bindEvent(fit_fail())
-
-    # download handlers -------------------------------------------------------
-    output$fitDlPlot <- downloadHandler(
-      filename = function() {
-        "ssdtools_distFitPlot.png"
-      },
-      content = function(file) {
-        ggplot2::ggsave(
-          file,
-          plot = plot_dist(),
-          device = "png",
-          width = input$width,
-          height = input$height,
-          dpi = input$dpi
-        )
-      }
-    )
-
-    output$fitDlRds <- downloadHandler(
-      filename = function() {
-        "ssdtools_fit_plot.rds"
-      },
-      content = function(file) {
-        saveRDS(plot_dist(), file = file)
-      }
-    )
-
-    output$fitDlCsv <- downloadHandler(
-      filename = function() {
-        "ssdtools_gof_table.csv"
-      },
-      content = function(file) {
-        readr::write_csv(dplyr::as_tibble(table_gof()), file)
-      }
-    )
-
-    output$fitDlXlsx <- downloadHandler(
-      filename = function() {
-        "ssdtools_gof_table.xlsx"
-      },
-      content = function(file) {
-        writexl::write_xlsx(dplyr::as_tibble(table_gof()), file)
-      }
-    )
 
     observe_step_button(input, "continue", "predict")
     observe_step_button(input, "goData", "data")
@@ -534,16 +447,7 @@ mod_fit_server <- function(
         title = reactive({
           input$title
         }),
-        has_fit = has_fit,
-        width = reactive({
-          input$width
-        }),
-        height = reactive({
-          input$height
-        }),
-        dpi = reactive({
-          input$dpi
-        })
+        has_fit = has_fit
       )
     )
   })

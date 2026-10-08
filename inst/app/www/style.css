@@ -1,6 +1,95 @@
-/* Colours, radii and component looks come from the bs_theme() Sass variables
-   in R/theme.R; rules here style the app's own ssd-* classes and read colours
-   from var(--bs-*), without !important. */
+/* App classes only. Colours, radii, spacing and component looks come from the
+   bs_theme() Sass variables in R/theme.R; rules here style the app's own
+   ssd-* classes and read colours from var(--bs-*), without !important. */
+
+.ssd-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  vertical-align: -0.1875em;
+}
+
+.ssd-spin {
+  animation: ssd-spin 1s linear infinite;
+}
+
+@keyframes ssd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Navbar brand: the SSD drawing beside the name and subtitle. */
+.ssd-art {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+}
+
+.ssd-brand-subtitle {
+  opacity: 0.75;
+}
+
+/* A step's marker after its name in the navbar: a white disc with a tick once
+   the step is done, a spinner while it runs in the background. */
+.ssd-step-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+}
+
+.ssd-step-marker .ssd-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Page header: the step's title, with its next action on the right. */
+.ssd-page-title {
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 0;
+}
+
+.ssd-page-header-text {
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.ssd-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ssd-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* The aside of a step stays in view beside long content on wide screens. */
+@media (min-width: 992px) {
+  .ssd-aside {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+/* Labels in the aside read as form labels. */
+.ssd-aside .control-label,
+.ssd-aside label {
+  font-weight: 500;
+}
+
+.ssd-aside .form-group:last-child,
+.ssd-aside .shiny-input-container:last-child {
+  margin-bottom: 0;
+}
 
 /* The help icons open a modal. Their focus ring stays visible for keyboard
    users (WCAG 2.4.7). */
@@ -27,11 +116,54 @@
   margin-top: 0.125rem;
 }
 
+/* Empty states and download tiles: an icon in a tinted shape. */
+.ssd-empty-icon,
+.ssd-tile-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ssd-empty-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
+
+.ssd-empty-icon .ssd-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.ssd-tile-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.ssd-measure {
+  max-width: 32rem;
+}
+
+/* A figure on a white ground with a hairline border. */
+.ssd-figure {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* The estimate under the model-average plot. */
+.ssd-estimate {
+  font-variant-numeric: tabular-nums;
+}
+
 /* The generated R script: wrapped, scrollable and in the code font. */
 .ssd-code {
-  max-height: 70vh;
+  max-height: 32rem;
   overflow-y: auto;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
@@ -46,17 +178,60 @@
   color: inherit;
 }
 
-/* Empty states: an icon in a tinted circle above the message. */
-.ssd-empty-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  font-size: 1.25rem;
+/* The report preview. */
+.ssd-report-frame {
+  width: 100%;
+  height: 40rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: #ffffff;
 }
 
-.ssd-measure {
-  max-width: 32rem;
+/* The weight column's bar in the goodness of fit and confidence limit
+   tables. */
+.ssd-weight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ssd-weight-bar {
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--bs-primary);
+  opacity: 0.6;
+}
+
+/* Column names with a tooltip. */
+.ssd-has-tip {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+/* shinyhelper places its help icon at the right edge of the wrapper; in a
+   title it sits just after the text instead. */
+.ssd-page-title .shinyhelper-wrapper,
+.ssd-card-title .shinyhelper-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ssd-page-title .shinyhelper-container,
+.ssd-card-title .shinyhelper-container {
+  position: static;
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.ssd-page-title .shinyhelper-container:hover,
+.ssd-card-title .shinyhelper-container:hover {
+  opacity: 1;
+}
+
+/* The drawing at icon size, in the welcome card's tile. */
+.ssd-art-sm {
+  width: 1.375rem;
+  height: 1.375rem;
 }

@@ -15,45 +15,32 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# R Code Module UI
+# R Code Module UI: the script panel of the Export step.
 mod_rcode_ui <- function(id) {
   ns <- NS(id)
-
-  layout_sidebar(
-    padding = "1rem",
-    gap = "1rem",
-    sidebar = sidebar(
-      width = 350,
+  panel(
+    span(`data-translate` = "ui_tabcode", "Get R code") |>
+      shinyhelper::helper(type = "markdown", content = "rcodeTab", size = "l", colour = color_primary, buttonLabel = "OK"),
+    description = uiOutput(ns("ui_4help"), inline = TRUE),
+    div(
+      class = "border rounded-3 overflow-hidden",
       div(
-        h5(span(`data-translate` = "ui_tabcode", "Get R code")),
-      ) |>
-        shinyhelper::helper(
-          type = "markdown",
-          content = "rcodeTab",
-          size = "l",
-          colour = color_primary,
-          buttonLabel = "OK"
-        ),
-      conditionalPanel(
-        condition = paste_js("has_code", ns),
-        uiOutput(ns("copyButton"))
-      )
-    ),
-    card(
-      class = card_shadow,
-      card_body(
-        tagList(
-          div(
-            id = ns("code-container"),
-            class = "ssd-code bg-body-tertiary border rounded-3 p-4 font-monospace",
-            uiOutput(ns("codeHead")),
-            uiOutput(ns("codeData")),
-            uiOutput(ns("codeFit")),
-            uiOutput(ns("codePredPlot")),
-            uiOutput(ns("codeSavePred")),
-            uiOutput(ns("codePredCl"))
-          )
+        class = "d-flex align-items-center justify-content-between border-bottom bg-body-tertiary px-3 py-1",
+        span(class = "font-monospace small text-body-secondary", "ssdtools-analysis.R"),
+        conditionalPanel(
+          condition = paste_js("has_code", ns),
+          uiOutput(ns("copyButton"), inline = TRUE)
         )
+      ),
+      div(
+        id = ns("code-container"),
+        class = "ssd-code bg-white px-3 py-2 font-monospace",
+        uiOutput(ns("codeHead")),
+        uiOutput(ns("codeData")),
+        uiOutput(ns("codeFit")),
+        uiOutput(ns("codePredPlot")),
+        uiOutput(ns("codeSavePred")),
+        uiOutput(ns("codePredCl"))
       )
     )
   )
@@ -480,12 +467,9 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       code_text <- all_code()
       rclipboard::rclipButton(
         inputId = ns("copyCode"),
-        label = tagList(
-          bsicons::bs_icon("clipboard"),
-          label
-        ),
+        label = span(class = "d-inline-flex align-items-center gap-2", lucide("copy"), label),
         clipText = code_text,
-        class = "btn-primary"
+        class = "btn-light border btn-sm"
       )
     })
 
@@ -496,5 +480,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
 
     output$has_code <- has_code
     outputOptions(output, "has_code", suspendWhenHidden = FALSE)
+
+    list(code = all_code)
   })
 }

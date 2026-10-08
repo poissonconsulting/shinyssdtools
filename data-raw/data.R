@@ -906,10 +906,10 @@ translations <- dplyr::bind_rows(
     spanish = "Continuar a la predicci\u00f3n"
   ),
   dplyr::tibble(
-    id = "ui_continue_report",
-    english = "Continue to report",
-    french = "Continuer vers le rapport",
-    spanish = "Continuar al informe"
+    id = "ui_continue_export",
+    english = "Continue to export",
+    french = "Continuer vers l'exportation",
+    spanish = "Continuar a la exportaci\u00f3n"
   ),
   dplyr::tibble(
     id = "ui_goto_data",
@@ -946,6 +946,60 @@ translations <- dplyr::bind_rows(
     english = "running",
     french = "en cours",
     spanish = "en curso"
+  ),
+  dplyr::tibble(
+    id = "ui_navexport",
+    english = "4. Export",
+    french = "4. Exportation",
+    spanish = "4. Exportar"
+  ),
+  dplyr::tibble(
+    id = "ui_export",
+    english = "Export",
+    french = "Exportation",
+    spanish = "Exportar"
+  ),
+  dplyr::tibble(
+    id = "ui_navhelp",
+    english = "Help",
+    french = "Aide",
+    spanish = "Ayuda"
+  ),
+  dplyr::tibble(
+    id = "ui_download_all",
+    english = "Download all",
+    french = "Tout t\u00e9l\u00e9charger",
+    spanish = "Descargar todo"
+  ),
+  dplyr::tibble(
+    id = "ui_data",
+    english = "Data",
+    french = "Donn\u00e9es",
+    spanish = "Datos"
+  ),
+  dplyr::tibble(
+    id = "ui_step_data",
+    english = "Use the boron dataset, upload a CSV file or fill out a table.",
+    french = "Utilisez le jeu de donn\u00e9es sur le bore, t\u00e9l\u00e9versez un fichier CSV ou remplissez un tableau.",
+    spanish = "Use el conjunto de datos de boro, cargue un archivo CSV o complete una tabla."
+  ),
+  dplyr::tibble(
+    id = "ui_step_fit",
+    english = "Fit distributions to the concentrations and compare how well they fit.",
+    french = "Ajustez des distributions aux concentrations et comparez la qualit\u00e9 de leur ajustement.",
+    spanish = "Ajuste distribuciones a las concentraciones y compare la calidad del ajuste."
+  ),
+  dplyr::tibble(
+    id = "ui_step_predict",
+    english = "Estimate a hazard concentration or the fraction affected, with confidence limits.",
+    french = "Estimez une concentration pr\u00e9sentant un risque ou la fraction affect\u00e9e, avec les bornes de l'intervalle de confiance.",
+    spanish = "Estime una concentraci\u00f3n peligrosa o la fracci\u00f3n afectada, con l\u00edmites de confianza."
+  ),
+  dplyr::tibble(
+    id = "ui_step_export",
+    english = "Download the plots, tables and BCANZ report, and the R code that reproduces them.",
+    french = "T\u00e9l\u00e9chargez les graphiques, les tableaux et le rapport BCANZ, ainsi que le code R qui les reproduit.",
+    spanish = "Descargue los gr\u00e1ficos, las tablas y el informe BCANZ, y el c\u00f3digo R que los reproduce."
   )
 )
 

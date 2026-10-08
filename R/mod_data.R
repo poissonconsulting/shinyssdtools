@@ -19,113 +19,106 @@
 mod_data_ui <- function(id) {
   ns <- NS(id)
 
-  layout_sidebar(
-    padding = "1rem",
-    gap = "1rem",
-    sidebar = sidebar(
-      width = 400,
-      div(
-        h5(span(`data-translate` = "ui_tabdata", "Provide data")),
-      ) |>
-        shinyhelper::helper(
-          type = "markdown",
-          content = "dataTab",
-          size = "l",
-          colour = color_primary,
-          buttonLabel = "OK"
-        ),
-      span(
-        `data-translate` = "ui_1choose",
-        "Choose one of the following options:",
-        id = ns("chooseOptions")
-      ),
-      p(
+  aside <- card(card_body(
+    div(
+      class = "small text-body-secondary mb-3",
+      span(`data-translate` = "ui_1choose", "Choose one of the following options:")
+    ),
+    div(
+      class = "d-flex flex-column gap-3",
+      button(
+        ns("demoData"),
         span(
           span(`data-translate` = "ui_1data", "1. Use "),
-          actionLink(
-            ns("demoData"),
-            span(`data-translate` = "ui_1data2", "boron dataset"),
-            icon = icon("table")
-          )
-        )
+          span(`data-translate` = "ui_1data2", "boron dataset")
+        ),
+        icon = "flask",
+        variant = "soft",
+        class = "w-100"
       ),
-
-      # CSV Upload Section
       fileInput(
         ns("uploadData"),
-        buttonLabel = span(tagList(icon("upload"), "csv")),
-        label = span(
-          span(`data-translate` = "ui_1csv", "2. Upload CSV file"),
-        ),
+        label = span(`data-translate` = "ui_1csv", "2. Upload CSV file"),
+        buttonLabel = span(class = "d-inline-flex align-items-center gap-2", lucide("upload"), "CSV"),
         placeholder = "...",
-        accept = c(".csv")
-      ),
+        accept = c(".csv"),
+        width = "100%"
+      ) |>
+        tagAppendAttributes(class = "mb-0"),
+      textInput(
+        ns("toxicant"),
+        label = span(`data-translate` = "ui_1toxname", "Toxicant name (optional)"),
+        value = "",
+        placeholder = "",
+        width = "100%"
+      ) |>
+        tagAppendAttributes(class = "mb-0")
+    )
+  ))
 
-      # Data Table Section
-      bslib::accordion(
-        open = FALSE,
-        bslib::accordion_panel(
-          title = span(
-            span(`data-translate` = "ui_1table", "3. Fill out table below:"),
+  main <- tagList(
+    page_header(
+      span(`data-translate` = "ui_tabdata", "Provide data") |>
+        shinyhelper::helper(type = "markdown", content = "dataTab", size = "l", colour = color_primary, buttonLabel = "OK"),
+      conditionalPanel(
+        condition = paste_js("has_data", ns),
+        step_button(ns("continue"), "ui_continue_fit", "Continue to fit")
+      )
+    ),
+    div(
+      class = "d-flex flex-column gap-4",
+      # In the page from the start, so it shows before the server's first
+      # response; hidden in the browser once data are loaded.
+      conditionalPanel(
+        condition = sprintf("!%s", paste_js("has_data", ns)),
+        welcome_card(ns("guide"))
+      ),
+      conditionalPanel(
+        condition = paste_js("has_data", ns),
+        notice(
+          "info",
+          span(
+            `data-translate` = "ui_1note",
+            "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value."
           ),
+          tone = "muted"
+        )
+      ),
+      accordion(
+        open = FALSE,
+        accordion_panel(
+          title = span(`data-translate` = "ui_1preview", "Preview chosen dataset"),
+          value = "preview",
+          icon = lucide("table"),
+          conditionalPanel(
+            condition = paste_js("has_data", ns),
+            reactable::reactableOutput(ns("viewUpload"))
+          ),
+          conditionalPanel(
+            condition = sprintf("!%s", paste_js("has_data", ns)),
+            div(class = "small text-body-secondary", span(`data-translate` = "ui_hintdata", "You have not added a dataset."))
+          )
+        ),
+        accordion_panel(
+          title = span(`data-translate` = "ui_1table", "3. Fill out table below:"),
           value = "data_table",
+          icon = lucide("sliders-horizontal"),
           rhandsontable::rHandsontableOutput(ns("handson")),
           div(
             class = "mt-3",
-            actionButton(
+            button(
               ns("handson_done"),
-              label = tagList(
-                icon("refresh", class = "me-1"),
-                span(`data-translate` = "ui_update_data", "Update")
-              ),
-              class = "btn-light border w-100"
+              span(`data-translate` = "ui_update_data", "Update"),
+              icon = "refresh-cw",
+              variant = "outline"
             )
           )
         )
-      ),
-      textInput(
-        ns("toxicant"),
-        label = span(
-          `data-translate` = "ui_1toxname",
-          "Toxicant name (optional)"
-        ),
-        value = "",
-        placeholder = ""
-      )
-    ),
-
-    conditionalPanel(
-      condition = glue::glue(
-        "input.main_nav == 'data' && {paste_js('has_data', ns)} == true"
-      ),
-      step_button(ns("continue"), "ui_continue_fit", "Continue to fit"),
-      card(
-        class = card_shadow,
-        card_header(
-          class = "d-flex justify-content-between align-items-center",
-          span(
-            `data-translate` = "ui_1preview",
-            "Preview chosen dataset"
-          )
-        ),
-        card_body(
-          padding = 25,
-          ui_download_popover_table(tab = "data", ns = ns),
-          div(
-            class = "table-responsive",
-            DT::DTOutput(ns("viewUpload"))
-          )
-        )
-      ),
-      card(
-        class = paste("mt-3", card_shadow),
-        card_body(span(
-          `data-translate` = "ui_1note",
-          "Note: the app is designed to handle one chemical at a time. Each species should not have more than one concentration value."
-        ))
       )
     )
   )
+
+  step_layout(aside, main)
 }
 
 # Data Module Server
@@ -301,52 +294,33 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
     output$handson <- rhandsontable::renderRHandsontable({
       x <- handson_data()
       if (!is.null(x)) {
-        rhandsontable::rhandsontable(x, width = 600, useTypes = FALSE)
+        rhandsontable::rhandsontable(x, useTypes = FALSE, stretchH = "all")
       }
     })
 
-    output$viewUpload <- DT::renderDataTable({
+    output$viewUpload <- reactable::renderReactable({
       data <- current_data()
       req(data)
-
-      DT::datatable(
-        data,
-        options = dt_options(lang()),
-        class = 'table-striped table-hover table-bordered',
-        selection = 'none',
-        extensions = 'Buttons'
-      ) |>
-        DT::formatStyle(
-          columns = colnames(data),
-          backgroundColor = 'white',
-          border = '1px solid #ddd'
-        )
+      app_table(
+        as.data.frame(data),
+        lang = lang(),
+        searchable = TRUE,
+        defaultPageSize = 10,
+        paginationType = "simple"
+      )
     })
 
-    # Download handlers
-    output$dataDlCsv <- downloadHandler(
-      filename = function() {
-        "ssdtools_data.csv"
-      },
-      content = function(file) {
-        readr::write_csv(dplyr::as_tibble(current_data()), file)
-      }
-    )
-
-    output$dataDlXlsx <- downloadHandler(
-      filename = function() {
-        "ssdtools_data.xlsx"
-      },
-      content = function(file) {
-        writexl::write_xlsx(dplyr::as_tibble(current_data()), file)
-      }
-    )
-
     observe_step_button(input, "continue", "fit")
+    observe({
+      nav_select("main_nav", "help", session = session$rootScope())
+      nav_select("help_page", "guide", session = session$rootScope())
+    }) |>
+      bindEvent(input$guide)
 
     return(
       list(
         data = names_data,
+        current_data = current_data,
         clean_data = clean_data,
         data_cols = reactive({
           names(clean_data())
