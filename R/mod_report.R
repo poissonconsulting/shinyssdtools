@@ -114,10 +114,14 @@ mod_report_ui <- function(id) {
     ),
     conditionalPanel(
       condition = paste0("!output['", ns("has_predict"), "']"),
-      ui_dashbox(span(
-        `data-translate` = "ui_hintpredict",
-        "You have not successfully generated predictions yet. Run the 'Predict' tab first."
-      ))
+empty_state(
+        icon = bsicons::bs_icon("calculator"),
+        title = span(
+          `data-translate` = "ui_hintpredict",
+          "You have not successfully generated predictions yet. Run the 'Predict' tab first."
+        ),
+        action = step_button(ns("goPredict"), "ui_goto_predict", "Go to Predict", variant = "outline")
+      )
     )
   )
 }
@@ -315,5 +319,9 @@ mod_report_server <- function(
         writeLines(req(report_result())$html, file)
       }
     )
+
+    observe_step_button(input, "goPredict", "predict")
+
+    list(running = report_runner$running, has_preview = has_preview)
   })
 }

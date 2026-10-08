@@ -119,18 +119,6 @@ dt_options <- function(lang = "english") {
   )
 }
 
-#' Create a dashed border info box
-#' @param x UI content to display inside the box
-#' @return div element with dashed border styling and centered muted text
-#' @keywords internal
-ui_dashbox <- function(x) {
-  div(
-    class = "text-muted text-center p-5",
-    style = "border: 2px dashed #dee2e6; border-radius: 8px; margin: 2rem;",
-    x
-  )
-}
-
 #' Create table download popover button
 #' @param tab Character string module prefix for button IDs (default: "fit")
 #' @param ns Shiny namespace function
@@ -144,7 +132,7 @@ ui_download_popover_table <- function(tab = "fit", ns) {
         bsicons::bs_icon("download"),
         span(`data-translate` = "ui_2download", "Download")
       ),
-      style = "padding:4px; font-size:80%; width: 100px"
+      class = "btn-light border btn-sm align-self-start"
     ),
     card(
       class = card_shadow,
@@ -155,14 +143,12 @@ ui_download_popover_table <- function(tab = "fit", ns) {
           downloadButton(
             ns(paste0(tab, "DlXlsx")),
             label = span(`data-translate` = "ui_2dlxlsx", "XLSX file"),
-            style = "width: 100%; padding: 6px; font-size: 12px;",
-            class = "btn-primary btn-sm"
+            class = "btn-light border btn-sm w-100"
           ),
           downloadButton(
             ns(paste0(tab, "DlCsv")),
             label = span(`data-translate` = "ui_2dlcsv", "CSV File"),
-            style = "width: 100%; padding: 6px; font-size: 12px;",
-            class = "btn-primary btn-sm"
+            class = "btn-light border btn-sm w-100"
           )
         )
       )
@@ -184,7 +170,7 @@ ui_download_report <- function(tab = "report", ns) {
         bsicons::bs_icon("download"),
         span(`data-translate` = "ui_2download", "Download")
       ),
-      style = "padding:4px; font-size:80%; width: 100px"
+      class = "btn-light border btn-sm align-self-start"
     ),
     card(
       class = card_shadow,
@@ -195,14 +181,12 @@ ui_download_report <- function(tab = "report", ns) {
           downloadButton(
             ns(paste0(tab, "DlPdf")),
             label = span(`data-translate` = "ui_2dlpdf", "PDF file"),
-            style = "width: 100%; padding: 6px; font-size: 12px;",
-            class = "btn-primary btn-sm"
+            class = "btn-light border btn-sm w-100"
           ),
           downloadButton(
             ns(paste0(tab, "DlHtml")),
             label = span(`data-translate` = "ui_2dlhtml", "HTML File"),
-            style = "width: 100%; padding: 6px; font-size: 12px;",
-            class = "btn-primary btn-sm"
+            class = "btn-light border btn-sm w-100"
           )
         )
       )
@@ -224,7 +208,7 @@ ui_download_popover <- function(tab = "fit", ns) {
         bsicons::bs_icon("download"),
         span(`data-translate` = "ui_2download", "Download")
       ),
-      style = "padding:4px; font-size:80%; width: 100px;"
+      class = "btn-light border btn-sm align-self-start"
     ),
     card(
       class = card_shadow,
@@ -235,14 +219,12 @@ ui_download_popover <- function(tab = "fit", ns) {
           downloadButton(
             ns(paste0(tab, "DlPlot")),
             label = span(`data-translate` = "ui_2dlplot", "PNG file"),
-            style = "width: 100%; padding: 6px; font-size: 12px;",
-            class = "btn-primary btn-sm"
+            class = "btn-light border btn-sm w-100"
           ),
           downloadButton(
             ns(paste0(tab, "DlRds")),
             label = span(`data-translate` = "ui_2dlrds", "RDS File"),
-            style = "width: 100%; padding: 6px; font-size: 12px;",
-            class = "btn-primary btn-sm"
+            class = "btn-light border btn-sm w-100"
           )
         ),
         div(
@@ -524,4 +506,40 @@ empty_state <- function(icon, title, description = NULL, action = NULL) {
       )
     )
   )
+}
+
+#' Create a button that opens a step
+#'
+#' The Continue button of a step (primary, at the top right of its content),
+#' or the button of an empty state that opens the step it needs (outline).
+#' Its server side is [observe_step_button()].
+#' @param id Character string namespaced input ID.
+#' @param translate_key Character string translation key of the label.
+#' @param default_text Character string English label.
+#' @param variant Character string button variant, as for [button()].
+#' @return A button tag; a primary one is right aligned in its own row.
+#' @keywords internal
+step_button <- function(id, translate_key, default_text, variant = "primary") {
+  btn <- button(
+    id,
+    span(`data-translate` = translate_key, default_text),
+    icon = bsicons::bs_icon("arrow-right"),
+    variant = variant
+  )
+  if (variant != "primary") {
+    return(btn)
+  }
+  div(class = "d-flex justify-content-end mb-3", btn)
+}
+
+#' Open a step when its button is clicked
+#' @param input The module's input.
+#' @param id Character string input ID of the button.
+#' @param step Character string value of the step's tab in `main_nav`.
+#' @param session The module's session.
+#' @return An observer.
+#' @keywords internal
+observe_step_button <- function(input, id, step, session = getDefaultReactiveDomain()) {
+  observe(nav_select("main_nav", step, session = session$rootScope())) |>
+    bindEvent(input[[id]])
 }

@@ -75,10 +75,10 @@ mod_data_ui <- function(id) {
             actionButton(
               ns("handson_done"),
               label = tagList(
-                icon("refresh", class = paste(color_button_icon, "me-1")),
+                icon("refresh", class = "me-1"),
                 span(`data-translate` = "ui_update_data", "Update")
               ),
-              class = "btn-primary w-100"
+              class = "btn-light border w-100"
             )
           )
         )
@@ -98,6 +98,7 @@ mod_data_ui <- function(id) {
       condition = glue::glue(
         "input.main_nav == 'data' && {paste_js('has_data', ns)} == true"
       ),
+      step_button(ns("continue"), "ui_continue_fit", "Continue to fit"),
       card(
         class = card_shadow,
         card_header(
@@ -340,6 +341,8 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
         writexl::write_xlsx(dplyr::as_tibble(current_data()), file)
       }
     )
+
+    observe_step_button(input, "continue", "fit")
 
     return(
       list(

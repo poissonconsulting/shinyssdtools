@@ -336,6 +336,7 @@ mod_predict_ui <- function(id) {
           class = "p-3",
           conditionalPanel(
             condition = paste_js('has_predict', ns),
+            step_button(ns("continue"), "ui_continue_report", "Continue to report"),
             card(
               class = card_shadow,
               full_screen = TRUE,
@@ -415,10 +416,14 @@ mod_predict_ui <- function(id) {
     ),
     conditionalPanel(
       condition = paste0("!output['", ns("has_fit"), "']"),
-      ui_dashbox(span(
-        `data-translate` = "ui_hintfit",
-        "You have not successfully fit any distributions yet. Run the 'Fit' tab first."
-      ))
+empty_state(
+        icon = bsicons::bs_icon("graph-up"),
+        title = span(
+          `data-translate` = "ui_hintfit",
+          "You have not successfully fit any distributions yet. Run the 'Fit' tab first."
+        ),
+        action = step_button(ns("goFit"), "ui_goto_fit", "Go to Fit", variant = "outline")
+      )
     )
   )
 }
@@ -1098,6 +1103,9 @@ mod_predict_server <- function(
     output$has_cl <- has_cl
     outputOptions(output, "has_cl", suspendWhenHidden = FALSE)
 
+    observe_step_button(input, "continue", "report")
+    observe_step_button(input, "goFit", "fit")
+
     # downloaders -------------------------------------------------------------
     output$predDlPlot <- downloadHandler(
       filename = function() {
@@ -1215,6 +1223,7 @@ mod_predict_server <- function(
         ribbon = reactive({
           as.logical(input$ribbonStyle)
         }),
+        cl_running = cl_runner$running,
         cl_requested = cl_requested,
         cl_nboot = cl_nboot,
         current_cl = current_cl,

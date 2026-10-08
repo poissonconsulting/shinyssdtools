@@ -136,6 +136,24 @@ app_server <- function(input, output, session) {
     predict_mod
   )
 
+  # The states of the step markers (step_marker_switch()): "done" once a step
+  # has a result, "busy" while it computes in the background, else "todo".
+  step_state <- function(done, busy = function() FALSE) {
+    reactive({
+      if (isTRUE(busy())) {
+        return("busy")
+      }
+      if (isTRUE(tryCatch(done(), error = function(e) FALSE))) "done" else "todo"
+    })
+  }
+  output$mark_data <- step_state(data_mod$has_data)
+  output$mark_fit <- step_state(fit_mod$has_fit)
+  output$mark_predict <- step_state(predict_mod$has_predict, predict_mod$cl_running)
+  output$mark_report <- step_state(report_mod$has_preview, report_mod$running)
+  for (step in c("data", "fit", "predict", "report")) {
+    outputOptions(output, paste0("mark_", step), suspendWhenHidden = FALSE)
+  }
+
   output$ui_5format <- renderUI({
     radioButtons("report_format", "Report format")
   })
