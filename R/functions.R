@@ -239,14 +239,6 @@ inline <- function(x) {
   tags$div(style = "display:inline-block;", x)
 }
 
-#' Create grey hint text
-#' @param x Character string hint text
-#' @return HTML object with grey font color
-#' @keywords internal
-hint <- function(x) {
-  HTML(paste0("<font color='grey'>", x, "</font>"))
-}
-
 #' Check if values have zero range
 #' @param x Numeric vector
 #' @param tol Tolerance for comparison (default: sqrt of machine precision)
@@ -296,76 +288,6 @@ calculate_threshold_percent <- function(fit, conc, digits = 3) {
 #' @keywords internal
 calculate_threshold_conc <- function(fit, thresh, digits = 3) {
   signif(estimate_hc(fit, thresh), digits)
-}
-
-#' Calculate hazard concentration with confidence intervals
-#' @param x A fitdists object from ssd_fit_bcanz()
-#' @param percent Numeric percent of species affected (0-100 scale)
-#' @param nboot Integer number of bootstrap samples for confidence intervals
-#' @return Data frame with columns: dist, est, se, lcl, ucl, wt
-#' @keywords internal
-ssd_hc_ave <- function(x, percent, nboot) {
-  dist <- ssdtools::ssd_hc_bcanz(
-    x,
-    proportion = percent / 100,
-    ci = TRUE,
-    average = FALSE,
-    nboot = nboot,
-    min_pboot = 0.8
-  )
-
-  if (length(x) == 1) {
-    ave <- dist
-    ave$dist <- "average"
-  } else {
-    ave <- ssdtools::ssd_hc_bcanz(
-      x,
-      proportion = percent / 100,
-      ci = TRUE,
-      average = TRUE,
-      nboot = nboot,
-      min_pboot = 0.8
-    )
-  }
-
-  dplyr::bind_rows(ave, dist) |>
-    dplyr::mutate_at(c("est", "se", "ucl", "lcl", "wt"), ~ signif(., 3))
-}
-
-#' Calculate hazard percent with confidence intervals
-#' @param x A fitdists object from ssd_fit_bcanz()
-#' @param conc Numeric concentration value
-#' @param nboot Integer number of bootstrap samples for confidence intervals
-#' @return Data frame with columns: dist, est, se, lcl, ucl, wt
-#' @keywords internal
-ssd_hp_ave <- function(x, conc, nboot) {
-  dist <- ssdtools::ssd_hp_bcanz(
-    x,
-    conc = conc,
-    ci = TRUE,
-    average = FALSE,
-    nboot = nboot,
-    min_pboot = 0.8,
-    proportion = TRUE
-  )
-
-  if (length(x) == 1) {
-    ave <- dist
-    ave$dist <- "average"
-  } else {
-    ave <- ssdtools::ssd_hp_bcanz(
-      x,
-      conc = conc,
-      ci = TRUE,
-      average = TRUE,
-      nboot = nboot,
-      min_pboot = 0.8,
-      proportion = TRUE
-    )
-  }
-
-  dplyr::bind_rows(ave, dist) |>
-    dplyr::mutate_at(c("est", "se", "ucl", "lcl", "wt"), ~ signif(., 3))
 }
 
 #' Format R code with proper styling
