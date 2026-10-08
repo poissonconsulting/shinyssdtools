@@ -436,8 +436,7 @@ mod_predict_server <- function(
   data_mod,
   fit_mod,
   big_mark,
-  decimal_mark,
-  main_nav = reactive("predict")
+  decimal_mark
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -445,30 +444,6 @@ mod_predict_server <- function(
     output$has_fit <- fit_mod$has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
 
-    # trigger for updating predictions - only occur when on predict tab
-    predict_trigger <- reactiveVal(0)
-
-    observe({
-      if (main_nav() == "predict") {
-        current_val <- isolate(predict_trigger())
-        predict_trigger(current_val + 1)
-      }
-    }) |>
-      bindEvent(main_nav())
-
-    # Also trigger when threshold values change
-    observe({
-      if (isolate(main_nav()) == "predict") {
-        current_val <- isolate(predict_trigger())
-        predict_trigger(current_val + 1)
-      }
-    }) |>
-      bindEvent(
-        thresh_rv$percent,
-        thresh_rv$conc,
-        ignoreNULL = FALSE,
-        ignoreInit = TRUE
-      )
 
     observe({
       trans <- translations()
@@ -829,9 +804,9 @@ mod_predict_server <- function(
     # The model-averaged curve is cached by fit and number of samples and
     # shared with the report, so neither Get CL nor Get Report bootstraps one
     # the other has computed. Only the current fit's curves are kept.
-    curves <- list()
+    curves <- reactiveVal(list())
     curve_lookup <- function(fit, nboot, percent = NULL) {
-      for (curve in curves) {
+      for (curve in curves()) {
         if (identical(curve$fit, fit) && identical(curve$nboot, nboot) &&
           (is.null(percent) || has_percent(curve$pred, percent))) {
           return(curve$pred)
@@ -842,8 +817,8 @@ mod_predict_server <- function(
     curve_store <- function(fit, nboot, pred) {
       kept <- Filter(function(curve) {
         identical(curve$fit, fit) && !identical(curve$nboot, nboot)
-      }, curves)
-      curves <<- c(kept, list(list(fit = fit, nboot = nboot, pred = pred)))
+      }, isolate(curves()))
+      curves(c(kept, list(list(fit = fit, nboot = nboot, pred = pred))))
     }
 
     cl_runner <- task_runner()
@@ -923,19 +898,10 @@ mod_predict_server <- function(
     output$cl_stale <- reactive(!is.null(cl_result()) && is.null(cl_table_current()))
     outputOptions(output, "cl_stale", suspendWhenHidden = FALSE)
 
-    observe({
-      if (isolate(main_nav()) == "predict") {
-        predict_trigger(isolate(predict_trigger()) + 1)
-      }
-    }) |>
-      bindEvent(cl_band(), input$includeCi, ignoreInit = TRUE, ignoreNULL = FALSE)
-
     # Without current confidence limits, the predictions are the estimates
-    # alone, which need no bootstrap.
+    # alone, which need no bootstrap, so they follow the fit and threshold
+    # whichever step is open (the report uses them).
     predict_hc <- reactive({
-      req(predict_trigger() > 0)
-      req(main_nav() == "predict")
-
       fit <- fit_mod$fit_dist()
       req(fit)
       req(thresh_rv$percent)
@@ -945,8 +911,7 @@ mod_predict_server <- function(
         return(band)
       }
       stats::predict(fit, proportion = unique(c(1:99, thresh_rv$percent)) / 100)
-    }) |>
-      bindEvent(predict_trigger())
+    })
 
     transformation <- reactive({
       trans <- "log10"

@@ -37,6 +37,7 @@ Imports:
     knitr,
     mirai,
     pkgload,
+    promises,
     rclipboard,
     readr,
     rhandsontable,

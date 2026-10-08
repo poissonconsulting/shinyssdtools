@@ -13,13 +13,14 @@ task_runner(background = mirai::daemons_set())
 A list of the runner's functions.
 }
 \description{
-A runner runs one job at a time. \code{invoke(fn, args)} starts \code{do.call(fn, args)}, \code{running()} is \code{TRUE} until it settles, and \code{done()} then becomes
-\code{list(n, value)} or \code{list(n, error)}, \code{n} counting the jobs settled.
-\code{cancel()} stops a running job, whose result is then discarded.
+A runner runs one job at a time. \code{invoke(fn, args)} starts \code{do.call(fn, args)}, replacing any job still running, \code{running()} is \code{TRUE} until it
+settles, and \code{done()} then becomes \code{list(n, value)} or \code{list(n, error)},
+\code{n} counting the jobs settled. \code{cancel()} stops a running job. The result
+of a job that was cancelled or replaced is discarded.
 }
 \details{
-With mirai daemons set (\code{inst/app/global.R}), jobs run on a daemon through
-an \link[shiny:ExtendedTask]{shiny::ExtendedTask}, so the session, and every other session in the
+With mirai daemons set (\code{inst/app/global.R}), jobs run on a daemon and
+settle through a promise, so the session, and every other session in the
 same R process, stays responsive. Without daemons (as in \code{testServer()}
 tests) a job runs in the session as soon as it is invoked.
 }

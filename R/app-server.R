@@ -114,10 +114,7 @@ app_server <- function(input, output, session) {
     data_mod,
     fit_mod,
     big_mark,
-    decimal_mark,
-    main_nav = reactive({
-      input$main_nav
-    })
+    decimal_mark
   )
   report_mod <- mod_report_server(
     "report_mod",
@@ -126,7 +123,8 @@ app_server <- function(input, output, session) {
     data_mod,
     fit_mod,
     predict_mod,
-    shared_toxicant_name
+    shared_toxicant_name,
+    main_nav = reactive(input$main_nav)
   )
   rcode_mod <- mod_rcode_server(
     "rcode_mod",

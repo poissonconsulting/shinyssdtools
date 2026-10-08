@@ -18,12 +18,13 @@
 #' Create a runner for slow jobs
 #'
 #' A runner runs one job at a time. `invoke(fn, args)` starts `do.call(fn,
-#' args)`, `running()` is `TRUE` until it settles, and `done()` then becomes
-#' `list(n, value)` or `list(n, error)`, `n` counting the jobs settled.
-#' `cancel()` stops a running job, whose result is then discarded.
+#' args)`, replacing any job still running, `running()` is `TRUE` until it
+#' settles, and `done()` then becomes `list(n, value)` or `list(n, error)`,
+#' `n` counting the jobs settled. `cancel()` stops a running job. The result
+#' of a job that was cancelled or replaced is discarded.
 #'
-#' With mirai daemons set (`inst/app/global.R`), jobs run on a daemon through
-#' an [shiny::ExtendedTask], so the session, and every other session in the
+#' With mirai daemons set (`inst/app/global.R`), jobs run on a daemon and
+#' settle through a promise, so the session, and every other session in the
 #' same R process, stays responsive. Without daemons (as in `testServer()`
 #' tests) a job runs in the session as soon as it is invoked.
 #'
@@ -51,8 +52,21 @@ task_runner <- function(background = mirai::daemons_set()) {
     return(list(invoke = invoke, running = running, done = done, cancel = function() NULL))
   }
 
+  # Each job has an id; a job that was cancelled or replaced settles with an
+  # old id, and its result is discarded.
+  id <- 0
   current <- NULL
-  task <- ExtendedTask$new(function(fn, args) {
+  cancel <- function() {
+    id <<- id + 1
+    if (isolate(running())) {
+      mirai::stop_mirai(current)
+      running(FALSE)
+    }
+  }
+  invoke <- function(fn, args) {
+    cancel()
+    job <- id
+    running(TRUE)
     current <<- mirai::mirai(
       tryCatch(
         list(value = do.call(fn, args)),
@@ -61,38 +75,17 @@ task_runner <- function(background = mirai::daemons_set()) {
       fn = fn,
       args = args
     )
-    current
-  })
-
-  # A cancelled job settles as an error after running() was cleared, so only
-  # the result of a job still running is used.
-  observe({
-    status <- task$status()
-    if (!status %in% c("success", "error") || !isolate(running())) {
-      return()
-    }
-    isolate(finish(tryCatch(
-      task$result(),
-      error = function(e) list(error = conditionMessage(e))
-    )))
-  })
-
-  cancel <- function() {
-    if (!is.null(current)) mirai::stop_mirai(current)
-    running(FALSE)
+    promises::then(
+      promises::as.promise(current),
+      onFulfilled = function(result) if (job == id) finish(result),
+      onRejected = function(e) if (job == id) finish(list(error = conditionMessage(e)))
+    )
+    invisible()
   }
   session <- getDefaultReactiveDomain()
   if (!is.null(session)) session$onSessionEnded(cancel)
 
-  list(
-    invoke = function(fn, args) {
-      running(TRUE)
-      task$invoke(fn, args)
-    },
-    running = running,
-    done = done,
-    cancel = cancel
-  )
+  list(invoke = invoke, running = running, done = done, cancel = cancel)
 }
 
 # The percents affected whose confidence limits Get CL always computes: the
