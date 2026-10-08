@@ -247,9 +247,11 @@ mod_fit_server <- function(
         rescale = rescale
       ), error = function(e) e)
     }) |>
+      # Sorted, so the same distributions in another order are the same fit,
+      # and the confidence limits and reports computed for it still apply.
       bindCache(
         input$selectConc,
-        input$selectDist,
+        sort(input$selectDist),
         input$rescale,
         data_mod$data()
       ) |>
