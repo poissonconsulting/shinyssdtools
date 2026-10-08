@@ -160,10 +160,6 @@ mod_predict_ui <- function(id) {
                   icon = busy_icon(),
                   title = span(`data-translate` = "ui_cl_running", "Computing confidence limits"),
                   htmlOutput(ns("describeCl")),
-                  span(
-                    `data-translate` = "ui_cl_running2",
-                    "You can keep working: the plot and table update when they are ready."
-                  ),
                   tone = "info",
                   action = button(
                     ns("cancelCl"),
@@ -183,12 +179,8 @@ mod_predict_ui <- function(id) {
                 notice(
                   icon = bsicons::bs_icon("exclamation-triangle"),
                   title = span(
-                    `data-translate` = "ui_cl_stale",
-                    "The confidence limits are out of date"
-                  ),
-                  span(
-                    `data-translate` = "ui_cl_stale2",
-                    "The fit or threshold has changed. Get CL again to update them."
+                    `data-translate` = "ui_3help",
+                    "Click 'Get CL' to calculate the upper and lower confidence limits (CL) for the estimate."
                   ),
                   tone = "warning"
                 )

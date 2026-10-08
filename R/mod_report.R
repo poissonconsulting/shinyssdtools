@@ -77,10 +77,6 @@ mod_report_ui <- function(id) {
               notice(
                 icon = busy_icon(),
                 title = span(`data-translate` = "ui_4gentitle", "Generating report..."),
-                span(
-                  `data-translate` = "ui_report_running",
-                  "You can keep working: the preview shows when the report is ready."
-                ),
                 tone = "info",
                 action = button(
                   ns("cancelReport"),

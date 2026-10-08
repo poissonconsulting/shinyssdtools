@@ -870,34 +870,10 @@ translations <- dplyr::bind_rows(
     spanish = "Calculando los l\u00edmites de confianza"
   ),
   dplyr::tibble(
-    id = "ui_cl_running2",
-    english = "You can keep working: the plot and table update when they are ready.",
-    french = "Vous pouvez continuer \u00e0 travailler : le graphique et le tableau se mettent \u00e0 jour lorsqu'ils sont pr\u00eats.",
-    spanish = "Puede seguir trabajando: el gr\u00e1fico y la tabla se actualizan cuando est\u00e9n listos."
-  ),
-  dplyr::tibble(
-    id = "ui_cl_stale",
-    english = "The confidence limits are out of date",
-    french = "Les limites de confiance ne sont plus \u00e0 jour",
-    spanish = "Los l\u00edmites de confianza est\u00e1n desactualizados"
-  ),
-  dplyr::tibble(
-    id = "ui_cl_stale2",
-    english = "The fit or threshold has changed. Get CL again to update them.",
-    french = "L'ajustement ou le seuil a chang\u00e9. Recalculez les LC pour les mettre \u00e0 jour.",
-    spanish = "El ajuste o el umbral ha cambiado. Obtenga los LC de nuevo para actualizarlos."
-  ),
-  dplyr::tibble(
     id = "ui_cl_failed",
     english = "The confidence limits could not be computed",
     french = "Les limites de confiance n'ont pas pu \u00eatre calcul\u00e9es",
     spanish = "No se pudieron calcular los l\u00edmites de confianza"
-  ),
-  dplyr::tibble(
-    id = "ui_report_running",
-    english = "You can keep working: the preview shows when the report is ready.",
-    french = "Vous pouvez continuer \u00e0 travailler : l'aper\u00e7u s'affiche lorsque le rapport est pr\u00eat.",
-    spanish = "Puede seguir trabajando: la vista previa se muestra cuando el informe est\u00e9 listo."
   ),
   dplyr::tibble(
     id = "ui_report_failed",
