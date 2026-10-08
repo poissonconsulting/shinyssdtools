@@ -1,33 +1,13 @@
-/* Minimal CSS for bslib dashboard - only essential overrides */
+/* Colours, radii and component looks come from the bs_theme() Sass variables
+   in R/theme.R; rules here style the app's own ssd-* classes and read colours
+   from var(--bs-*), without !important. */
 
-/* Limit input number width for better layout */
-input[type="number"] {
-  max-width: 80%;
+/* The help icons open a modal. Their focus ring stays visible for keyboard
+   users (WCAG 2.4.7). */
+.bi-question-circle {
+  cursor: pointer;
 }
 
-/* Code block styling for R Code tab */
-#codes {
-  background-color: #f8f9fa;
-  font-family: 'Courier New', Monaco, 'Lucida Console', monospace;
-  font-size: 12px;
-  font-weight: 200;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-}
-
-/* Ensure primary buttons use theme colors */
-.btn-primary {
-  background-color: var(--bs-primary) !important;
-  border-color: var(--bs-primary) !important;
-}
-
-.btn-primary:hover,
-.btn-primary:focus {
-  background-color: var(--bs-primary) !important;
-  border-color: var(--bs-primary) !important;
-  opacity: 0.9;
-}
 /* The soft button: an optional step, filled with the primary's subtle tint.
    It sets Bootstrap's own .btn variables, so states follow the theme. */
 .ssd-btn-soft {
@@ -45,4 +25,38 @@ input[type="number"] {
 .ssd-notice-icon {
   display: inline-flex;
   margin-top: 0.125rem;
+}
+
+/* The generated R script: wrapped, scrollable and in the code font. */
+.ssd-code {
+  max-height: 70vh;
+  overflow-y: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ssd-code pre {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font: inherit;
+  color: inherit;
+}
+
+/* Empty states: an icon in a tinted circle above the message. */
+.ssd-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  font-size: 1.25rem;
+}
+
+.ssd-measure {
+  max-width: 32rem;
 }

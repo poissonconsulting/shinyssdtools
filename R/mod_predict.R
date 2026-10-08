@@ -100,7 +100,8 @@ mod_predict_ui <- function(id) {
                   )
                 ),
                 div(
-                  style = "padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa; min-height: 38px; display: flex; align-items: center; margin-top: 7px;",
+                  class = "form-control bg-body-tertiary mt-2",
+                  `aria-live` = "polite",
                   textOutput(ns("threshPc"), inline = TRUE)
                 )
               )

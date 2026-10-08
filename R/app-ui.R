@@ -24,6 +24,13 @@ app_ui <- function() {
     useBusyIndicators(pulse = FALSE),
     rclipboard::rclipboardSetup(),
 
+    # Versioned by the file's modification time, so a browser fetches the
+    # stylesheet again when it changes rather than using a cached copy.
+    tags$head(tags$link(
+      rel = "stylesheet",
+      href = paste0("style.css?v=", styles_version())
+    )),
+
     # Include custom JavaScript for translations
     tags$script(src = "translation.js"),
 
@@ -42,40 +49,13 @@ app_ui <- function() {
     "
     )),
 
-    # Hide shiny errors
     tags$style(
       type = "text/css",
       ".shiny-output-error { visibility: hidden; }",
       ".shiny-output-error:before { visibility: hidden; }",
-      "/* Remove focus outline from help icons */",
-      ".bi-question-circle:focus { outline: none !important; border: none !important; box-shadow: none !important; }",
-      ".bi-question-circle { cursor: pointer; }",
-      ".initially-hidden {
-        display: none;
-      }"
+      ".initially-hidden { display: none; }"
     ),
 
-    # Language dropdown menu styling with theme colors
-    tags$style(
-      type = "text/css",
-      glue::glue("
-        .dropdown-menu {{
-          background-color: {color_secondary} !important;
-        }}
-        .dropdown-menu .bslib-nav-item a,
-        .dropdown-menu .action-button {{
-          color: #FFFFFF !important;
-          display: block;
-          padding: 0.5rem 1rem;
-        }}
-        .dropdown-menu .bslib-nav-item a:hover,
-        .dropdown-menu .action-button:hover {{
-          background-color: rgba(255, 255, 255, 0.1) !important;
-          color: #FFFFFF !important;
-          text-decoration: none;
-        }}
-      ")
-    ),
     tags$script(HTML(
       "
       $(document).on('shiny:connected', function() {
@@ -86,12 +66,8 @@ app_ui <- function() {
 
     page_navbar(
       title = "shinyssdtools",
-      theme = bs_theme(
-        primary = color_primary,
-        secondary = color_secondary,
-        success = color_primary,
-        info = color_primary
-      ),
+      theme = app_theme(),
+      lang = "en",
       navbar_options = navbar_options(bg = color_secondary, underline = TRUE),
       nav_panel(
         title = span(`data-translate` = "ui_navanalyse", "Analyse"),
@@ -226,4 +202,9 @@ app_ui <- function() {
       )
     )
   )
+}
+
+styles_version <- function() {
+  path <- system.file("app", "www", "style.css", package = "shinyssdtools")
+  as.integer(file.mtime(path))
 }

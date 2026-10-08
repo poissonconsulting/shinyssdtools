@@ -15,65 +15,51 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Theme colors for shinyssdtools app
-# To change color scheme, uncomment one set of colors and comment out the others
+# The app's theme: colours, radii, spacing and component looks are Bootstrap
+# Sass variables, so custom CSS (inst/app/www/style.css) only styles the app's
+# own ssd-* classes and reads colours from var(--bs-*).
+#
+# The colours meet WCAG 2.1 AA contrast for text on white (primary) and for
+# white text on the navbar (secondary).
 
-# ==============================================================================
-# REFINED NAVY (CURRENT)
-# ==============================================================================
-# color_primary <- "#3498DB" # Bright blue for buttons, primary actions, and help icons
-# color_secondary <- "#2C3E50" # Darker slate blue for navbar and secondary elements
-# color_sidebar <- "#D5DBDF" # Light tint of navbar
-# color_button_icon <- "text-dark" # Black icons for buttons
-
-# ==============================================================================
-# TEAL
-# ==============================================================================
-# color_primary <- "#26A69A" # Teal for buttons, primary actions, and help icons
-# color_secondary <- "#1A5F7A" # Darker teal for navbar and secondary elements
-# color_sidebar <- "#C8E1E7" # Light tint of navbar
-# color_button_icon <- "text-dark" # White icons for buttons
-
-# ==============================================================================
-# slate and teal
-# ==============================================================================
-# color_primary <- "#0D9488" # Teal accent for buttons, primary actions, and help icons
-# color_secondary <- "#1F2937" # Charcoal for navbar and secondary elements
-# color_sidebar <- "#F3F4F6" # Light gray tint of navbar
-# color_button_icon <- "text-dark" # White icons for buttons
-
-# ==============================================================================
-# deep blue sage
-# ==============================================================================
-# color_primary <- "#4B9C8E" # Teal accent for buttons, primary actions, and help icons
-# color_secondary <- "#0F172A" # Charcoal for navbar and secondary elements
-# color_sidebar <- "#E5E7EB" # Light gray tint of navbar
-# color_button_icon <- "text-dark" # White icons for buttons
-
-# ==============================================================================
-# Deep Blue & Slate
-# ==============================================================================
-# color_primary <- "#0066cc" # Professional blue for buttons, primary actions, and links
-# color_secondary <- "#1e3a5f" # Deep navy blue for navbar
-# color_sidebar <- "#f0f4f7" # Light blue-gray for sidebar background
-# color_button_icon <- "text-white" # White icons for buttons
-
-# ==============================================================================
-# Charcoal & Warm Gray
-# ==============================================================================
-# color_primary <- "#00897b" # Teal for buttons, primary actions, and links
-# color_secondary <- "#2d3436" # Charcoal for navbar
-# color_sidebar <- "#f5f5f5" # Warm light gray for sidebar background
-# color_button_icon <- "text-dark" # White icons for buttons
-
-# WCAG accessibility standards (https://www.w3.org/WAI/standards-guidelines/wcag/) - suggestions from Claude opus
-# ==============================================================================
-# Deep Navy Academic
-# ==============================================================================
-color_primary <- "#2e7d9a" # Professional teal-blue for buttons, primary actions, and links
-color_secondary <- "#1e3a5f" # Deep navy blue for navbar
-color_sidebar <- "#f4f6f9" # Cool light gray for sidebar
-color_button_icon <- "text-white" # White icons for buttons
+color_primary <- "#2e7d9a" # buttons, links, active tabs and help icons
+color_secondary <- "#1e3a5f" # navbar
+color_sidebar <- "#f4f6f9" # step navigation
+color_button_icon <- "text-white" # icons on primary buttons
 
 # Card styling
-card_shadow <- "border" # Bootstrap shadow class for cards
+card_shadow <- "border"
+
+app_theme <- function() {
+  bs_theme(
+    version = 5,
+    primary = color_primary,
+    secondary = "#5a6672",
+    success = "#187c49",
+    info = color_primary,
+    warning = "#a76100",
+    danger = "#c5221f",
+    "font-size-base" = "0.9375rem",
+    "headings-font-weight" = 600,
+    "border-radius" = "0.5rem",
+    "border-radius-sm" = "0.375rem",
+    "border-radius-lg" = "0.625rem",
+    "link-decoration" = "none",
+    "link-hover-decoration" = "underline",
+    "btn-font-weight" = 500,
+    "card-cap-bg" = "transparent",
+    "card-cap-padding-y" = "0.75rem",
+    "form-label-font-weight" = 500,
+    # The language menu drops down from the dark navbar, so it shares its colour.
+    "dropdown-bg" = color_secondary,
+    "dropdown-border-color" = color_secondary,
+    "dropdown-link-color" = "#ffffff",
+    "dropdown-link-hover-color" = "#ffffff",
+    "dropdown-link-hover-bg" = "rgba(255, 255, 255, 0.1)",
+    "dropdown-link-active-bg" = color_primary,
+    "popover-max-width" = "22rem",
+    "accordion-button-active-bg" = color_sidebar,
+    "accordion-button-active-color" = "#212529",
+    "progress-height" = "0.5rem"
+  )
+}
