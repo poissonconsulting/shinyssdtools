@@ -685,11 +685,20 @@ mod_predict_server <- function(
     outputOptions(output, "uiSelectShape", suspendWhenHidden = FALSE)
 
     # output renders ----------------------------------------------------------
+    # The model-averaged confidence limits after an estimate, once Get CL has
+    # computed them for the threshold.
+    estimate_limits <- function(scale = 1) {
+      cl_limits_text(cl_table_current(), scale, big_mark(), decimal_mark())
+    }
+
     output$estConc <- renderText({
-      format(
-        thresh_rv$conc,
-        big.mark = big_mark(),
-        decimal.mark = decimal_mark()
+      paste0(
+        format(
+          thresh_rv$conc,
+          big.mark = big_mark(),
+          decimal.mark = decimal_mark()
+        ),
+        estimate_limits()
       )
     })
 
@@ -706,7 +715,10 @@ mod_predict_server <- function(
     })
 
     output$estPerc2 <- renderText({
-      thresh_rv$percent
+      paste0(
+        format(thresh_rv$percent, decimal.mark = decimal_mark()),
+        estimate_limits(scale = 100)
+      )
     })
 
     output$describeTime <- renderText({
@@ -741,10 +753,13 @@ mod_predict_server <- function(
     })
 
     output$hcConc <- renderText({
-      format(
-        thresh_rv$conc,
-        big.mark = big_mark(),
-        decimal.mark = decimal_mark()
+      paste0(
+        format(
+          thresh_rv$conc,
+          big.mark = big_mark(),
+          decimal.mark = decimal_mark()
+        ),
+        estimate_limits()
       )
     })
 

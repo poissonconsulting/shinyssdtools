@@ -192,6 +192,30 @@ cl_table <- function(cl, threshold_type, percent, conc) {
     dplyr::arrange(dplyr::desc(.data$wt))
 }
 
+#' Confidence limits as text
+#'
+#' @param table The confidence limits table (from [cl_table()]), or `NULL`.
+#' @param scale Numeric scalar to multiply the limits by: 100 to show a
+#'   fraction affected as a percent.
+#' @param big_mark,decimal_mark Character strings of the number marks.
+#' @return The model-averaged lower and upper limits in brackets, separated
+#'   by an en dash and preceded by a space, or `""` without a table.
+#' @keywords internal
+cl_limits_text <- function(table, scale = 1, big_mark = ",", decimal_mark = ".") {
+  if (is.null(table)) {
+    return("")
+  }
+  average <- table[table$dist == "average", ]
+  limits <- vapply(
+    c(average$lcl, average$ucl) * scale,
+    format,
+    "",
+    big.mark = big_mark,
+    decimal.mark = decimal_mark
+  )
+  sprintf(" (%s\u2013%s)", limits[[1]], limits[[2]])
+}
+
 #' Report confidence limits
 #'
 #' @param pred Model-averaged hazard concentrations with confidence limits,
