@@ -181,9 +181,6 @@ mod_fit_server <- function(
     output$has_data <- data_mod$has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
 
-    waiter_gof <- ui_waiter(id = "tableGof", ns = ns)
-    waiter_distplot <- ui_waiter(id = "plotDist", ns = ns)
-
     needs_update <- reactiveVal(FALSE)
 
     fit_trigger <- reactiveVal(0)
@@ -228,9 +225,6 @@ mod_fit_server <- function(
       req(input$selectConc)
       req(input$selectDist)
       req(iv$is_valid())
-
-      waiter_gof$show()
-      waiter_distplot$show()
 
       data <- data_mod$data()
       conc <- make.names(input$selectConc)
@@ -373,20 +367,9 @@ mod_fit_server <- function(
       gof
     })
 
-    # render plot and table - waiter stops when plot and table ready
-    render_status <- reactiveValues(plot_ready = FALSE, table_ready = FALSE)
-
-    observe({
-      render_status$plot_ready <- FALSE
-      render_status$table_ready <- FALSE
-    }) |>
-      bindEvent(fit_dist())
-
     output$plotDist <- renderPlot(
       {
-        result <- plot_dist()
-        render_status$plot_ready <- TRUE
-        result
+        plot_dist()
       },
       alt = reactive({
         switch(
@@ -416,17 +399,8 @@ mod_fit_server <- function(
 
       result <- dt_weight_color_bar(result, gof, trans)
 
-      render_status$table_ready <- TRUE
       result
     })
-
-    observe({
-      if (render_status$plot_ready && render_status$table_ready) {
-        waiter_distplot$hide()
-        waiter_gof$hide()
-      }
-    }) |>
-      bindEvent(render_status$plot_ready, render_status$table_ready)
 
     # Notify when failed fits
     fit_fail <- reactive({

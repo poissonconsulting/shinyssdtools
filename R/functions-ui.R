@@ -15,15 +15,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-#' Create a waiter loading screen
-#' @param id Character string output ID to attach waiter to
-#' @param ns Shiny namespace function
-#' @return A Waiter object configured for the namespaced output
-#' @keywords internal
-ui_waiter <- function(id, ns) {
-  waiter::Waiter$new(id = ns(id), html = waiter::spin_2(), color = "white")
-}
-
 #' Create static label with dynamic input pattern
 #' @param ns_id Character string namespaced input ID for label's 'for' attribute
 #' @param translate_key Character string translation key for data-translate attribute
@@ -415,4 +406,122 @@ dt_weight_color_bar <- function(dt, data, trans) {
     )
   }
   dt
+}
+
+#' Create a button in one of the app's variants
+#'
+#' Primary (filled) is the next step of the analysis, at most one per screen.
+#' Soft (tinted) is an optional step, such as Get CL. Outline is any other
+#' action: navigation, Cancel and downloads. Ghost (no border) is a small
+#' adjustment inside a panel. Each non-primary variant carries `btn-light`,
+#' which keeps Shiny's `btn-default` styles off the button.
+#' @param id Character string input ID.
+#' @param label Button label.
+#' @param icon Optional icon tag shown before the label.
+#' @param variant Character string: `"primary"`, `"soft"`, `"outline"` or
+#'   `"ghost"`.
+#' @param size Optional character string Bootstrap size: `"sm"` or `"lg"`.
+#' @param class Optional character string of extra classes.
+#' @param ... Further arguments passed to [shiny::actionButton()].
+#' @return An action button tag.
+#' @keywords internal
+button <- function(
+  id,
+  label,
+  icon = NULL,
+  variant = c("primary", "soft", "outline", "ghost"),
+  size = NULL,
+  class = NULL,
+  ...
+) {
+  variant <- match.arg(variant)
+  classes <- c(
+    switch(
+      variant,
+      primary = "btn-primary",
+      soft = "btn-light ssd-btn-soft",
+      outline = "btn-light border",
+      ghost = "btn-light"
+    ),
+    if (!is.null(size)) paste0("btn-", size),
+    class
+  )
+  actionButton(
+    id,
+    span(class = "d-inline-flex align-items-center gap-2", icon, label),
+    class = paste(classes, collapse = " "),
+    ...
+  )
+}
+
+#' Create a notice
+#' @param icon Icon tag.
+#' @param title Notice title.
+#' @param ... Optional body content.
+#' @param tone Character string: `"info"`, `"warning"`, `"danger"` or
+#'   `"muted"`.
+#' @param action Optional tag shown on the right, such as a button.
+#' @return A div with the notice; errors are announced at once by screen
+#'   readers (role alert), other notices when they are idle (role status).
+#' @keywords internal
+notice <- function(
+  icon,
+  title,
+  ...,
+  tone = c("info", "warning", "danger", "muted"),
+  action = NULL
+) {
+  tone <- match.arg(tone)
+  box <- switch(
+    tone,
+    muted = "bg-body-tertiary",
+    sprintf("bg-%s-subtle border-%s-subtle", tone, tone)
+  )
+  icon_class <- if (tone == "muted") "text-body-secondary" else paste0("text-", tone)
+  body <- Filter(Negate(is.null), list(...))
+  div(
+    role = if (tone == "danger") "alert" else "status",
+    class = paste("d-flex align-items-start gap-3 rounded-3 border p-3 my-2 small", box),
+    span(class = paste("ssd-notice-icon", icon_class), icon),
+    div(
+      class = "flex-grow-1 d-flex flex-column gap-1",
+      div(class = "fw-semibold", title),
+      if (length(body) > 0) div(class = "text-body-secondary", body)
+    ),
+    if (!is.null(action)) div(class = "flex-shrink-0", action)
+  )
+}
+
+#' Create a busy icon
+#' @return A small spinner, hidden from screen readers (the text beside it
+#'   says what is running).
+#' @keywords internal
+busy_icon <- function() {
+  span(class = "spinner-border spinner-border-sm text-primary", `aria-hidden` = "true")
+}
+
+#' Create an empty state
+#'
+#' Shown in place of a step that needs an earlier one: what is missing, and a
+#' button to go there.
+#' @param icon Icon tag.
+#' @param title Short title.
+#' @param description Optional longer description.
+#' @param action Optional button.
+#' @return A card with the empty state.
+#' @keywords internal
+empty_state <- function(icon, title, description = NULL, action = NULL) {
+  div(
+    class = "p-3",
+    card(
+      class = card_shadow,
+      card_body(
+        class = "d-flex flex-column align-items-center text-center gap-2 py-5",
+        div(class = "ssd-empty-icon bg-primary-subtle text-primary-emphasis", icon),
+        div(class = "fw-semibold mt-1", title),
+        if (!is.null(description)) div(class = "text-body-secondary ssd-measure", description),
+        if (!is.null(action)) div(class = "mt-2", action)
+      )
+    )
+  )
 }

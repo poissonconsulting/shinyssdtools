@@ -19,7 +19,9 @@ app_ui <- function() {
   tagList(
     # Dependencies
     shinyjs::useShinyjs(),
-    waiter::useWaiter(),
+    # Spinners on outputs while they recalculate; the pulse would flash at
+    # the top of the page on every input change.
+    useBusyIndicators(pulse = FALSE),
     rclipboard::rclipboardSetup(),
 
     # Include custom JavaScript for translations
