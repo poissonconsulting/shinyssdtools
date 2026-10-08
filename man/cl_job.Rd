@@ -4,7 +4,7 @@
 \alias{cl_job}
 \title{Compute bootstrap confidence limits}
 \usage{
-cl_job(fit, threshold_type, percent, conc, nboot)
+cl_job(fit, threshold_type, percent, conc, nboot, pred = NULL)
 }
 \arguments{
 \item{fit}{A \code{fitdists} object.}
@@ -18,6 +18,10 @@ concentration for \code{percent}) or \code{"Fraction"} (the fraction affected at
 \item{conc}{Numeric scalar concentration.}
 
 \item{nboot}{Integer scalar number of bootstrap samples.}
+
+\item{pred}{Model-averaged hazard concentrations with confidence limits at
+every whole percent and the threshold (see \code{\link[=model_average_cl]{model_average_cl()}}), or
+\code{NULL} to bootstrap them.}
 }
 \value{
 A list of \code{pred} (model-averaged hazard concentrations), \code{hc} (each
@@ -32,6 +36,8 @@ confidence limits table and the report), and the estimates of each
 distribution for the table: by percent, at the threshold and at
 \link{cl_percents}; by concentration, the fraction affected at \code{conc}, with its
 model average. The percents of one call share their bootstrap fits, so
-extra percents cost little.
+extra percents cost little. A model-averaged curve already bootstrapped
+with the same fit and number of samples (\code{pred}) is used rather than
+computed again.
 }
 \keyword{internal}

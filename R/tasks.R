@@ -108,7 +108,9 @@ cl_percents <- c(1, 5, 10, 20)
 #' distribution for the table: by percent, at the threshold and at
 #' [cl_percents]; by concentration, the fraction affected at `conc`, with its
 #' model average. The percents of one call share their bootstrap fits, so
-#' extra percents cost little.
+#' extra percents cost little. A model-averaged curve already bootstrapped
+#' with the same fit and number of samples (`pred`) is used rather than
+#' computed again.
 #'
 #' @param fit A `fitdists` object.
 #' @param threshold_type Character string: `"Concentration"` (a hazard
@@ -117,19 +119,16 @@ cl_percents <- c(1, 5, 10, 20)
 #' @param percent Numeric scalar percent of species affected.
 #' @param conc Numeric scalar concentration.
 #' @param nboot Integer scalar number of bootstrap samples.
+#' @param pred Model-averaged hazard concentrations with confidence limits at
+#'   every whole percent and the threshold (see [model_average_cl()]), or
+#'   `NULL` to bootstrap them.
 #' @return A list of `pred` (model-averaged hazard concentrations), `hc` (each
 #'   distribution's hazard concentrations, or `NULL`), `hp` (each
 #'   distribution's fraction affected and their model average, or `NULL`) and
 #'   `n_dists` (the number of distributions fitted).
 #' @keywords internal
-cl_job <- function(fit, threshold_type, percent, conc, nboot) {
-  loadNamespace("ssdtools")
-  pred <- stats::predict(
-    fit,
-    proportion = unique(c(1:99, percent)) / 100,
-    nboot = nboot,
-    ci = TRUE
-  )
+cl_job <- function(fit, threshold_type, percent, conc, nboot, pred = NULL) {
+  pred <- pred %||% model_average_cl(fit, percent, nboot)
   result <- list(pred = pred, hc = NULL, hp = NULL, n_dists = length(fit))
   if (threshold_type == "Concentration") {
     result$hc <- ssdtools::ssd_hc_bcanz(
@@ -155,6 +154,39 @@ cl_job <- function(fit, threshold_type, percent, conc, nboot) {
   }
   result$hp <- list(dists = hp(average = FALSE), average = if (length(fit) > 1) hp(average = TRUE))
   result
+}
+
+#' Bootstrap the model-averaged hazard concentrations
+#'
+#' The model-averaged curve with confidence limits at every whole percent and
+#' at `percent` (when it is not a whole percent): the plot's band, the
+#' model-averaged row of the confidence limits table and the report's hazard
+#' concentrations. Get CL and Get Report share it (see [has_percent()]).
+#'
+#' @param fit A `fitdists` object.
+#' @param percent Optional numeric scalar percent of species affected.
+#' @param nboot Integer scalar number of bootstrap samples.
+#' @return Model-averaged hazard concentrations, as from
+#'   [ssdtools::ssd_hc()].
+#' @keywords internal
+model_average_cl <- function(fit, percent = NULL, nboot) {
+  loadNamespace("ssdtools")
+  stats::predict(
+    fit,
+    proportion = unique(c(1:99, percent)) / 100,
+    nboot = nboot,
+    ci = TRUE
+  )
+}
+
+#' Whether predictions include a percent affected
+#'
+#' @param pred Model-averaged hazard concentrations.
+#' @param percent Numeric scalar percent of species affected.
+#' @return A flag.
+#' @keywords internal
+has_percent <- function(pred, percent) {
+  !is.null(percent) && any(abs(pred$proportion - percent / 100) < 1e-9)
 }
 
 #' Confidence limits table
@@ -232,31 +264,30 @@ report_cl <- function(pred) {
 
 #' Compute the report
 #'
-#' Bootstraps the report's hazard concentrations, unless they are given from
-#' confidence limits already computed with the same fit and number of
-#' bootstrap samples, and renders the HTML report.
+#' Renders the HTML report, with the hazard concentrations from the
+#' model-averaged curve `pred`, bootstrapping the curve first when it is not
+#' given.
 #'
 #' @param fit A `fitdists` object.
 #' @param nboot Integer scalar number of bootstrap samples.
-#' @param pred_cl The report's hazard concentrations (from [report_cl()]), or
-#'   `NULL` to bootstrap them.
+#' @param pred Model-averaged hazard concentrations with confidence limits at
+#'   every whole percent (from [model_average_cl()]), or `NULL` to bootstrap
+#'   them.
 #' @param params Named list of report parameters other than `pred_cl`.
 #' @param template Character string file name of the report template.
-#' @return A list of `pred_cl` and `html` (the rendered report as one string).
+#' @return A list of `pred` (the model-averaged curve), `pred_cl` (the
+#'   report's hazard concentrations) and `html` (the rendered report as one
+#'   string).
 #' @keywords internal
-report_job <- function(fit, nboot, pred_cl, params, template) {
-  if (is.null(pred_cl)) {
-    pred_cl <- report_cl(ssdtools::ssd_hc_bcanz(
-      fit,
-      proportion = c(0.01, 0.05, 0.1, 0.2),
-      ci = TRUE,
-      nboot = nboot,
-      min_pboot = 0.8
-    ))
-  }
-  params$pred_cl <- pred_cl
+report_job <- function(fit, nboot, pred, params, template) {
+  pred <- pred %||% model_average_cl(fit, nboot = nboot)
+  params$pred_cl <- report_cl(pred)
   html <- tempfile(fileext = ".html")
   on.exit(unlink(html), add = TRUE)
   render_report(template, params, output_format = "html_document", output_file = html)
-  list(pred_cl = pred_cl, html = paste(readLines(html, warn = FALSE), collapse = "\n"))
+  list(
+    pred = pred,
+    pred_cl = params$pred_cl,
+    html = paste(readLines(html, warn = FALSE), collapse = "\n")
+  )
 }

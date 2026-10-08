@@ -208,24 +208,24 @@ mod_report_server <- function(
       )
     })
 
-    # Get Report bootstraps and renders on a mirai daemon (task_runner()). The
-    # confidence limits of the Predict step are reused when they were computed
-    # from the same fit with the same number of bootstrap samples.
+    # Get Report renders on a mirai daemon (task_runner()), bootstrapping the
+    # model-averaged curve first unless Get CL or an earlier report computed
+    # it with the same fit and number of samples (predict_mod$curve_lookup()).
     report_runner <- task_runner()
+    report_request <- reactiveVal(NULL)
     report_result <- reactiveVal(NULL)
 
     observe({
       fit <- fit_mod$fit_dist()
       req(fit)
       nboot <- clean_nboot(input$bootSamp)
-      cl <- predict_mod$current_cl()
-      reuse <- !is.null(cl) && identical(cl$nboot, nboot)
+      report_request(list(fit = fit, nboot = nboot))
       report_runner$invoke(
         report_job,
         list(
           fit = fit,
           nboot = nboot,
-          pred_cl = if (reuse) report_cl(cl$pred),
+          pred = predict_mod$curve_lookup(fit, nboot),
           params = params_list(),
           template = tr("ui_bcanz_file", translations())
         )
@@ -250,6 +250,8 @@ mod_report_server <- function(
         )
         return()
       }
+      request <- report_request()
+      predict_mod$curve_store(request$fit, request$nboot, done$value$pred)
       report_result(done$value)
     }) |>
       bindEvent(report_runner$done())

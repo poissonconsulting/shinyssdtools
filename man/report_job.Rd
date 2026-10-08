@@ -4,26 +4,29 @@
 \alias{report_job}
 \title{Compute the report}
 \usage{
-report_job(fit, nboot, pred_cl, params, template)
+report_job(fit, nboot, pred, params, template)
 }
 \arguments{
 \item{fit}{A \code{fitdists} object.}
 
 \item{nboot}{Integer scalar number of bootstrap samples.}
 
-\item{pred_cl}{The report's hazard concentrations (from \code{\link[=report_cl]{report_cl()}}), or
-\code{NULL} to bootstrap them.}
+\item{pred}{Model-averaged hazard concentrations with confidence limits at
+every whole percent (from \code{\link[=model_average_cl]{model_average_cl()}}), or \code{NULL} to bootstrap
+them.}
 
 \item{params}{Named list of report parameters other than \code{pred_cl}.}
 
 \item{template}{Character string file name of the report template.}
 }
 \value{
-A list of \code{pred_cl} and \code{html} (the rendered report as one string).
+A list of \code{pred} (the model-averaged curve), \code{pred_cl} (the
+report's hazard concentrations) and \code{html} (the rendered report as one
+string).
 }
 \description{
-Bootstraps the report's hazard concentrations, unless they are given from
-confidence limits already computed with the same fit and number of
-bootstrap samples, and renders the HTML report.
+Renders the HTML report, with the hazard concentrations from the
+model-averaged curve \code{pred}, bootstrapping the curve first when it is not
+given.
 }
 \keyword{internal}

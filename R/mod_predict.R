@@ -825,6 +825,27 @@ mod_predict_server <- function(
     # percent (the plot's band and the report) and the table at the threshold
     # and at 1, 5, 10 and 20% affected (cl_job()). A threshold change shows
     # whichever of these still apply; a new fit discards them all.
+    #
+    # The model-averaged curve is cached by fit and number of samples and
+    # shared with the report, so neither Get CL nor Get Report bootstraps one
+    # the other has computed. Only the current fit's curves are kept.
+    curves <- list()
+    curve_lookup <- function(fit, nboot, percent = NULL) {
+      for (curve in curves) {
+        if (identical(curve$fit, fit) && identical(curve$nboot, nboot) &&
+          (is.null(percent) || has_percent(curve$pred, percent))) {
+          return(curve$pred)
+        }
+      }
+      NULL
+    }
+    curve_store <- function(fit, nboot, pred) {
+      kept <- Filter(function(curve) {
+        identical(curve$fit, fit) && !identical(curve$nboot, nboot)
+      }, curves)
+      curves <<- c(kept, list(list(fit = fit, nboot = nboot, pred = pred)))
+    }
+
     cl_runner <- task_runner()
     cl_request <- reactiveVal(NULL)
     cl_result <- reactiveVal(NULL)
@@ -839,6 +860,7 @@ mod_predict_server <- function(
         nboot = clean_nboot(input$bootSamp)
       )
       cl_request(request)
+      request$pred <- curve_lookup(request$fit, request$nboot, request$percent)
       cl_runner$invoke(cl_job, request)
     }) |>
       bindEvent(input$getCl)
@@ -861,6 +883,7 @@ mod_predict_server <- function(
         return()
       }
       request <- cl_request()
+      curve_store(request$fit, request$nboot, done$value$pred)
       cl_result(c(
         done$value,
         list(fit = request$fit, nboot = request$nboot, conc = request$conc)
@@ -878,7 +901,7 @@ mod_predict_server <- function(
     # is for a hazard concentration, as the threshold is a whole percent).
     cl_band <- reactive({
       cl <- current_cl()
-      if (!is.null(cl) && any(abs(cl$pred$proportion - thresh_rv$percent / 100) < 1e-9)) {
+      if (!is.null(cl) && has_percent(cl$pred, thresh_rv$percent)) {
         cl$pred
       }
     })
@@ -1251,7 +1274,8 @@ mod_predict_server <- function(
         cl_running = cl_runner$running,
         cl_requested = cl_requested,
         cl_nboot = cl_nboot,
-        current_cl = current_cl,
+        curve_lookup = curve_lookup,
+        curve_store = curve_store,
         has_cl = has_cl,
         has_predict = has_predict,
         width = reactive({
