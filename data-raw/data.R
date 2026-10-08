@@ -870,6 +870,18 @@ translations <- dplyr::bind_rows(
     spanish = "Calculando los l\u00edmites de confianza"
   ),
   dplyr::tibble(
+    id = "ui_cl_stale",
+    english = "The confidence limits are out of date",
+    french = "Les limites de confiance ne sont plus \u00e0 jour",
+    spanish = "Los l\u00edmites de confianza est\u00e1n desactualizados"
+  ),
+  dplyr::tibble(
+    id = "ui_cl_stale2",
+    english = "The fit or threshold has changed. Get CL again to update them.",
+    french = "L'ajustement ou le seuil a chang\u00e9. Recalculez les LC pour les mettre \u00e0 jour.",
+    spanish = "El ajuste o el umbral ha cambiado. Obtenga los LC de nuevo para actualizarlos."
+  ),
+  dplyr::tibble(
     id = "ui_cl_failed",
     english = "The confidence limits could not be computed",
     french = "Les limites de confiance n'ont pas pu \u00eatre calcul\u00e9es",
