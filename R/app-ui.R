@@ -75,9 +75,9 @@ language_menu <- function() {
     ),
     align = "right",
     nav_item(actionLink(inputId = "english", label = "English", class = "dropdown-item")),
-    nav_item(actionLink(inputId = "french", label = "Français", class = "dropdown-item"))
+    nav_item(actionLink(inputId = "french", label = "Fran\u00e7ais", class = "dropdown-item"))
     # Spanish disabled
-    # nav_item(actionLink(inputId = "spanish", label = "Español", class = "dropdown-item"))
+    # nav_item(actionLink(inputId = "spanish", label = "Espa\u00f1ol", class = "dropdown-item"))
   )
 }
 
@@ -125,12 +125,13 @@ app_ui <- function() {
     ),
     language_menu(),
     footer = div(
-      class = "border-top text-center small text-body-secondary py-4 mt-4",
+      class = "border-top small text-body-secondary py-4 mt-4 d-flex flex-column align-items-center gap-2",
       sprintf(
-        "shinyssdtools v%s · ssdtools v%s",
+        "shinyssdtools v%s \u00b7 ssdtools v%s",
         utils::packageVersion("shinyssdtools"),
         utils::packageVersion("ssdtools")
-      )
+      ),
+      theme_picker()
     )
   )
 }
@@ -155,6 +156,30 @@ help_ui <- function() {
     widths = c(3, 9),
     page("guide", "book-open", "ui_navguide", "User Guide", "ui_userguide"),
     page("about", "info", "ui_navabout", "About", "ui_about")
+  )
+}
+
+# A trial of colour palettes: a small radio group in the footer that switches
+# the theme while the app runs (app_server()).
+theme_picker <- function() {
+  choice <- function(name) {
+    span(
+      class = "d-inline-flex align-items-center gap-1",
+      span(class = "ssd-swatch", style = sprintf("background: %s", app_palettes[[name]]$primary)),
+      app_palettes[[name]]$label
+    )
+  }
+  div(
+    class = "ssd-theme-picker d-flex align-items-center gap-2",
+    span("Theme"),
+    radioButtons(
+      "theme",
+      label = NULL,
+      choiceNames = lapply(names(app_palettes), choice),
+      choiceValues = names(app_palettes),
+      selected = "indigo",
+      inline = TRUE
+    )
   )
 }
 

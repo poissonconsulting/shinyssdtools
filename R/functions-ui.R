@@ -112,27 +112,27 @@ table_lang <- function(lang = "english") {
     lang,
     "french" = reactable::reactableLang(
       searchPlaceholder = "Rechercher",
-      noData = "Aucune donnée",
-      pageInfo = "{rowStart} à {rowEnd} sur {rows} lignes",
-      pagePrevious = "‹",
-      pageNext = "›",
-      pagePreviousLabel = "Page précédente",
+      noData = "Aucune donn\u00e9e",
+      pageInfo = "{rowStart} \u00e0 {rowEnd} sur {rows} lignes",
+      pagePrevious = "\u2039",
+      pageNext = "\u203a",
+      pagePreviousLabel = "Page pr\u00e9c\u00e9dente",
       pageNextLabel = "Page suivante"
     ),
     "spanish" = reactable::reactableLang(
       searchPlaceholder = "Buscar",
       noData = "No hay datos",
       pageInfo = "{rowStart} a {rowEnd} de {rows} filas",
-      pagePrevious = "‹",
-      pageNext = "›",
-      pagePreviousLabel = "Página anterior",
-      pageNextLabel = "Página siguiente"
+      pagePrevious = "\u2039",
+      pageNext = "\u203a",
+      pagePreviousLabel = "P\u00e1gina anterior",
+      pageNextLabel = "P\u00e1gina siguiente"
     ),
     reactable::reactableLang(
       searchPlaceholder = "Search",
       pageInfo = "{rowStart} to {rowEnd} of {rows} rows",
-      pagePrevious = "‹",
-      pageNext = "›",
+      pagePrevious = "\u2039",
+      pageNext = "\u203a",
       pagePreviousLabel = "Previous page",
       pageNextLabel = "Next page"
     )

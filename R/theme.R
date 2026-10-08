@@ -15,37 +15,48 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# The app's theme: a slate and indigo palette expressed as Bootstrap Sass
-# variables. Everything else reads colours from var(--bs-*) rather than from
-# this palette; custom CSS (inst/app/www/style.css) styles only the app's own
-# ssd-* classes.
+# The app's theme: one of several palettes (app_palettes), each a neutral
+# family for the page and an accent for primary actions, expressed as
+# Bootstrap Sass variables. Everything else reads colours from var(--bs-*)
+# rather than from a palette; custom CSS (inst/app/www/style.css) styles only
+# the app's own ssd-* classes.
 #
-# Indigo is Bootstrap's primary: primary and soft buttons, links, the active
-# tab and checked inputs. Every text and border pair below meets WCAG 2.1 AA
-# contrast (input borders 3:1, text 4.5:1).
+# Every text and border pair meets WCAG 2.1 AA contrast (input borders 3:1,
+# text 4.5:1, white text on the primary 4.5:1).
 
-app_palette <- list(
-  bg = "#f8fafc", fg = "#0f172a", card = "#ffffff",
-  primary = "#4f46e5", muted = "#f1f5f9", muted_fg = "#64748b",
-  accent = "#eef2ff", accent_fg = "#3730a3", accent_border = "#c7d2fe",
-  secondary_fg = "#334155",
-  info = "#0369a1", info_bg = "#e0f2fe", info_border = "#bae6fd", info_fg = "#075985",
-  border = "#e2e8f0", input = "#8291a6", ring = "#6366f1", ring_rgb = "99, 102, 241",
-  navbar_bg = "#0f172a", navbar_fg = "rgba(255, 255, 255, 0.72)", navbar_hover = "#ffffff",
-  navbar_active = "#ffffff", navbar_brand = "#ffffff"
+neutrals <- list(
+  slate = list(bg = "#f8fafc", fg = "#0f172a", muted = "#f1f5f9", muted_fg = "#64748b", border = "#e2e8f0", input = "#8291a6", secondary_fg = "#334155"),
+  zinc = list(bg = "#fafafa", fg = "#18181b", muted = "#f4f4f5", muted_fg = "#71717a", border = "#e4e4e7", input = "#85858f", secondary_fg = "#3f3f46"),
+  stone = list(bg = "#fafaf9", fg = "#1c1917", muted = "#f5f5f4", muted_fg = "#78716c", border = "#e7e5e4", input = "#8a827a", secondary_fg = "#44403c")
+)
+
+accent <- function(primary, subtle, border, emphasis, ring_rgb) {
+  list(primary = primary, accent = subtle, accent_border = border, accent_fg = emphasis, ring_rgb = ring_rgb)
+}
+
+app_palettes <- list(
+  indigo = c(neutrals$slate, accent("#4f46e5", "#eef2ff", "#c7d2fe", "#3730a3", "99, 102, 241"), list(label = "Indigo", navbar_bg = "#0f172a")),
+  ocean = c(neutrals$slate, accent("#0f766e", "#f0fdfa", "#99f6e4", "#115e59", "20, 184, 166"), list(label = "Ocean", navbar_bg = "#0b1f2a")),
+  graphite = c(neutrals$zinc, accent("#0969da", "#ddf4ff", "#b6e3ff", "#0550ae", "84, 174, 255"), list(label = "Graphite", navbar_bg = "#18181b")),
+  forest = c(neutrals$stone, accent("#15803d", "#f0fdf4", "#bbf7d0", "#166534", "34, 197, 94"), list(label = "Forest", navbar_bg = "#1a2e22")),
+  ember = c(neutrals$stone, accent("#c2410c", "#fff7ed", "#fed7aa", "#9a3412", "249, 115, 22"), list(label = "Ember", navbar_bg = "#1c1917")),
+  violet = c(neutrals$zinc, accent("#7c3aed", "#f5f3ff", "#ddd6fe", "#5b21b6", "139, 92, 246"), list(label = "Violet", navbar_bg = "#1e1b2e"))
 )
 
 app_status_colours <- list(
   success = "#047857", success_muted = "#d1fae5",
   warning = "#b45309", warning_fg = "#92400e", warning_muted = "#fef3c7", warning_border = "#fde68a",
+  info = "#0369a1", info_bg = "#e0f2fe", info_border = "#bae6fd", info_fg = "#075985",
   danger = "#dc2626"
 )
 
-# Used by the shinyhelper help icons.
-color_primary <- app_palette$primary
+# The shinyhelper help icons take the theme's primary colour.
+color_primary <- "var(--bs-primary)"
 
-app_theme <- function() {
-  col <- c(app_palette, app_status_colours)
+app_theme <- function(palette = "indigo") {
+  col <- c(app_palettes[[palette]], app_status_colours)
+  col$card <- "#ffffff"
+  col$ring <- sprintf("rgb(%s)", col$ring_rgb)
   bs_theme(
     version = 5,
     bg = col$bg,
@@ -113,11 +124,11 @@ app_theme <- function() {
     # so equal top padding keeps their labels on the navbar's centre line.
     "navbar-padding-y" = "0.75rem",
     "nav-link-padding-y" = "0.75rem",
-    "navbar-light-color" = col$navbar_fg,
-    "navbar-light-hover-color" = col$navbar_hover,
-    "navbar-light-active-color" = col$navbar_active,
-    "navbar-light-brand-color" = col$navbar_brand,
-    "navbar-light-brand-hover-color" = col$navbar_brand,
+    "navbar-light-color" = "rgba(255, 255, 255, 0.72)",
+    "navbar-light-hover-color" = "#ffffff",
+    "navbar-light-active-color" = "#ffffff",
+    "navbar-light-brand-color" = "#ffffff",
+    "navbar-light-brand-hover-color" = "#ffffff",
     "nav-link-font-weight" = 500,
     "nav-link-color" = col$fg,
     "nav-link-hover-color" = col$fg,
