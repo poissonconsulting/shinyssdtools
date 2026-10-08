@@ -10,7 +10,7 @@ cl_job(fit, threshold_type, percent, conc, nboot)
 \item{fit}{A \code{fitdists} object.}
 
 \item{threshold_type}{Character string: \code{"Concentration"} (a hazard
-concentration for \code{percent}) or \code{"Fraction"} (the percent affected at
+concentration for \code{percent}) or \code{"Fraction"} (the fraction affected at
 \code{conc}).}
 
 \item{percent}{Numeric scalar percent of species affected.}
@@ -20,15 +20,18 @@ concentration for \code{percent}) or \code{"Fraction"} (the percent affected at
 \item{nboot}{Integer scalar number of bootstrap samples.}
 }
 \value{
-A list of \code{pred} (model-averaged predictions), \code{dists} (the
-threshold estimate of each distribution) and \code{average} (the model-averaged
-threshold estimate by concentration, otherwise \code{NULL}).
+A list of \code{pred} (model-averaged hazard concentrations), \code{hc} (each
+distribution's hazard concentrations, or \code{NULL}), \code{hp} (each
+distribution's fraction affected and their model average, or \code{NULL}) and
+\code{n_dists} (the number of distributions fitted).
 }
 \description{
-Bootstraps the model-averaged predictions at \code{proportion} (for the plot and
-the report) and the estimates of each distribution at the threshold (for
-the confidence limits table). A model-averaged hazard concentration is one
-of the predictions, which share their bootstrap samples; a model-averaged
-fraction affected is bootstrapped separately.
+Bootstraps the model-averaged hazard concentrations at every whole percent
+and the threshold (for the plot's band, the model-averaged row of the
+confidence limits table and the report), and the estimates of each
+distribution for the table: by percent, at the threshold and at
+\link{cl_percents}; by concentration, the fraction affected at \code{conc}, with its
+model average. The percents of one call share their bootstrap fits, so
+extra percents cost little.
 }
 \keyword{internal}

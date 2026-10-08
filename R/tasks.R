@@ -95,24 +95,32 @@ task_runner <- function(background = mirai::daemons_set()) {
   )
 }
 
+# The percents affected whose confidence limits Get CL always computes: the
+# BCANZ hazard concentrations. Together they cost little more than the
+# threshold alone, as every percent is computed from the same bootstrap fits.
+cl_percents <- c(1, 5, 10, 20)
+
 #' Compute bootstrap confidence limits
 #'
-#' Bootstraps the model-averaged predictions at `proportion` (for the plot and
-#' the report) and the estimates of each distribution at the threshold (for
-#' the confidence limits table). A model-averaged hazard concentration is one
-#' of the predictions, which share their bootstrap samples; a model-averaged
-#' fraction affected is bootstrapped separately.
+#' Bootstraps the model-averaged hazard concentrations at every whole percent
+#' and the threshold (for the plot's band, the model-averaged row of the
+#' confidence limits table and the report), and the estimates of each
+#' distribution for the table: by percent, at the threshold and at
+#' [cl_percents]; by concentration, the fraction affected at `conc`, with its
+#' model average. The percents of one call share their bootstrap fits, so
+#' extra percents cost little.
 #'
 #' @param fit A `fitdists` object.
 #' @param threshold_type Character string: `"Concentration"` (a hazard
-#'   concentration for `percent`) or `"Fraction"` (the percent affected at
+#'   concentration for `percent`) or `"Fraction"` (the fraction affected at
 #'   `conc`).
 #' @param percent Numeric scalar percent of species affected.
 #' @param conc Numeric scalar concentration.
 #' @param nboot Integer scalar number of bootstrap samples.
-#' @return A list of `pred` (model-averaged predictions), `dists` (the
-#'   threshold estimate of each distribution) and `average` (the model-averaged
-#'   threshold estimate by concentration, otherwise `NULL`).
+#' @return A list of `pred` (model-averaged hazard concentrations), `hc` (each
+#'   distribution's hazard concentrations, or `NULL`), `hp` (each
+#'   distribution's fraction affected and their model average, or `NULL`) and
+#'   `n_dists` (the number of distributions fitted).
 #' @keywords internal
 cl_job <- function(fit, threshold_type, percent, conc, nboot) {
   loadNamespace("ssdtools")
@@ -122,50 +130,61 @@ cl_job <- function(fit, threshold_type, percent, conc, nboot) {
     nboot = nboot,
     ci = TRUE
   )
+  result <- list(pred = pred, hc = NULL, hp = NULL, n_dists = length(fit))
   if (threshold_type == "Concentration") {
-    dists <- ssdtools::ssd_hc_bcanz(
+    result$hc <- ssdtools::ssd_hc_bcanz(
       fit,
-      proportion = percent / 100,
+      proportion = sort(unique(c(cl_percents, percent))) / 100,
       ci = TRUE,
       average = FALSE,
       nboot = nboot,
       min_pboot = 0.8
     )
-    average <- NULL
-  } else {
-    hp <- function(average) {
-      ssdtools::ssd_hp_bcanz(
-        fit,
-        conc = conc,
-        ci = TRUE,
-        average = average,
-        nboot = nboot,
-        min_pboot = 0.8,
-        proportion = TRUE
-      )
-    }
-    dists <- hp(average = FALSE)
-    average <- if (length(fit) > 1) hp(average = TRUE)
+    return(result)
   }
-  list(pred = pred, dists = dists, average = average)
+  hp <- function(average) {
+    ssdtools::ssd_hp_bcanz(
+      fit,
+      conc = conc,
+      ci = TRUE,
+      average = average,
+      nboot = nboot,
+      min_pboot = 0.8,
+      proportion = TRUE
+    )
+  }
+  result$hp <- list(dists = hp(average = FALSE), average = if (length(fit) > 1) hp(average = TRUE))
+  result
 }
 
 #' Confidence limits table
 #'
-#' @param result The list returned by [cl_job()].
-#' @param fit The `fitdists` object `result` was computed from.
-#' @param threshold_type,percent As for [cl_job()].
+#' @param cl Confidence limits: the list returned by [cl_job()].
+#' @param threshold_type,percent,conc The current threshold, as for [cl_job()].
 #' @return A tibble of the model-averaged threshold estimate and that of each
-#'   distribution, by descending weight.
+#'   distribution, by descending weight, or `NULL` when `cl` does not cover
+#'   the threshold.
 #' @keywords internal
-cl_table <- function(result, fit, threshold_type, percent) {
-  dists <- result$dists
-  average <- if (length(fit) == 1) {
-    dplyr::mutate(dists, dist = "average")
-  } else if (threshold_type == "Concentration") {
-    result$pred[abs(result$pred$proportion - percent / 100) < 1e-9, ]
+cl_table <- function(cl, threshold_type, percent, conc) {
+  if (threshold_type == "Concentration") {
+    if (is.null(cl$hc) || is.null(percent)) {
+      return(NULL)
+    }
+    at_percent <- function(x) x[abs(x$proportion - percent / 100) < 1e-9, ]
+    dists <- at_percent(cl$hc)
+    average <- at_percent(cl$pred)
   } else {
-    result$average
+    if (is.null(cl$hp) || !identical(cl$conc, conc)) {
+      return(NULL)
+    }
+    dists <- cl$hp$dists
+    average <- cl$hp$average
+  }
+  if (nrow(dists) == 0) {
+    return(NULL)
+  }
+  if (cl$n_dists == 1) {
+    average <- dplyr::mutate(dists, dist = "average")
   }
   dplyr::bind_rows(average, dists) |>
     dplyr::select(-dplyr::any_of(c("dists", "samples"))) |>

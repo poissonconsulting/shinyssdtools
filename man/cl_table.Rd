@@ -4,18 +4,17 @@
 \alias{cl_table}
 \title{Confidence limits table}
 \usage{
-cl_table(result, fit, threshold_type, percent)
+cl_table(cl, threshold_type, percent, conc)
 }
 \arguments{
-\item{result}{The list returned by \code{\link[=cl_job]{cl_job()}}.}
+\item{cl}{Confidence limits: the list returned by \code{\link[=cl_job]{cl_job()}}.}
 
-\item{fit}{The \code{fitdists} object \code{result} was computed from.}
-
-\item{threshold_type, percent}{As for \code{\link[=cl_job]{cl_job()}}.}
+\item{threshold_type, percent, conc}{The current threshold, as for \code{\link[=cl_job]{cl_job()}}.}
 }
 \value{
 A tibble of the model-averaged threshold estimate and that of each
-distribution, by descending weight.
+distribution, by descending weight, or \code{NULL} when \code{cl} does not cover
+the threshold.
 }
 \description{
 Confidence limits table

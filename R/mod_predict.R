@@ -806,8 +806,10 @@ mod_predict_server <- function(
 
     # confidence limits -------------------------------------------------------
     # Get CL bootstraps on a mirai daemon (task_runner()), so the app stays
-    # responsive. The limits apply to the fit and threshold they were computed
-    # for; once either changes they are out of date and leave the plot.
+    # responsive. One run covers the model-averaged curve at every whole
+    # percent (the plot's band and the report) and the table at the threshold
+    # and at 1, 5, 10 and 20% affected (cl_job()). A threshold change shows
+    # whichever of these still apply; a new fit discards them all.
     cl_runner <- task_runner()
     cl_request <- reactiveVal(NULL)
     cl_result <- reactiveVal(NULL)
@@ -831,7 +833,6 @@ mod_predict_server <- function(
 
     observe({
       done <- cl_runner$done()
-      request <- cl_request()
       if (!is.null(done$error)) {
         showNotification(
           div(
@@ -844,35 +845,44 @@ mod_predict_server <- function(
         )
         return()
       }
+      request <- cl_request()
       cl_result(c(
-        request,
-        list(
-          pred = done$value$pred,
-          table = cl_table(done$value, request$fit, request$threshold_type, request$percent)
-        )
+        done$value,
+        list(fit = request$fit, nboot = request$nboot, conc = request$conc)
       ))
     }) |>
       bindEvent(cl_runner$done())
 
-    # The confidence limits while they apply to the current fit and threshold.
+    # The confidence limits of the current fit.
     current_cl <- reactive({
       cl <- cl_result()
-      if (is.null(cl)) {
-        return(NULL)
-      }
-      current <- identical(cl$fit, fit_mod$fit_dist()) &&
-        identical(cl$threshold_type, input$threshType) &&
-        identical(cl$percent, thresh_rv$percent) &&
-        identical(cl$conc, thresh_rv$conc)
-      if (current) cl
+      if (!is.null(cl) && identical(cl$fit, fit_mod$fit_dist())) cl
     })
 
-    cl_requested <- reactive(!is.null(current_cl()))
+    # The plot's band, while the threshold is one of its percents (it always
+    # is for a hazard concentration, as the threshold is a whole percent).
+    cl_band <- reactive({
+      cl <- current_cl()
+      if (!is.null(cl) && any(abs(cl$pred$proportion - thresh_rv$percent / 100) < 1e-9)) {
+        cl$pred
+      }
+    })
+
+    # The table at the current threshold, or NULL when it needs Get CL again.
+    cl_table_current <- reactive({
+      cl <- current_cl()
+      req(input$threshType)
+      if (!is.null(cl)) {
+        cl_table(cl, input$threshType, thresh_rv$percent, thresh_rv$conc)
+      }
+    })
+
+    cl_requested <- reactive(!is.null(cl_band()))
     cl_nboot <- reactive(current_cl()$nboot)
 
     output$cl_running <- reactive(cl_runner$running())
     outputOptions(output, "cl_running", suspendWhenHidden = FALSE)
-    output$cl_stale <- reactive(!is.null(cl_result()) && is.null(current_cl()))
+    output$cl_stale <- reactive(!is.null(cl_result()) && is.null(cl_table_current()))
     outputOptions(output, "cl_stale", suspendWhenHidden = FALSE)
 
     observe({
@@ -880,7 +890,7 @@ mod_predict_server <- function(
         predict_trigger(isolate(predict_trigger()) + 1)
       }
     }) |>
-      bindEvent(current_cl(), input$includeCi, ignoreInit = TRUE)
+      bindEvent(cl_band(), input$includeCi, ignoreInit = TRUE, ignoreNULL = FALSE)
 
     # Without current confidence limits, the predictions are the estimates
     # alone, which need no bootstrap.
@@ -892,9 +902,9 @@ mod_predict_server <- function(
       req(fit)
       req(thresh_rv$percent)
 
-      cl <- current_cl()
-      if (isTRUE(input$includeCi) && !is.null(cl)) {
-        return(cl$pred)
+      band <- cl_band()
+      if (isTRUE(input$includeCi) && !is.null(band)) {
+        return(band)
       }
       stats::predict(fit, proportion = unique(c(1:99, thresh_rv$percent)) / 100)
     }) |>
@@ -1047,7 +1057,7 @@ mod_predict_server <- function(
     })
 
     table_cl <- reactive({
-      req(current_cl())$table
+      req(cl_table_current())
     })
 
     describe_cl <- reactive({
@@ -1098,7 +1108,7 @@ mod_predict_server <- function(
     output$has_predict <- has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
 
-    has_cl <- reactive(!is.null(current_cl()))
+    has_cl <- reactive(!is.null(cl_table_current()))
 
     output$has_cl <- has_cl
     outputOptions(output, "has_cl", suspendWhenHidden = FALSE)
