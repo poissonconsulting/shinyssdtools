@@ -390,3 +390,36 @@ format_r_code <- function(code_lines) {
 
   formatted_text
 }
+
+#' Render the BCANZ report
+#'
+#' Renders the report template in its own temporary directory, so concurrent
+#' sessions in one R process do not share intermediate files.
+#'
+#' @param template Character string file name of the report template in
+#'   `inst/extdata`.
+#' @param params Named list of report parameters.
+#' @param output_format Character string rmarkdown output format.
+#' @param output_file Character string path of the rendered file.
+#' @return The path of the rendered file, invisibly.
+#' @keywords internal
+render_report <- function(template, params, output_format, output_file) {
+  dir <- tempfile("report-")
+  dir.create(dir)
+  on.exit(unlink(dir, recursive = TRUE), add = TRUE)
+  path <- file.path(dir, template)
+  file.copy(system.file("extdata", template, package = "shinyssdtools"), path)
+
+  render_env <- new.env(parent = globalenv())
+  assign("params", params, envir = render_env)
+  suppressMessages(rmarkdown::render(
+    path,
+    output_format = output_format,
+    output_file = output_file,
+    params = params,
+    envir = render_env,
+    encoding = "utf-8",
+    quiet = TRUE
+  ))
+  invisible(output_file)
+}

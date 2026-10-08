@@ -232,33 +232,12 @@ mod_report_server <- function(
 
       on.exit(waiter::waiter_hide(), add = TRUE)
 
-      trans <- translations()
-      temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans))
-      file.copy(
-        system.file(
-          package = "shinyssdtools",
-          file.path("extdata", tr("ui_bcanz_file", trans))
-        ),
-        temp_report
-      )
-
       temp_html <- tempfile(fileext = ".html")
-      params <- params_list()
-
-      # Create render environment and explicitly assign params
-      render_env <- new.env(parent = globalenv())
-      assign("params", params, envir = render_env)
-
-      suppressMessages(
-        rmarkdown::render(
-          temp_report,
-          output_format = "html_document",
-          output_file = temp_html,
-          params = params,
-          envir = render_env,
-          encoding = "utf-8",
-          quiet = TRUE
-        )
+      render_report(
+        tr("ui_bcanz_file", translations()),
+        params_list(),
+        output_format = "html_document",
+        output_file = temp_html
       )
 
       html_content <- readLines(temp_html, warn = FALSE)
@@ -307,26 +286,11 @@ mod_report_server <- function(
         paste0(tr("ui_bcanz_filename", trans), ".pdf")
       },
       content = function(file) {
-        trans <- translations()
-        temp_report <- file.path(tempdir(), tr("ui_bcanz_file", trans))
-        file.copy(
-          system.file(
-            package = "shinyssdtools",
-            file.path("extdata", tr("ui_bcanz_file", trans))
-          ),
-          temp_report
-        )
-        params <- params_list()
-        render_env <- new.env(parent = globalenv())
-        assign("params", params, envir = render_env)
-
-        rmarkdown::render(
-          temp_report,
+        render_report(
+          tr("ui_bcanz_file", translations()),
+          params_list(),
           output_format = "pdf_document",
-          output_file = file,
-          params = params,
-          envir = render_env,
-          encoding = "utf-8"
+          output_file = file
         )
       }
     )

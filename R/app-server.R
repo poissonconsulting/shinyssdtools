@@ -16,21 +16,11 @@
 #    limitations under the License.
 app_server <- function(input, output, session) {
   # --- Translations
-  current_lang <- reactive({
-    # Determine which language was clicked most recently
-    clicks <- c(
-      english = input$english %||% 0,
-      french = input$french %||% 0,
-      spanish = input$spanish %||% 0
-    )
-
-    # Return the language with the highest click count
-    # Default to english if all are 0
-    if (all(clicks == 0)) {
-      return("english")
-    }
-    names(which.max(clicks))
-  })
+  # The language last chosen in the Language menu.
+  current_lang <- reactiveVal("english")
+  observe(current_lang("english")) |> bindEvent(input$english)
+  observe(current_lang("french")) |> bindEvent(input$french)
+  observe(current_lang("spanish")) |> bindEvent(input$spanish)
 
   # Set up shinyhelper with language-specific help files
   observe({
