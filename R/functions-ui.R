@@ -143,7 +143,9 @@ table_lang <- function(lang = "english") {
 #'
 #' A reactable with the app's theme. Column names in `tooltips` explain
 #' themselves on hover, and the weight column, when there is one, shows its
-#' value as a bar.
+#' value as a bar. Each column is as narrow as its contents allow, so a wide
+#' table such as the goodness of fit fits a step's content, and the first
+#' column stays in view when a table scrolls sideways.
 #' @param data A data frame.
 #' @param lang Character string language, as for [table_lang()].
 #' @param tooltips Optional named character vector of column descriptions.
@@ -152,12 +154,14 @@ table_lang <- function(lang = "english") {
 #' @return A reactable widget.
 #' @keywords internal
 app_table <- function(data, lang = "english", tooltips = NULL, weight = NULL, ...) {
+  first <- names(data)[1]
   columns <- lapply(stats::setNames(nm = names(data)), function(name) {
+    is_weight <- identical(name, weight)
     tip <- if (!is.null(tooltips)) tooltips[name] else NA
     header <- if (!is.na(tip)) {
       function(value) span(class = "ssd-has-tip", title = unname(tip), value)
     }
-    cell <- if (identical(name, weight)) {
+    cell <- if (is_weight) {
       function(value) {
         div(
           class = "ssd-weight",
@@ -166,7 +170,19 @@ app_table <- function(data, lang = "english", tooltips = NULL, weight = NULL, ..
         )
       }
     }
-    args <- Filter(Negate(is.null), list(header = header, cell = cell, minWidth = if (identical(name, weight)) 140))
+    # Wide enough for the longest of the name and the values (about 7.5 px a
+    # character, and the cell padding), so a narrow column does not wrap;
+    # long text, such as species names, wraps beyond 160 px.
+    chars <- max(nchar(name), nchar(as.character(data[[name]])), na.rm = TRUE)
+    min_width <- if (is_weight) 116 else min(ceiling(chars * 7.5) + 16, 160)
+    args <- Filter(Negate(is.null), list(
+      header = header,
+      cell = cell,
+      minWidth = min_width,
+      # The bar starts at the left, so its header does too.
+      align = if (is_weight) "left",
+      sticky = if (identical(name, first)) "left"
+    ))
     do.call(reactable::colDef, args)
   })
   reactable::reactable(

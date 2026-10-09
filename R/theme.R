@@ -173,7 +173,7 @@ app_table_theme <- function() {
     backgroundColor = "var(--bs-card-bg, var(--bs-body-bg))",
     borderColor = "var(--bs-border-color)",
     highlightColor = "var(--bs-tertiary-bg)",
-    cellPadding = "0.5rem 0.75rem",
+    cellPadding = "0.5rem",
     style = list(fontFamily = "inherit", fontSize = "0.8125rem", fontVariantNumeric = "tabular-nums"),
     headerStyle = list(
       background = "var(--bs-tertiary-bg)",

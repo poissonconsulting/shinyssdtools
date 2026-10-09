@@ -411,6 +411,9 @@ mod_fit_server <- function(
       gof <- table_gof()
       trans <- translations()
       weight <- intersect(c("wt", "weight", tr("ui_2weight", trans)), names(gof))[1]
+      # The weight beside the distribution, where it is seen first; the
+      # downloads keep the ssdtools column order.
+      gof <- dplyr::relocate(gof, dplyr::all_of(weight), .after = 1)
       app_table(
         as.data.frame(gof),
         lang = lang(),
