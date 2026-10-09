@@ -122,6 +122,15 @@ mod_fit_ui <- function(id) {
         )
       )
     ),
+    # Without a fit, why the data cannot be fitted, in place of the results.
+    conditionalPanel(
+      condition = sprintf("!%s && %s", paste_js("has_fit", ns), paste_js("has_conc_problem", ns)),
+      empty_state(
+        "alert-triangle",
+        textOutput(ns("concProblem"), inline = TRUE),
+        action = step_button(ns("goDataProblem"), "ui_goto_data", "Go to Data", variant = "outline")
+      )
+    ),
     conditionalPanel(
       condition = sprintf("%s && %s", paste_js("has_fit", ns), paste_js("fit_stale", ns)),
       div(
@@ -320,7 +329,8 @@ mod_fit_server <- function(
     # validation --------------------------------------------------------------
     iv <- InputValidator$new()
 
-    iv$add_rule("selectConc", function(value) {
+    # Why the chosen concentration column cannot be fitted, or NULL.
+    conc_problem <- function(value) {
       trans <- translations()
       dat <- data_mod$data()
 
@@ -346,7 +356,17 @@ mod_fit_server <- function(
       }
 
       NULL
+    }
+
+    iv$add_rule("selectConc", conc_problem)
+
+    current_conc_problem <- reactive({
+      req(data_mod$has_data(), input$selectConc)
+      conc_problem(input$selectConc)
     })
+    output$has_conc_problem <- reactive(!is.null(current_conc_problem()))
+    outputOptions(output, "has_conc_problem", suspendWhenHidden = FALSE)
+    output$concProblem <- renderText(current_conc_problem())
 
     iv$add_rule("selectDist", function(value) {
       trans <- translations()
@@ -442,6 +462,7 @@ mod_fit_server <- function(
 
     observe_step_button(input, "continue", "predict")
     observe_step_button(input, "goData", "data")
+    observe_step_button(input, "goDataProblem", "data")
 
     # return values ------------------------------------------------------------
     # The fit stays while an input is being edited (such as every distribution

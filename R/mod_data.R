@@ -85,6 +85,14 @@ mod_data_ui <- function(id) {
           tone = "muted"
         )
       ),
+      conditionalPanel(
+        condition = sprintf("%s && %s", paste_js("has_data", ns), paste_js("too_few", ns)),
+        notice(
+          "alert-triangle",
+          span(`data-translate` = "ui_hint6", "There must be at least 6 concentration values."),
+          tone = "warning"
+        )
+      ),
       accordion(
         id = ns("sections"),
         open = FALSE,
@@ -297,6 +305,10 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
     output$has_data <- has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
 
+    # Too few rows to fit, whichever column holds the concentrations.
+    output$too_few <- reactive(nrow(clean_data()) < 6)
+    outputOptions(output, "too_few", suspendWhenHidden = FALSE)
+
     output$handson <- rhandsontable::renderRHandsontable({
       x <- handson_data()
       if (!is.null(x)) {
@@ -304,9 +316,9 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
       }
     })
 
+    # The data as they are fitted, without the table's empty rows.
     output$viewUpload <- reactable::renderReactable({
-      data <- current_data()
-      req(data)
+      data <- clean_data()
       app_table(
         as.data.frame(data),
         lang = lang(),
