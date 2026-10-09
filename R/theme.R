@@ -73,7 +73,26 @@ app_theme <- function(palette = "hakai", navbar = "light") {
   rules <- c(
     sprintf(".ssd-step-done { background: %s; color: %s; }", if (light) col$success_muted else "#ffffff", if (light) col$success else col$secondary_fg),
     sprintf(".ssd-step-busy { background: %s; color: %s; }", col$accent, col$accent_fg),
-    if (light) sprintf(".navbar { border-bottom: 1px solid %s; }", col$border)
+    if (light) sprintf(".navbar { border-bottom: 1px solid %s; }", col$border),
+    # Navigation items as in shadcn/ui: rounded ghost items, the open one
+    # filled with a muted pill, the others on hover.
+    ".navbar .navbar-nav .nav-link { border-radius: 0.375rem; padding: 0.375rem 0.75rem; margin: 0 0.125rem; }",
+    sprintf(
+      ".navbar .navbar-nav .nav-link:hover, .navbar .navbar-nav .show > .nav-link { background: %s; }",
+      if (light) col$muted else "rgba(255, 255, 255, 0.08)"
+    ),
+    sprintf(
+      ".navbar .navbar-nav .nav-link.active { background: %s; color: %s; font-weight: 600; box-shadow: inset 0 0 0 1px %s; }",
+      if (light) col$muted else "rgba(255, 255, 255, 0.14)",
+      if (light) col$fg else "#ffffff",
+      if (light) col$border else "rgba(255, 255, 255, 0.18)"
+    ),
+    # A divider between the steps and Help, so the steps read as the app's
+    # navigation and Help and Language as utilities.
+    sprintf(
+      ".navbar .navbar-nav .nav-item:has(> .nav-link[data-value='help']) { margin-left: 0.5rem; padding-left: 0.625rem; border-left: 1px solid %s; }",
+      if (light) col$border else "rgba(255, 255, 255, 0.18)"
+    )
   )
   theme <- bs_theme(
     version = 5,
@@ -138,10 +157,7 @@ app_theme <- function(palette = "hakai", navbar = "light") {
     "progress-bg" = col$muted,
     "progress-height" = "0.5rem",
     "navbar-bg" = nav$bg,
-    # The underlined step tabs get extra bottom padding equal to the navbar's,
-    # so equal top padding keeps their labels on the navbar's centre line.
-    "navbar-padding-y" = "0.75rem",
-    "nav-link-padding-y" = "0.75rem",
+    "navbar-padding-y" = "0.625rem",
     "navbar-light-color" = nav$fg,
     "navbar-light-hover-color" = nav$hover,
     "navbar-light-active-color" = nav$active,
