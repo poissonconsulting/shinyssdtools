@@ -45,9 +45,12 @@ mod_fit_ui <- function(id) {
     ),
     actionButton(
       ns("updateFit"),
+      # Both icons are in the page and switched in the browser, so the
+      # button does not re-render (and resize) as the fit goes out of date.
       label = span(
         class = "d-inline-flex align-items-center gap-2",
-        uiOutput(ns("update_icon"), inline = TRUE),
+        span(`data-display-if` = paste_js("fit_stale", ns), `data-ns-prefix` = "", lucide("refresh-cw")),
+        span(`data-display-if` = sprintf("!%s", paste_js("fit_stale", ns)), `data-ns-prefix` = "", lucide("check-circle-2")),
         span(`data-translate` = "ui_update_fit", "Update Fit")
       ),
       class = "btn-light ssd-btn-soft w-100"
@@ -99,9 +102,27 @@ mod_fit_ui <- function(id) {
         step_button(ns("continue"), "ui_continue_predict", "Continue to predict")
       )
     ),
-    # Outside the panels' column, so it takes no space while there is no
-    # error.
+    # Outside the panels' column, so they take no space while there is no
+    # error and the fit is current.
     uiOutput(ns("fitError")),
+    conditionalPanel(
+      condition = sprintf("%s && %s", paste_js("has_fit", ns), paste_js("fit_stale", ns)),
+      div(
+        class = "mb-4",
+        notice(
+          "alert-triangle",
+          span(`data-translate` = "ui_fit_stale", "The fit is out of date"),
+          tone = "warning",
+          action = button(
+            ns("updateFitNotice"),
+            span(`data-translate` = "ui_update_fit", "Update Fit"),
+            icon = "refresh-cw",
+            variant = "outline",
+            size = "sm"
+          )
+        )
+      )
+    ),
     div(
       class = "d-flex flex-column gap-4",
       conditionalPanel(
@@ -154,42 +175,36 @@ mod_fit_server <- function(
     output$has_data <- data_mod$has_data
     outputOptions(output, "has_data", suspendWhenHidden = FALSE)
 
-    needs_update <- reactiveVal(FALSE)
-
     fit_trigger <- reactiveVal(0)
+
+    # The distributions and rescaling of the last fit: the fit is out of date
+    # while the current choices differ from them.
+    fit_settings <- reactive(list(dists = sort(input$selectDist), rescale = isTRUE(input$rescale)))
+    fitted_settings <- reactiveVal(NULL)
+    refit <- function() {
+      fitted_settings(isolate(fit_settings()))
+      fit_trigger(isolate(fit_trigger()) + 1)
+    }
+    fit_stale <- reactive(!is.null(fitted_settings()) && !identical(fit_settings(), fitted_settings()))
+    output$fit_stale <- fit_stale
+    outputOptions(output, "fit_stale", suspendWhenHidden = FALSE)
 
     # trigger if navigate to fit tab
     observe({
-      if (main_nav() == "fit") {
-        current_val <- isolate(fit_trigger())
-        fit_trigger(current_val + 1)
-      }
+      if (main_nav() == "fit") refit()
     }) |>
       bindEvent(main_nav())
 
-    # Also increment when manual update is needed
-    observe({
-      needs_update(FALSE)
-      current_val <- isolate(fit_trigger())
-      fit_trigger(current_val + 1)
-    }) |>
-      bindEvent(input$updateFit)
+    # Also when Update Fit is clicked, in the aside or in the out of date
+    # notice
+    observe(refit()) |>
+      bindEvent(input$updateFit, input$updateFitNotice)
 
     # Auto-update for critical changes
     observe({
-      needs_update(FALSE)
-      if (isolate(main_nav()) == "fit") {
-        current_val <- isolate(fit_trigger())
-        fit_trigger(current_val + 1)
-      }
+      if (isolate(main_nav()) == "fit") refit()
     }) |>
       bindEvent(input$selectConc, data_mod$data(), ignoreInit = TRUE)
-
-    # monitor if out of date
-    observe({
-      needs_update(TRUE)
-    }) |>
-      bindEvent(input$selectDist, input$rescale)
 
     # The fit, or the error when no distribution could be fitted, so the error
     # can be shown rather than an empty tab.
@@ -243,15 +258,6 @@ mod_fit_server <- function(
       )
     })
 
-    # Dynamic icon for update button
-    output$update_icon <- renderUI({
-      if (needs_update()) {
-        lucide("refresh-cw")
-      } else {
-        lucide("check-circle-2")
-      }
-    }) |>
-      bindEvent(needs_update())
 
     observe({
       data <- data_mod$clean_data()
