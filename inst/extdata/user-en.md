@@ -66,11 +66,13 @@ Distributions are not treated as constituting a single distribution for calculat
 3. Since confidence limits take time to calculate, they are not calculated automatically; you must press the `Get CL` button.
 4. **Format plot** using various inputs in sidebar and **download the plot** as PNG or RDS and the **confidence limits table** as CSV or XLSX.
 
-### Step 4: Get BCANZ report
+### Step 4: Export
+
+#### Get BCANZ report
 Generate a report in HTML or PDF format including the fitted distribution plot, goodness of fit table, model-averaged fit plot and table of estimated hazardous/protective concentrations. 
 Any options selected in the app will be incorporated into the report. 
 
-### Step 5: Get R code
+#### Get R code
 
 Copy R code to reproduce outputs programmatically. 
 Code is dynamically generated based on user inputs and functions executed within the app (e.g., code for generating confidence limits will appear after `Get CL` button is clicked). 

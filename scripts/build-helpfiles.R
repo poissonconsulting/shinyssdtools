@@ -20,7 +20,8 @@
 
 #' Extract a section from markdown file
 #' @param file_path Path to the markdown file
-#' @param section_heading The heading to extract (e.g., "Step 1: Provide data")
+#' @param section_heading The heading to extract (e.g., "Step 1: Provide data"),
+#'   a step (level 3) or a part of one (level 4)
 #' @param output_heading The heading for the output file (e.g., "Provide data")
 #' @return Character vector of the extracted section
 extract_section <- function(file_path, section_heading, output_heading) {
@@ -28,15 +29,14 @@ extract_section <- function(file_path, section_heading, output_heading) {
 
   # Find the start line (section heading)
   # Use fixed=TRUE to avoid regex issues
-  search_string <- paste0("### ", section_heading)
-  start_line <- which(trimws(lines) == search_string)[1]
+  start_line <- which(trimws(lines) %in% paste(c("###", "####"), section_heading))[1]
 
   if (is.na(start_line)) {
     stop(sprintf("Section '%s' not found in %s", section_heading, file_path))
   }
 
   # Find the next heading (end of section)
-  next_heading <- grep("^###\\s+", lines)
+  next_heading <- grep("^####?\\s+", lines)
   end_line <- next_heading[next_heading > start_line][1]
 
   if (is.na(end_line)) {
@@ -119,11 +119,11 @@ build_helpfiles_for_language <- function(lang) {
         output = "Estimate hazard concentration"
       ),
       reportTab = list(
-        section = "Step 4: Get BCANZ report",
+        section = "Get BCANZ report",
         output = "Get BCANZ report"
       ),
       rcodeTab = list(
-        section = "Step 5: Get R code",
+        section = "Get R code",
         output = "Get R code"
       )
     ),
@@ -141,11 +141,11 @@ build_helpfiles_for_language <- function(lang) {
         output = "Estimation de la concentration pr\u00e9sentant un risque"
       ),
       reportTab = list(
-        section = "\u00c9tape 4: Obtenir le rapport BCANZ",
+        section = "Obtenir le rapport BCANZ",
         output = "Obtenir le rapport BCANZ"
       ),
       rcodeTab = list(
-        section = "\u00c9tape 5: Obtenir le code R",
+        section = "Obtenir le code R",
         output = "Obtenir le code R"
       )
     ),
@@ -163,11 +163,11 @@ build_helpfiles_for_language <- function(lang) {
         output = "Estimar concentraci\u00f3n de peligro"
       ),
       reportTab = list(
-        section = "Paso 4: Obtener informe BCANZ",
+        section = "Obtener informe BCANZ",
         output = "Obtener informe BCANZ"
       ),
       rcodeTab = list(
-        section = "Paso 5: Obtener c\u00f3digo R",
+        section = "Obtener c\u00f3digo R",
         output = "Obtener c\u00f3digo R"
       )
     )
