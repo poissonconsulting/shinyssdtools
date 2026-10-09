@@ -23,6 +23,8 @@ A reactable widget.
 \description{
 A reactable with the app's theme. Column names in \code{tooltips} explain
 themselves on hover, and the weight column, when there is one, shows its
-value as a bar.
+value as a bar. Each column is as narrow as its contents allow, so a wide
+table such as the goodness of fit fits a step's content, and the first
+column stays in view when a table scrolls sideways.
 }
 \keyword{internal}

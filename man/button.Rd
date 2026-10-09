@@ -12,6 +12,7 @@ button(
   size = NULL,
   class = NULL,
   download = FALSE,
+  busy = FALSE,
   ...
 )
 }
@@ -31,6 +32,10 @@ button(
 
 \item{download}{Logical scalar: whether the button downloads the file of
 the \code{\link[shiny:downloadHandler]{shiny::downloadHandler()}} output \code{id}.}
+
+\item{busy}{Logical scalar: whether a download button shows a spinner, and
+is disabled, from its click until \code{\link[=download_done]{download_done()}} is called for it. For
+a file that takes some seconds to prepare.}
 
 \item{...}{Further arguments passed to \code{\link[shiny:actionButton]{shiny::actionButton()}} or
 \code{\link[shiny:downloadLink]{shiny::downloadLink()}}.}
