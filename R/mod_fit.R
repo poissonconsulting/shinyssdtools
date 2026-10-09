@@ -209,6 +209,10 @@ mod_fit_server <- function(
     # while the current choices differ from them.
     fit_settings <- reactive(list(dists = sort(input$selectDist), rescale = isTRUE(input$rescale)))
     fitted_settings <- reactiveVal(NULL)
+    # The data of the last fit: the fit, and the predictions, confidence
+    # limits and report computed from it, no longer apply once the data
+    # change.
+    fitted_data <- reactiveVal(NULL)
     refit <- function() {
       # The validation rules need a concentration column to check.
       valid <- !is.null(isolate(input$selectConc)) &&
@@ -217,6 +221,7 @@ mod_fit_server <- function(
         return()
       }
       fitted_settings(isolate(fit_settings()))
+      fitted_data(isolate(data_mod$data()))
       fit_trigger(isolate(fit_trigger()) + 1)
     }
     fit_stale <- reactive(!is.null(fitted_settings()) && !identical(fit_settings(), fitted_settings()))
@@ -278,13 +283,19 @@ mod_fit_server <- function(
       ) |>
       bindEvent(fit_trigger())
 
-    fit_dist <- reactive({
+    # The fit or its error while it is of the current data, else NULL.
+    current_result <- reactive({
       result <- fit_result()
+      if (identical(fitted_data(), data_mod$data())) result
+    })
+
+    fit_dist <- reactive({
+      result <- current_result()
       if (!inherits(result, "error")) result
     })
 
     output$fitError <- renderUI({
-      result <- fit_result()
+      result <- current_result()
       req(inherits(result, "error"))
       div(
         class = "mb-4",

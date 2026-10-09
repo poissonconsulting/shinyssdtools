@@ -734,6 +734,8 @@ mod_predict_server <- function(
         estimate_limits(scale = 100)
       )
     })
+    output$estPerc2 <- renderText(fraction_text())
+    output$fracValue <- renderText(fraction_text())
 
     output$describeTime <- renderText({
       describe_time()
@@ -866,7 +868,9 @@ mod_predict_server <- function(
         conc = thresh_rv$conc,
         nboot = clean_nboot(input$bootSamp)
       )
-      cl_request(request)
+      # The data too, so limits of other data are not shown; the job does
+      # not need them.
+      cl_request(c(request, list(data = data_mod$data())))
       request$pred <- curve_lookup(request$fit, request$nboot, request$percent)
       cl_runner$invoke(cl_job, request)
     }) |>
@@ -874,6 +878,14 @@ mod_predict_server <- function(
 
     observe(cl_runner$cancel()) |>
       bindEvent(input$cancelCl, input$cancelClAside)
+
+    # Limits being computed for other data are no longer wanted.
+    observe({
+      data <- data_mod$data()
+      if (isolate(cl_runner$running()) && !identical(isolate(cl_request())$data, data)) {
+        cl_runner$cancel()
+      }
+    })
 
     observe({
       done <- cl_runner$done()
@@ -893,7 +905,7 @@ mod_predict_server <- function(
       curve_store(request$fit, request$nboot, done$value$pred)
       cl_result(c(
         done$value,
-        list(fit = request$fit, nboot = request$nboot, conc = request$conc)
+        list(fit = request$fit, nboot = request$nboot, conc = request$conc, data = request$data)
       ))
     }) |>
       bindEvent(cl_runner$done())
@@ -932,7 +944,12 @@ mod_predict_server <- function(
 
     output$cl_running <- reactive(cl_runner$running())
     outputOptions(output, "cl_running", suspendWhenHidden = FALSE)
-    output$cl_stale <- reactive(!is.null(cl_result()) && is.null(cl_table_current()))
+    # Limits of other data are not out of date but absent, as in a new
+    # session.
+    output$cl_stale <- reactive({
+      cl <- cl_result()
+      !is.null(cl) && identical(cl$data, data_mod$data()) && is.null(cl_table_current())
+    })
     outputOptions(output, "cl_stale", suspendWhenHidden = FALSE)
 
     # Without current confidence limits, the predictions are the estimates
