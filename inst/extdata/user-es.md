@@ -68,11 +68,13 @@ Las distribuciones no se tratan como una sola distribución para calcular interv
 3. Dado que los límites de confianza tardan en calcularse, no se calculan automáticamente; debe presionar el botón `Obtener CL`.
 4. **Formatee el gráfico** usando varias entradas en la barra lateral y **descargue el gráfico** en formato PNG o RDS y **la tabla de límites de confianza** en formato CSV o XLSX.
 
-### Paso 4: Obtener informe BCANZ
+### Paso 4: Exportar
+
+#### Obtener informe BCANZ
 Genere un informe en formato HTML o PDF que incluya el gráfico de distribución ajustada, la tabla de bondad de ajuste, el gráfico de ajuste promediado del modelo y la tabla de concentraciones peligrosas/protectoras estimadas.
 Cualquier opción seleccionada en la aplicación se incorporará al informe.
 
-### Paso 5: Obtener código R
+#### Obtener código R
 
 Copie el código R para reproducir las salidas de forma programática.
 El código se genera dinámicamente en función de las entradas del usuario y las funciones ejecutadas dentro de la aplicación (por ejemplo, el código para generar límites de confianza aparecerá después de hacer clic en el botón `Obtener CL`).
