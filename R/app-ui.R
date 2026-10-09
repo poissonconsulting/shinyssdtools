@@ -115,7 +115,7 @@ app_ui <- function() {
     fillable = FALSE,
     window_title = "ssdtools",
     lang = "en",
-    navbar_options = navbar_options(collapsible = TRUE, underline = FALSE),
+    navbar_options = navbar_options(collapsible = TRUE, underline = FALSE, theme = "dark"),
     header = tagList(
       shinyjs::useShinyjs(),
       rclipboard::rclipboardSetup(),

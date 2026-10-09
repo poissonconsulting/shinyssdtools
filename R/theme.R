@@ -15,21 +15,23 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# The app's theme: kelpbioshiny's Hakai greys with Hakai's slate, pushed a
-# step toward blue, as the accent for primary actions, expressed as Bootstrap
-# Sass variables. Everything else reads colours from var(--bs-*) rather than
+# The app's theme: kelpbioshiny's Hakai greys with the app's original deep
+# navy navbar and teal-blue primary actions, expressed as Bootstrap Sass
+# variables. Everything else reads colours from var(--bs-*) rather than
 # from this palette; custom CSS (inst/app/www/style.css) styles only the app's
 # own ssd-* classes. Red is kept for errors.
 #
 # Every text and border pair meets WCAG 2.1 AA contrast (input borders 3:1,
-# text 4.5:1, white text on the primary 4.5:1).
+# text 4.5:1, white text on the primary and on the navbar 4.5:1).
 
 app_palette <- list(
   bg = "#f6f7f9", fg = "#1d2733", card = "#ffffff",
   muted = "#eef1f4", muted_fg = "#5a6672", secondary_fg = "#2c3e50",
   border = "#e1e5ea", input = "#8a949e",
-  primary = "#2b4a6f", accent = "#eef3f9", accent_border = "#c8d6e6", accent_fg = "#1e3550",
-  ring = "rgb(70, 110, 155)", ring_rgb = "70, 110, 155"
+  primary = "#2e7d9a", accent = "#eaf4f7", accent_border = "#bfdce6", accent_fg = "#1d5468",
+  navbar = "#1e3a5f", navbar_fg = "rgba(255, 255, 255, 0.85)",
+  navbar_hover = "rgba(255, 255, 255, 0.12)", navbar_border = "rgba(255, 255, 255, 0.25)",
+  ring = "rgb(46, 125, 154)", ring_rgb = "46, 125, 154"
 )
 
 app_status_colours <- list(
@@ -45,25 +47,29 @@ color_primary <- "var(--bs-primary)"
 app_theme <- function() {
   col <- c(app_palette, app_status_colours)
   rules <- c(
-    # The navbar is white with a hairline border, as in shadcn/ui.
-    sprintf(".navbar { border-bottom: 1px solid %s; }", col$border),
     # A done step's marker: a green ring and tick, outlined like the numbers
-    # of the steps to do.
-    ".ssd-step-done { background: transparent; color: #059669; border: 1.5px solid #059669; }",
+    # of the steps to do, light enough to read on the navy navbar.
+    ".ssd-step-done { background: transparent; color: #6ee7b7; border: 1.5px solid #6ee7b7; }",
     sprintf(".ssd-step-busy { background: %s; color: %s; }", col$accent, col$accent_fg),
-    # Navigation items as in shadcn/ui: rounded ghost items, the open one a
-    # muted pill with a hairline ring, the others muted on hover.
+    # Navigation items as rounded ghost items, the open one a translucent
+    # white pill with a hairline ring, the others lightened on hover.
     ".navbar .navbar-nav .nav-link { border-radius: 0.375rem; padding: 0.375rem 0.75rem; margin: 0 0.125rem; }",
-    sprintf(".navbar .navbar-nav .nav-link:hover, .navbar .navbar-nav .show > .nav-link { background: %s; }", col$muted),
+    sprintf(".navbar .navbar-nav .nav-link:hover, .navbar .navbar-nav .show > .nav-link { background: %s; }", col$navbar_hover),
     sprintf(
-      ".navbar .navbar-nav .nav-link.active { background: %s; color: %s; font-weight: 600; box-shadow: inset 0 0 0 1px %s; }",
-      col$muted, col$fg, col$border
+      ".navbar .navbar-nav .nav-link.active { background: %s; color: #ffffff; font-weight: 600; box-shadow: inset 0 0 0 1px %s; }",
+      col$navbar_hover, col$navbar_border
+    ),
+    # The language menu stays light below the dark navbar, rather than taking
+    # the navbar's dark colour mode.
+    sprintf(
+      ".navbar .dropdown-menu { --bs-dropdown-color: %1$s; --bs-dropdown-link-color: %1$s; --bs-dropdown-link-hover-color: %1$s; --bs-dropdown-link-hover-bg: %2$s; --bs-dropdown-border-color: %3$s; }",
+      col$fg, col$muted, col$border
     ),
     # A divider between the steps and Help, so the steps read as the app's
     # navigation and Help and Language as utilities.
     sprintf(
       ".navbar .navbar-nav .nav-item:has(> .nav-link[data-value='help']) { margin-left: 0.5rem; padding-left: 0.625rem; border-left: 1px solid %s; }",
-      col$border
+      col$navbar_border
     )
   )
   theme <- bs_theme(
@@ -128,13 +134,13 @@ app_theme <- function() {
     "badge-font-weight" = 500,
     "progress-bg" = col$muted,
     "progress-height" = "0.5rem",
-    "navbar-bg" = col$card,
+    "navbar-bg" = col$navbar,
     "navbar-padding-y" = "0.625rem",
-    "navbar-light-color" = col$muted_fg,
-    "navbar-light-hover-color" = col$fg,
-    "navbar-light-active-color" = col$fg,
-    "navbar-light-brand-color" = col$fg,
-    "navbar-light-brand-hover-color" = col$fg,
+    "navbar-dark-color" = col$navbar_fg,
+    "navbar-dark-hover-color" = "#ffffff",
+    "navbar-dark-active-color" = "#ffffff",
+    "navbar-dark-brand-color" = "#ffffff",
+    "navbar-dark-brand-hover-color" = "#ffffff",
     "nav-link-font-weight" = 500,
     "nav-link-color" = col$fg,
     "nav-link-hover-color" = col$fg,
