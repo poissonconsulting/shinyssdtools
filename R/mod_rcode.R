@@ -480,10 +480,9 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       )
     })
 
-    # for copy button
-    has_code <- reactive({
-      all_code() != ""
-    })
+    # For the copy button. On the data, not the script, so the script is only
+    # generated when it is shown, copied or downloaded.
+    has_code <- reactive(isTRUE(data_mod$has_data()))
 
     output$has_code <- has_code
     outputOptions(output, "has_code", suspendWhenHidden = FALSE)
