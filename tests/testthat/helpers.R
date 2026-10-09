@@ -233,6 +233,20 @@ wait_for_predict <- function(app, timeout = 10000) {
   invisible(app)
 }
 
+#' Wait for confidence limits
+#'
+#' Get CL runs in the background, so the app is idle before the limits are
+#' done; wait for them instead.
+#'
+#' @param app AppDriver instance
+#' @param timeout Maximum time to wait in milliseconds; the first Get CL also
+#'   starts the background R process.
+#' @return The app, invisibly.
+wait_for_cl <- function(app, timeout = 60000) {
+  app$wait_for_value(output = "predict_mod-has_cl", ignore = list(NULL, FALSE), timeout = timeout)
+  invisible(app)
+}
+
 #' Set bootstrap samples in selectizeInput using JavaScript
 #'
 #' The bootSamp selectizeInput has create=TRUE but set_inputs() doesn't handle
