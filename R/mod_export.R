@@ -59,29 +59,64 @@ mod_export_ui <- function(id, rcode = NULL) {
     )
   }
 
-  downloads <- panel(
-    span(`data-translate` = "ui_2download", "Download"),
-    div(class = "d-flex flex-column gap-2", lapply(export_files, file_row)),
-    div(
-      class = "border-top pt-3",
-      div(class = "ssd-eyebrow text-body-secondary mb-2", span(`data-translate` = "ui_2png", "PNG file formatting options")),
-      png_settings
+  # The BCANZ report: its settings, and the actions its state allows: Get
+  # Report while its bootstrap is needed, a spinner and Cancel while it
+  # renders, and once it is current, Preview, its files and a ZIP of every
+  # BCANZ output.
+  report_actions <- tagList(
+    conditionalPanel(
+      condition = sprintf("!%s && %s", paste_js("report_running", ns), paste_js("needs_bootstrap", ns)),
+      button(
+        ns("generateReport"),
+        span(`data-translate` = "ui_getreport", "Get Report"),
+        icon = "file-text",
+        variant = "soft",
+        size = "sm"
+      )
+    ),
+    conditionalPanel(
+      condition = paste_js("report_running", ns),
+      div(
+        class = "d-flex align-items-center gap-2 small",
+        busy_icon(),
+        span(`data-translate` = "ui_4gentitle", "Generating report..."),
+        button(ns("cancelReport"), span(`data-translate` = "ui_cancel", "Cancel"), icon = "x", variant = "outline", size = "sm")
+      )
+    ),
+    conditionalPanel(
+      condition = sprintf("%s && !%s", paste_js("has_preview", ns), paste_js("report_running", ns)),
+      div(
+        class = "d-flex flex-wrap gap-2 justify-content-end",
+        button(ns("previewReport"), span(`data-translate` = "ui_prevreport", "Preview report"), icon = "book-open", variant = "ghost", size = "sm"),
+        button(ns("reportDlPdf"), "PDF", icon = "download", variant = "outline", size = "sm", download = TRUE),
+        button(ns("reportDlHtml"), "HTML", icon = "download", variant = "outline", size = "sm", download = TRUE),
+        button(
+          ns("bcanzZip"), "ZIP", icon = "file-archive", variant = "outline", size = "sm", download = TRUE,
+          title = "The report and every BCANZ output"
+        )
+      )
     )
   )
 
-  report_downloads <- conditionalPanel(
-    condition = paste_js("has_preview", ns),
+  report_row <- div(
+    class = "d-flex flex-column gap-3 border rounded-3 p-3",
     div(
-      class = "d-flex gap-2",
-      button(ns("reportDlPdf"), "PDF", icon = "download", variant = "outline", size = "sm", download = TRUE),
-      button(ns("reportDlHtml"), "HTML", icon = "download", variant = "outline", size = "sm", download = TRUE)
-    )
-  )
-
-  report <- panel(
-    span(`data-translate` = "ui_tabreport", "Get BCANZ report") |>
-      shinyhelper::helper(type = "markdown", content = "reportTab", size = "l", colour = color_primary, buttonLabel = "OK"),
-    action = report_downloads,
+      class = "d-flex flex-wrap align-items-center gap-3",
+      div(class = "ssd-tile-icon bg-primary-subtle text-primary-emphasis", lucide("file-text")),
+      div(
+        class = "flex-grow-1",
+        div(
+          class = "fw-medium ssd-card-title",
+          span(`data-translate` = "ui_tabreport", "Get BCANZ report") |>
+            shinyhelper::helper(type = "markdown", content = "reportTab", size = "l", colour = color_primary, buttonLabel = "OK")
+        ),
+        conditionalPanel(
+          condition = sprintf("!%s && %s", paste_js("report_running", ns), paste_js("needs_bootstrap", ns)),
+          div(class = "small text-body-secondary", htmlOutput(ns("describeTime"), inline = TRUE))
+        )
+      ),
+      div(class = "flex-shrink-0", report_actions)
+    ),
     layout_column_wrap(
       width = 1 / 2,
       gap = "0.75rem",
@@ -90,7 +125,8 @@ mod_export_ui <- function(id, rcode = NULL) {
         label = span(`data-translate` = "ui_4toxname", "Toxicant name"),
         value = "",
         width = "100%"
-      ),
+      ) |>
+        tagAppendAttributes(class = "mb-0"),
       selectizeInput(
         ns("bootSamp"),
         options = list(
@@ -101,50 +137,18 @@ mod_export_ui <- function(id, rcode = NULL) {
         choices = c("500", "1,000", "5,000", "10,000"),
         selected = "10,000",
         width = "100%"
-      )
-    ),
-    # Get Report shows until the model-averaged curve is bootstrapped; from
-    # then on the report renders by itself.
-    conditionalPanel(
-      condition = sprintf("!%s && %s", paste_js("report_running", ns), paste_js("needs_bootstrap", ns)),
-      notice(
-        "file-text",
-        span(`data-translate` = "ui_prevreport", "Preview report"),
-        htmlOutput(ns("describeTime"), inline = TRUE),
-        tone = "muted",
-        action = button(
-          ns("generateReport"),
-          span(`data-translate` = "ui_getreport", "Get Report"),
-          icon = "file-text",
-          variant = "soft",
-          size = "sm"
-        )
-      )
-    ),
-    conditionalPanel(
-      condition = paste_js("report_running", ns),
-      notice(
-        busy_icon(),
-        span(`data-translate` = "ui_4gentitle", "Generating report..."),
-        tone = "info",
-        action = button(
-          ns("cancelReport"),
-          span(`data-translate` = "ui_cancel", "Cancel"),
-          icon = "x",
-          variant = "outline",
-          size = "sm"
-        )
-      )
-    ),
-    conditionalPanel(
-      condition = paste_js("has_preview", ns),
-      tags$iframe(
-        srcdoc = "",
-        id = ns("htmlPreview"),
-        class = "ssd-report-frame",
-        title = "BCANZ report",
-        sandbox = "allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
-      )
+      ) |>
+        tagAppendAttributes(class = "mb-0")
+    )
+  )
+
+  downloads <- panel(
+    span(`data-translate` = "ui_2download", "Download"),
+    div(class = "d-flex flex-column gap-2", report_row, lapply(export_files, file_row)),
+    div(
+      class = "border-top pt-3",
+      div(class = "ssd-eyebrow text-body-secondary mb-2", span(`data-translate` = "ui_2png", "PNG file formatting options")),
+      png_settings
     )
   )
 
@@ -173,7 +177,6 @@ mod_export_ui <- function(id, rcode = NULL) {
         well = FALSE,
         widths = c(3, 9),
         page("downloads", "download", "ui_2download", "Download", downloads),
-        page("report", "file-text", "ui_tabreport", "Get BCANZ report", report),
         page("rcode", "code", "ui_tabcode", "Get R code", rcode)
       )
     ),
@@ -393,17 +396,21 @@ mod_export_server <- function(
     output$has_preview <- has_preview
     outputOptions(output, "has_preview", suspendWhenHidden = FALSE)
 
-    # Update iframe content with HTML
     observe({
-      shinyjs::runjs(paste0(
-        "var iframe = document.getElementById('",
-        ns("htmlPreview"),
-        "'); if (iframe) { iframe.srcdoc = ",
-        jsonlite::toJSON(report_preview_html()),
-        "; }"
+      showModal(modalDialog(
+        tags$iframe(
+          srcdoc = report_preview_html(),
+          class = "ssd-report-frame",
+          title = "BCANZ report",
+          sandbox = "allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
+        ),
+        title = tr("ui_prevreport", translations()),
+        size = "xl",
+        easyClose = TRUE,
+        footer = modalButton("OK")
       ))
     }) |>
-      bindEvent(report_preview_html())
+      bindEvent(input$previewReport)
 
     output$reportDlPdf <- downloadHandler(
       filename = function() {
@@ -503,6 +510,29 @@ mod_export_server <- function(
         }
         script <- code()
         if (length(script) && nzchar(script)) writeLines(script, file.path(dir, "ssdtools-analysis.R"))
+        utils::zip(file, list.files(dir, full.names = TRUE), flags = "-jq")
+      }
+    )
+
+    # Every BCANZ output in one ZIP: the report as PDF and HTML, its hazard
+    # concentrations, and the plots and tables it shows.
+    output$bcanzZip <- downloadHandler(
+      filename = function() paste0(tr("ui_bcanz_filename", translations()), ".zip"),
+      content = function(file) {
+        report <- req(current_report())
+        dir <- tempfile("bcanz-")
+        dir.create(dir)
+        on.exit(unlink(dir, recursive = TRUE), add = TRUE)
+        name <- tr("ui_bcanz_filename", translations())
+        writeLines(report$html, file.path(dir, paste0(name, ".html")))
+        params <- report$params
+        params$pred_cl <- report$pred_cl
+        try(render_report(report$template, params, "pdf_document", file.path(dir, paste0(name, ".pdf"))), silent = TRUE)
+        readr::write_csv(dplyr::as_tibble(report$pred_cl), file.path(dir, paste0(name, "_hc.csv")))
+        readr::write_csv(dplyr::as_tibble(report$params$gof_table), file.path(dir, "ssdtools_gof_table.csv"))
+        readr::write_csv(dplyr::as_tibble(report$params$data), file.path(dir, "ssdtools_data.csv"))
+        save_png(report$params$fit_plot, file.path(dir, "ssdtools_distFitPlot.png"))
+        save_png(report$params$model_average_plot, file.path(dir, "ssdtools_model_average_plot.png"))
         utils::zip(file, list.files(dir, full.names = TRUE), flags = "-jq")
       }
     )
