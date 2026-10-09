@@ -139,20 +139,28 @@ app_server <- function(input, output, session) {
     predict_mod
   )
 
-  # The states of the step markers (step_title()): "done" once a step
-  # has a result, "busy" while it computes in the background, else "todo".
-  step_state <- function(done, busy = function() FALSE) {
+  # The steps the user has opened: a step computed in the background is not
+  # done until it has been seen.
+  visited <- reactiveVal(character())
+  observe(visited(union(visited(), input$main_nav))) |>
+    bindEvent(input$main_nav)
+
+  # The states of the step markers (step_title()): "done" once a step has
+  # been opened and has a result, "busy" while it computes in the
+  # background, else "todo".
+  step_state <- function(step, done, busy = function() FALSE) {
     reactive({
       if (isTRUE(busy())) {
         return("busy")
       }
-      if (isTRUE(tryCatch(done(), error = function(e) FALSE))) "done" else "todo"
+      has_result <- isTRUE(tryCatch(done(), error = function(e) FALSE))
+      if (has_result && step %in% visited()) "done" else "todo"
     })
   }
-  output$mark_data <- step_state(data_mod$has_data)
-  output$mark_fit <- step_state(fit_mod$has_fit)
-  output$mark_predict <- step_state(predict_mod$has_predict, predict_mod$cl_running)
-  output$mark_export <- step_state(export_mod$has_preview, export_mod$running)
+  output$mark_data <- step_state("data", data_mod$has_data)
+  output$mark_fit <- step_state("fit", fit_mod$has_fit)
+  output$mark_predict <- step_state("predict", predict_mod$has_predict, predict_mod$cl_running)
+  output$mark_export <- step_state("export", export_mod$has_preview, export_mod$running)
   for (step in c("data", "fit", "predict", "export")) {
     outputOptions(output, paste0("mark_", step), suspendWhenHidden = FALSE)
   }
