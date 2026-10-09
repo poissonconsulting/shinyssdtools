@@ -877,9 +877,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_cl_stale2",
-    english = "The fit or threshold has changed. Get CL again to update them.",
-    french = "L'ajustement ou le seuil a chang\u00e9. Recalculez les LC pour les mettre \u00e0 jour.",
-    spanish = "El ajuste o el umbral ha cambiado. Obtenga los LC de nuevo para actualizarlos."
+    english = "The fit, threshold or number of bootstrap samples has changed.",
+    french = "L'ajustement, le seuil ou le nombre de simulations bootstrap a chang\u00e9.",
+    spanish = "El ajuste, el umbral o el n\u00famero de muestras bootstrap ha cambiado."
   ),
   dplyr::tibble(
     id = "ui_cl_failed",

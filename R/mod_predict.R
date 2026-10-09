@@ -395,7 +395,7 @@ mod_predict_ui <- function(id) {
                 ),
                 span(
                   `data-translate` = "ui_cl_stale2",
-                  "The fit or threshold has changed. Get CL again to update them."
+                  "The fit, threshold or number of bootstrap samples has changed."
                 ),
                 tone = "warning",
                 action = button(
@@ -488,6 +488,8 @@ mod_predict_server <- function(
     }) |>
       bindEvent(translations())
 
+    # The choices in the language's number format, keeping the number
+    # selected, so a change of language does not change the number of samples.
     observe({
       current <- lang()
       choices <- switch(
@@ -496,11 +498,20 @@ mod_predict_server <- function(
         "spanish" = c("500", "1.000", "5.000", "10.000"),
         c("500", "1,000", "5,000", "10,000") # Default for English
       )
+      nboot <- clean_nboot(isolate(input$bootSamp) %||% "1000")
+      if (length(nboot) != 1 || is.na(nboot)) nboot <- 1000L
+      standard <- match(nboot, c(500, 1000, 5000, 10000))
+      if (is.na(standard)) {
+        choices <- c(choices, as.character(nboot))
+        selected <- as.character(nboot)
+      } else {
+        selected <- choices[standard]
+      }
       updateSelectizeInput(
         session,
         "bootSamp",
         choices = choices,
-        selected = choices[2]
+        selected = selected
       )
     }) |>
       bindEvent(lang())
@@ -872,9 +883,14 @@ mod_predict_server <- function(
       bindEvent(cl_runner$done())
 
     # The confidence limits of the current fit.
+    # The confidence limits of the current fit and number of bootstrap
+    # samples: limits from another number of samples are out of date.
     current_cl <- reactive({
       cl <- cl_result()
-      if (!is.null(cl) && identical(cl$fit, fit_mod$fit_dist())) cl
+      if (!is.null(cl) && identical(cl$fit, fit_mod$fit_dist()) &&
+        identical(cl$nboot, clean_nboot(input$bootSamp))) {
+        cl
+      }
     })
 
     # The plot's band, while the threshold is one of its percents (it always
