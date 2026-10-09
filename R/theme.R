@@ -37,7 +37,8 @@ accent <- function(primary, subtle, border, emphasis, ring_rgb) {
 }
 
 app_palettes <- list(
-  hakai = c(neutrals$hakai, accent("#2c3e50", "#eef2f6", "#cbd5e1", "#1e2b38", "71, 97, 122"), list(label = "Hakai slate", navbar_bg = "#2c3e50")),
+  # Hakai's slate pushed a step toward blue, for a little more colour.
+  hakai = c(neutrals$hakai, accent("#2b4a6f", "#eef3f9", "#c8d6e6", "#1e3550", "70, 110, 155"), list(label = "Hakai slate", navbar_bg = "#2c3e50")),
   indigo = c(neutrals$slate, accent("#4f46e5", "#eef2ff", "#c7d2fe", "#3730a3", "99, 102, 241"), list(label = "Indigo", navbar_bg = "#0f172a")),
   ocean = c(neutrals$slate, accent("#0f766e", "#f0fdfa", "#99f6e4", "#115e59", "20, 184, 166"), list(label = "Ocean", navbar_bg = "#0b1f2a")),
   graphite = c(neutrals$zinc, accent("#0969da", "#ddf4ff", "#b6e3ff", "#0550ae", "84, 174, 255"), list(label = "Graphite", navbar_bg = "#18181b")),
