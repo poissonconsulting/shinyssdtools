@@ -420,8 +420,26 @@ mod_export_server <- function(
     output$predDlPlot <- plot_handler(plots$pred, "png")
     output$predDlRds <- plot_handler(plots$pred, "rds")
 
-    # Every file there is to download, in one ZIP: the data, plots and tables
-    # that exist, the report when it is current, and the R script.
+    # The report's own files: the report as HTML and PDF and its hazard
+    # concentrations. The PDF is left out when it cannot be rendered (it needs
+    # LaTeX).
+    write_report_files <- function(report, dir) {
+      name <- tr("ui_bcanz_filename", translations())
+      writeLines(report$html, file.path(dir, paste0(name, ".html")))
+      params <- report$params
+      params$pred_cl <- report$pred_cl
+      try(render_report(report$template, params, "pdf_document", file.path(dir, paste0(name, ".pdf"))), silent = TRUE)
+      save_table(report$pred_cl, file.path(dir, paste0(name, "_hc.csv")), "csv")
+      save_table(report$pred_cl, file.path(dir, paste0(name, "_hc.xlsx")), "xlsx")
+    }
+
+    zip_dir <- function(dir, file) {
+      utils::zip(file, list.files(dir, full.names = TRUE), flags = "-jq")
+    }
+
+    # Every file there is to download, in one ZIP: each table and plot that
+    # exists in every format, the report's files when it is current, and the
+    # R script.
     output$downloadAll <- downloadHandler(
       filename = function() "ssdtools.zip",
       content = function(file) {
@@ -433,20 +451,25 @@ mod_export_server <- function(
           result <- try(save(path), silent = TRUE)
           if (inherits(result, "try-error")) unlink(path)
         }
-        for (table in tables) try_save(paste0(table$name, ".csv"), function(path) save_table(table$value(), path, "csv"))
-        for (plot in plots) try_save(paste0(plot$name, ".png"), function(path) save_png(plot$value(), path))
-        report <- current_report()
-        if (!is.null(report)) {
-          writeLines(report$html, file.path(dir, paste0(tr("ui_bcanz_filename", translations()), ".html")))
+        for (table in tables) {
+          for (format in c("csv", "xlsx")) {
+            try_save(paste0(table$name, ".", format), function(path) save_table(table$value(), path, format))
+          }
         }
+        for (plot in plots) {
+          try_save(paste0(plot$name, ".png"), function(path) save_png(plot$value(), path))
+          try_save(paste0(plot$name, ".rds"), function(path) saveRDS(plot$value(), path))
+        }
+        report <- current_report()
+        if (!is.null(report)) write_report_files(report, dir)
         script <- code()
         if (length(script) && nzchar(script)) writeLines(script, file.path(dir, "ssdtools-analysis.R"))
-        utils::zip(file, list.files(dir, full.names = TRUE), flags = "-jq")
+        zip_dir(dir, file)
       }
     )
 
-    # Every BCANZ output in one ZIP: the report as PDF and HTML, its hazard
-    # concentrations, and the plots and tables it shows.
+    # Every BCANZ output in one ZIP: the report's files, and the data, plots
+    # and tables it shows.
     output$bcanzZip <- downloadHandler(
       filename = function() paste0(tr("ui_bcanz_filename", translations()), ".zip"),
       content = function(file) {
@@ -454,17 +477,12 @@ mod_export_server <- function(
         dir <- tempfile("bcanz-")
         dir.create(dir)
         on.exit(unlink(dir, recursive = TRUE), add = TRUE)
-        name <- tr("ui_bcanz_filename", translations())
-        writeLines(report$html, file.path(dir, paste0(name, ".html")))
-        params <- report$params
-        params$pred_cl <- report$pred_cl
-        try(render_report(report$template, params, "pdf_document", file.path(dir, paste0(name, ".pdf"))), silent = TRUE)
-        readr::write_csv(dplyr::as_tibble(report$pred_cl), file.path(dir, paste0(name, "_hc.csv")))
-        readr::write_csv(dplyr::as_tibble(report$params$gof_table), file.path(dir, "ssdtools_gof_table.csv"))
-        readr::write_csv(dplyr::as_tibble(report$params$data), file.path(dir, "ssdtools_data.csv"))
+        write_report_files(report, dir)
+        save_table(report$params$data, file.path(dir, "ssdtools_data.csv"), "csv")
+        save_table(report$params$gof_table, file.path(dir, "ssdtools_gof_table.csv"), "csv")
         save_png(report$params$fit_plot, file.path(dir, "ssdtools_distFitPlot.png"))
         save_png(report$params$model_average_plot, file.path(dir, "ssdtools_model_average_plot.png"))
-        utils::zip(file, list.files(dir, full.names = TRUE), flags = "-jq")
+        zip_dir(dir, file)
       }
     )
 
