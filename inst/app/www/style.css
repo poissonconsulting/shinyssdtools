@@ -64,8 +64,10 @@
   margin-bottom: 0;
 }
 
+/* The title takes its full width when it can, so a long title (as in
+   French) puts the action below it rather than wrapping beside it. */
 .ssd-page-header-text {
-  flex: 1 1 20rem;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -282,12 +284,10 @@
 }
 
 /* shinyhelper places its help icon at the right edge of the wrapper; in a
-   title it sits just after the text instead. */
+   title it follows the last word instead, also when the title wraps. */
 .ssd-page-title .shinyhelper-wrapper,
 .ssd-card-title .shinyhelper-wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: inline;
 }
 
 .ssd-page-title .shinyhelper-container,
@@ -295,6 +295,8 @@
   position: static;
   display: inline-flex;
   align-items: center;
+  vertical-align: middle;
+  margin-left: 0.5rem;
   width: auto;
   height: auto;
   font-size: 1rem;
