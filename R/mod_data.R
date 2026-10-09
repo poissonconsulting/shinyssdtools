@@ -309,6 +309,9 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
         paginationType = "simple"
       )
     })
+    # The preview is in a collapsed accordion panel, and Shiny does not resume
+    # a suspended output when an accordion panel opens.
+    outputOptions(output, "viewUpload", suspendWhenHidden = FALSE)
 
     observe_step_button(input, "continue", "fit")
     observe({
