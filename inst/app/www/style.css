@@ -252,3 +252,44 @@
   width: 1.375rem;
   height: 1.375rem;
 }
+
+/* The About page: articles as a grid of tiles, citations with a Copy
+   button that turns into a tick once copied. */
+.ssd-about p:last-child {
+  margin-bottom: 0;
+}
+
+.ssd-about-methods ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem;
+}
+
+.ssd-about-methods li {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--bs-secondary-color);
+}
+
+.ssd-about-methods li a {
+  font-weight: 600;
+}
+
+.ssd-cite-text code {
+  color: inherit;
+}
+
+.ssd-cite .ssd-copied-icon,
+.ssd-cite .ssd-copied .ssd-copy-icon {
+  display: none;
+}
+
+.ssd-cite .ssd-copied .ssd-copied-icon {
+  display: inline;
+  color: var(--bs-success);
+}

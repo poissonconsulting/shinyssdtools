@@ -158,36 +158,13 @@ app_server <- function(input, output, session) {
   }
 
   output$ui_about <- renderUI({
-    lang <- current_lang()
-    ver <- paste("ssdtools version:", utils::packageVersion("ssdtools"))
-    sver <- paste(
-      "shinyssdtools version:",
-      utils::packageVersion("shinyssdtools")
-    )
-
-    file_suffix <- switch(
-      lang,
-      "english" = "en",
-      "french" = "fr",
-      "spanish" = "es",
-      "en"  # Default to English
-    )
-
-    file_path <- system.file(
-      package = "shinyssdtools",
-      paste0("extdata/about-", file_suffix, ".html")
-    )
-
+    file_suffix <- switch(current_lang(), "french" = "fr", "spanish" = "es", "en")
+    file_path <- system.file(package = "shinyssdtools", paste0("extdata/about-", file_suffix, ".html"))
     # Fall back to English if translation doesn't exist
-    if (!file.exists(file_path) || file_path == "") {
+    if (!nzchar(file_path)) {
       file_path <- system.file(package = "shinyssdtools", "extdata/about-en.html")
     }
-
-    tagList(
-      p(ver),
-      p(sver),
-      includeHTML(file_path)
-    )
+    about_page(paste(readLines(file_path, encoding = "UTF-8", warn = FALSE), collapse = "\n"))
   }) |>
     bindEvent(current_lang())
 

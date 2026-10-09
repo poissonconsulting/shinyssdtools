@@ -162,7 +162,7 @@ app_ui <- function() {
 
 # The Help tab: the user guide and about pages, picked in its sidebar.
 help_ui <- function() {
-  page <- function(value, icon, translate_key, default_text, output_id) {
+  page <- function(value, icon, translate_key, default_text, content) {
     nav_panel(
       title = span(
         class = "d-inline-flex align-items-center gap-2",
@@ -171,15 +171,15 @@ help_ui <- function() {
       ),
       value = value,
       page_header(span(`data-translate` = translate_key, default_text)),
-      card(card_body(uiOutput(output_id)))
+      content
     )
   }
   navset_pill_list(
     id = "help_page",
     well = FALSE,
     widths = c(3, 9),
-    page("guide", "book-open", "ui_navguide", "User Guide", "ui_userguide"),
-    page("about", "info", "ui_navabout", "About", "ui_about")
+    page("guide", "book-open", "ui_navguide", "User Guide", card(card_body(uiOutput("ui_userguide")))),
+    page("about", "info", "ui_navabout", "About", uiOutput("ui_about"))
   )
 }
 
