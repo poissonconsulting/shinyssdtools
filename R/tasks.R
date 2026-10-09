@@ -99,7 +99,7 @@ cl_percents <- c(1, 5, 10, 20)
 #' and the threshold (for the plot's band, the model-averaged row of the
 #' confidence limits table and the report), and the estimates of each
 #' distribution for the table: by percent, at the threshold and at
-#' [cl_percents]; by concentration, the fraction affected at `conc`, with its
+#' `cl_percents`; by concentration, the fraction affected at `conc`, with its
 #' model average. The percents of one call share their bootstrap fits, so
 #' extra percents cost little. A model-averaged curve already bootstrapped
 #' with the same fit and number of samples (`pred`) is used rather than
