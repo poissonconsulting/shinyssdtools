@@ -4,7 +4,7 @@
 \alias{task_runner}
 \title{Create a runner for slow jobs}
 \usage{
-task_runner(background = mirai::daemons_set())
+task_runner(background = background_jobs())
 }
 \arguments{
 \item{background}{Logical scalar: whether to run jobs on mirai daemons.}
@@ -19,9 +19,10 @@ settles, and \code{done()} then becomes \code{list(n, value)} or \code{list(n, e
 of a job that was cancelled or replaced is discarded.
 }
 \details{
-With mirai daemons set (\code{inst/app/global.R}), jobs run on a daemon and
-settle through a promise, so the session, and every other session in the
-same R process, stays responsive. Without daemons (as in \code{testServer()}
-tests) a job runs in the session as soon as it is invoked.
+In the background, jobs run on mirai daemons, started by the first job
+(\code{\link[=start_daemons]{start_daemons()}}), and settle through a promise, so the session, and
+every other session in the same R process, stays responsive. Otherwise (no
+daemons, as in \code{testServer()} tests) a job runs in the session as soon as
+it is invoked, and the page shows that it is busy (\code{busy.js}).
 }
 \keyword{internal}

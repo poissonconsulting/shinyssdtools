@@ -39,30 +39,29 @@ rmarkdown::render("inst/extdata/about-es.md", output_format = "html_fragment")
 # 3. Build helpfiles from user guides (single source of truth)
 source("scripts/build-helpfiles.R")
 
+# Deploy the app with its number of mirai daemons per worker process, which
+# run Get CL and the report (see task_runner()). Each is an R process with
+# the package loaded (about 0.3 GB, more after a bootstrap), started on the
+# first Get CL or report; 0 runs them in the session, which is frozen until
+# they are done but uses no more memory. Set it to fit the instance's memory
+# and its maximum number of worker processes.
+deploy <- function(account, appName, daemons) {
+  setting <- "inst/app/daemons"
+  writeLines(as.character(daemons), setting)
+  on.exit(unlink(setting))
+  rsconnect::deployApp(account = account, appName = appName, forceUpdate = TRUE)
+}
+
 # 4. Deploy to poissonconsulting test site
-rsconnect::deployApp(
-  account = "poissonconsulting",
-  appName = "shinyssdtools-dev",
-  forceUpdate = TRUE
-)
+deploy("poissonconsulting", "shinyssdtools-dev", daemons = 1)
 
 # 5. Deploy to poissonconsulting live site
-rsconnect::deployApp(
-  account = "poissonconsulting",
-  appName = "shinyssdtools",
-  forceUpdate = TRUE
-)
+deploy("poissonconsulting", "shinyssdtools", daemons = 1)
 
-# 6. Deploy to bcgov test site (requires bcgov-env account access)
-# rsconnect::deployApp(
-#   account = "bcgov-env",
-#   appName = "shinyssdtools_test",
-#   forceUpdate = TRUE
-# )
+# 6. Deploy to bcgov test site (requires bcgov-env account access). No
+# daemons until its instances have the memory for them: 2 GB instances with
+# up to 6 worker processes do not.
+# deploy("bcgov-env", "shinyssdtools_test", daemons = 0)
 
 # 7. Deploy to bcgov live site (requires bcgov-env account access)
-# rsconnect::deployApp(
-#   account = "bcgov-env",
-#   appName = "ssdtools",
-#   forceUpdate = TRUE
-# )
+# deploy("bcgov-env", "ssdtools", daemons = 0)

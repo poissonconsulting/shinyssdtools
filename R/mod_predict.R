@@ -19,6 +19,89 @@
 mod_predict_ui <- function(id) {
   ns <- NS(id)
 
+  # Get CL, or Update CL while the limits are out of date: both labels are in
+  # the page and switched in the browser, so the button does not re-render.
+  get_cl <- button(
+    ns("getCl"),
+    tagList(
+      span(
+        `data-display-if` = sprintf("!%s", paste_js("cl_stale", ns)),
+        `data-ns-prefix` = "",
+        span(
+          class = "d-inline-flex align-items-center gap-2",
+          lucide("calculator"),
+          span(`data-translate` = "ui_3clbutton", "Get CL")
+        )
+      ),
+      span(
+        `data-display-if` = paste_js("cl_stale", ns),
+        `data-ns-prefix` = "",
+        span(
+          class = "d-inline-flex align-items-center gap-2",
+          lucide("refresh-cw"),
+          span(`data-translate` = "ui_update_cl", "Update CL")
+        )
+      )
+    ),
+    variant = "soft",
+    class = "w-100",
+    `data-sync-busy` = if (!background_jobs()) ""
+  )
+  update_cl <- button(
+    ns("getClNotice"),
+    span(`data-translate` = "ui_update_cl", "Update CL"),
+    icon = "refresh-cw",
+    variant = "outline",
+    size = "sm",
+    `data-sync-busy` = if (!background_jobs()) ""
+  )
+  cl_busy <- function(cancel = NULL) {
+    div(
+      role = "status",
+      class = "d-flex flex-wrap align-items-center gap-2 small",
+      busy_icon(),
+      span(class = "flex-grow-1", `data-translate` = "ui_cl_running", "Computing confidence limits"),
+      cancel
+    )
+  }
+  # Where Get CL was, while the limits are computed: from the server, with
+  # Cancel, when they are computed in the background, else from the page
+  # (busy.js), as the session cannot respond until they are done.
+  cl_actions <- if (background_jobs()) {
+    tagList(
+      conditionalPanel(
+        condition = sprintf("!%s", paste_js("cl_running", ns)),
+        get_cl,
+        shiny::helpText(htmlOutput(ns("describeTime")))
+      ),
+      conditionalPanel(
+        condition = paste_js("cl_running", ns),
+        cl_busy(button(
+          ns("cancelClAside"),
+          span(`data-translate` = "ui_cancel", "Cancel"),
+          icon = "x",
+          variant = "outline",
+          size = "sm"
+        ))
+      )
+    )
+  } else {
+    div(
+      `data-sync-scope` = "",
+      div(class = "ssd-sync-hide", get_cl, shiny::helpText(htmlOutput(ns("describeTime")))),
+      div(class = "ssd-sync-show", cl_busy())
+    )
+  }
+  update_cl_action <- if (background_jobs()) {
+    update_cl
+  } else {
+    div(
+      `data-sync-scope` = "",
+      div(class = "ssd-sync-hide", update_cl),
+      div(class = "ssd-sync-show", cl_busy())
+    )
+  }
+
   title <- span(`data-translate` = "ui_tabpredict", "Estimate hazard concentration") |>
     shinyhelper::helper(type = "markdown", content = "predictTab", size = "l", colour = color_primary, buttonLabel = "OK")
 
@@ -129,55 +212,7 @@ mod_predict_ui <- function(id) {
           selected = "1000",
           width = "190px"
         ),
-        conditionalPanel(
-          condition = sprintf("!%s", paste_js("cl_running", ns)),
-          # Get CL, or Update CL while the limits are out of date: both labels
-          # are in the page and switched in the browser, so the button does
-          # not re-render.
-          button(
-            ns("getCl"),
-            tagList(
-              span(
-                `data-display-if` = sprintf("!%s", paste_js("cl_stale", ns)),
-                `data-ns-prefix` = "",
-                span(
-                  class = "d-inline-flex align-items-center gap-2",
-                  lucide("calculator"),
-                  span(`data-translate` = "ui_3clbutton", "Get CL")
-                )
-              ),
-              span(
-                `data-display-if` = paste_js("cl_stale", ns),
-                `data-ns-prefix` = "",
-                span(
-                  class = "d-inline-flex align-items-center gap-2",
-                  lucide("refresh-cw"),
-                  span(`data-translate` = "ui_update_cl", "Update CL")
-                )
-              )
-            ),
-            variant = "soft",
-            class = "w-100"
-          ),
-          shiny::helpText(htmlOutput(ns("describeTime")))
-        ),
-        # Where Get CL was, while the limits are computed.
-        conditionalPanel(
-          condition = paste_js("cl_running", ns),
-          div(
-            role = "status",
-            class = "d-flex flex-wrap align-items-center gap-2 small",
-            busy_icon(),
-            span(class = "flex-grow-1", `data-translate` = "ui_cl_running", "Computing confidence limits"),
-            button(
-              ns("cancelClAside"),
-              span(`data-translate` = "ui_cancel", "Cancel"),
-              icon = "x",
-              variant = "outline",
-              size = "sm"
-            )
-          )
-        )
+        cl_actions
       ),
       # ui plot formatting -------------------------------------------------------
       bslib::accordion_panel(
@@ -417,13 +452,7 @@ mod_predict_ui <- function(id) {
                   "The fit, threshold or number of bootstrap samples has changed."
                 ),
                 tone = "warning",
-                action = button(
-                  ns("getClNotice"),
-                  span(`data-translate` = "ui_update_cl", "Update CL"),
-                  icon = "refresh-cw",
-                  variant = "outline",
-                  size = "sm"
-                )
+                action = update_cl_action
               )
             ),
             conditionalPanel(
@@ -829,8 +858,8 @@ mod_predict_server <- function(
     })
 
     # confidence limits -------------------------------------------------------
-    # Get CL bootstraps on a mirai daemon (task_runner()), so the app stays
-    # responsive. One run covers the model-averaged curve at every whole
+    # Get CL bootstraps with task_runner(), on a mirai daemon unless daemons
+    # are turned off, so the app stays responsive. One run covers the model-averaged curve at every whole
     # percent (the plot's band and the report) and the table at the threshold
     # and at 1, 5, 10 and 20% affected (cl_job()). A threshold change shows
     # whichever of these still apply; a new fit discards them all.
