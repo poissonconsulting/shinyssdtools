@@ -343,21 +343,36 @@ mod_export_server <- function(
     }) |>
       bindEvent(input$previewReport)
 
-    output$reportDlPdf <- downloadHandler(
-      filename = function() {
-        trans <- translations()
-        paste0(tr("ui_bcanz_filename", trans), ".pdf")
-      },
-      content = function(file) {
-        report <- req(current_report())
+    # The report as PDF, rendered on its first download and reused by the
+    # later ones until the report changes.
+    pdf_report <- NULL
+    pdf_file <- NULL
+    report_pdf <- function(report) {
+      if (!identical(pdf_report, report) || !file.exists(pdf_file %||% "")) {
+        if (!is.null(pdf_file)) unlink(pdf_file)
+        pdf_report <<- NULL
+        pdf_file <<- tempfile("report-", fileext = ".pdf")
         params <- report$params
         params$pred_cl <- report$pred_cl
         render_report(
           report$template,
           params,
           output_format = "pdf_document",
-          output_file = file
+          output_file = pdf_file
         )
+        pdf_report <<- report
+      }
+      pdf_file
+    }
+    session$onSessionEnded(function() if (!is.null(pdf_file)) unlink(pdf_file))
+
+    output$reportDlPdf <- downloadHandler(
+      filename = function() {
+        trans <- translations()
+        paste0(tr("ui_bcanz_filename", trans), ".pdf")
+      },
+      content = function(file) {
+        file.copy(report_pdf(req(current_report())), file)
       }
     )
 
@@ -426,9 +441,7 @@ mod_export_server <- function(
     write_report_files <- function(report, dir) {
       name <- tr("ui_bcanz_filename", translations())
       writeLines(report$html, file.path(dir, paste0(name, ".html")))
-      params <- report$params
-      params$pred_cl <- report$pred_cl
-      try(render_report(report$template, params, "pdf_document", file.path(dir, paste0(name, ".pdf"))), silent = TRUE)
+      try(file.copy(report_pdf(report), file.path(dir, paste0(name, ".pdf"))), silent = TRUE)
       save_table(report$pred_cl, file.path(dir, paste0(name, "_hc.csv")), "csv")
       save_table(report$pred_cl, file.path(dir, paste0(name, "_hc.xlsx")), "xlsx")
     }
