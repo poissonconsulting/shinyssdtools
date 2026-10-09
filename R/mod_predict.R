@@ -158,6 +158,23 @@ mod_predict_ui <- function(id) {
             class = "w-100"
           ),
           shiny::helpText(htmlOutput(ns("describeTime")))
+        ),
+        # Where Get CL was, while the limits are computed.
+        conditionalPanel(
+          condition = paste_js("cl_running", ns),
+          div(
+            role = "status",
+            class = "d-flex flex-wrap align-items-center gap-2 small",
+            busy_icon(),
+            span(class = "flex-grow-1", `data-translate` = "ui_cl_running", "Computing confidence limits"),
+            button(
+              ns("cancelClAside"),
+              span(`data-translate` = "ui_cancel", "Cancel"),
+              icon = "x",
+              variant = "outline",
+              size = "sm"
+            )
+          )
         )
       ),
       # ui plot formatting -------------------------------------------------------
@@ -854,7 +871,7 @@ mod_predict_server <- function(
       bindEvent(input$getCl, input$getClNotice)
 
     observe(cl_runner$cancel()) |>
-      bindEvent(input$cancelCl)
+      bindEvent(input$cancelCl, input$cancelClAside)
 
     observe({
       done <- cl_runner$done()
