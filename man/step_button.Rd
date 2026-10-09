@@ -16,11 +16,11 @@ step_button(id, translate_key, default_text, variant = "primary")
 \item{variant}{Character string button variant, as for \code{\link[=button]{button()}}.}
 }
 \value{
-A button tag; a primary one is right aligned in its own row.
+A button tag.
 }
 \description{
-The Continue button of a step (primary, at the top right of its content),
-or the button of an empty state that opens the step it needs (outline).
-Its server side is \code{\link[=observe_step_button]{observe_step_button()}}.
+The Continue button of a step (primary, in its page header), or the button
+of an empty state that opens the step it needs (outline). Its server side
+is \code{\link[=observe_step_button]{observe_step_button()}}.
 }
 \keyword{internal}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{format_r_code}
 \alias{format_r_code}
-\title{Format R code with proper styling}
+\title{Format R code}
 \usage{
 format_r_code(code_lines)
 }
@@ -10,9 +10,10 @@ format_r_code(code_lines)
 \item{code_lines}{Character vector of R code lines}
 }
 \value{
-Single character string with formatted, styled code
+Single character string of the code
 }
 \description{
-Format R code with proper styling
+Joins the lines of code, which are written in tidyverse style, and quotes
+their strings with single quotes.
 }
 \keyword{internal}

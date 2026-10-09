@@ -13,7 +13,7 @@ notice(
 )
 }
 \arguments{
-\item{icon}{Icon tag.}
+\item{icon}{Icon: a \code{\link[=lucide]{lucide()}} name or tag.}
 
 \item{title}{Notice title.}
 

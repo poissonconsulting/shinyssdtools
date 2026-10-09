@@ -99,7 +99,7 @@ cl_percents <- c(1, 5, 10, 20)
 #' and the threshold (for the plot's band, the model-averaged row of the
 #' confidence limits table and the report), and the estimates of each
 #' distribution for the table: by percent, at the threshold and at
-#' [cl_percents]; by concentration, the fraction affected at `conc`, with its
+#' `cl_percents`; by concentration, the fraction affected at `conc`, with its
 #' model average. The percents of one call share their bootstrap fits, so
 #' extra percents cost little. A model-averaged curve already bootstrapped
 #' with the same fit and number of samples (`pred`) is used rather than
@@ -160,15 +160,16 @@ cl_job <- function(fit, threshold_type, percent, conc, nboot, pred = NULL) {
 #' @param percent Optional numeric scalar percent of species affected.
 #' @param nboot Integer scalar number of bootstrap samples.
 #' @return Model-averaged hazard concentrations, as from
-#'   [ssdtools::ssd_hc()].
+#'   [ssdtools::ssd_hc_bcanz()].
 #' @keywords internal
 model_average_cl <- function(fit, percent = NULL, nboot) {
-  loadNamespace("ssdtools")
-  stats::predict(
+  ssdtools::ssd_hc_bcanz(
     fit,
     proportion = unique(c(1:99, percent)) / 100,
+    ci = TRUE,
+    average = TRUE,
     nboot = nboot,
-    ci = TRUE
+    min_pboot = 0.8
   )
 }
 
@@ -239,6 +240,19 @@ cl_limits_text <- function(table, scale = 1, big_mark = ",", decimal_mark = ".")
     decimal.mark = decimal_mark
   )
   sprintf(" (%s\u2013%s)", limits[[1]], limits[[2]])
+}
+
+#' Format a percent
+#'
+#' English writes the percent sign straight after the number; French and
+#' Spanish separate them by a non-breaking space.
+#' @param x Number, or character string of a formatted number.
+#' @param lang Character string language: `"english"`, `"french"` or
+#'   `"spanish"`.
+#' @return A character string.
+#' @keywords internal
+percent_text <- function(x, lang) {
+  paste0(x, if (identical(lang, "english")) "%" else "\u00a0%")
 }
 
 #' Report confidence limits

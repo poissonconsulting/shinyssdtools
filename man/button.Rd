@@ -11,6 +11,8 @@ button(
   variant = c("primary", "soft", "outline", "ghost"),
   size = NULL,
   class = NULL,
+  download = FALSE,
+  busy = FALSE,
   ...
 )
 }
@@ -19,7 +21,7 @@ button(
 
 \item{label}{Button label.}
 
-\item{icon}{Optional icon tag shown before the label.}
+\item{icon}{Optional icon: a \code{\link[=lucide]{lucide()}} name or tag, shown before the label.}
 
 \item{variant}{Character string: \code{"primary"}, \code{"soft"}, \code{"outline"} or
 \code{"ghost"}.}
@@ -28,10 +30,18 @@ button(
 
 \item{class}{Optional character string of extra classes.}
 
-\item{...}{Further arguments passed to \code{\link[shiny:actionButton]{shiny::actionButton()}}.}
+\item{download}{Logical scalar: whether the button downloads the file of
+the \code{\link[shiny:downloadHandler]{shiny::downloadHandler()}} output \code{id}.}
+
+\item{busy}{Logical scalar: whether a download button shows a spinner, and
+is disabled, from its click until \code{\link[=download_done]{download_done()}} is called for it. For
+a file that takes some seconds to prepare.}
+
+\item{...}{Further arguments passed to \code{\link[shiny:actionButton]{shiny::actionButton()}} or
+\code{\link[shiny:downloadLink]{shiny::downloadLink()}}.}
 }
 \value{
-An action button tag.
+A button tag.
 }
 \description{
 Primary (filled) is the next step of the analysis, at most one per screen.

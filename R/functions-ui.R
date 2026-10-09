@@ -38,250 +38,13 @@ static_label_input <- function(
   )
 }
 
-#' Generate DataTables options with language support
-#' @param lang Character string language code: "english", "french", or "spanish" (default: "english")
-#' @return List of DataTables options including pageLength, language translations, and column definitions
-#' @keywords internal
-dt_options <- function(lang = "english") {
-  # Language-specific translations
-  lang_options <- switch(
-    lang,
-    "french" = list(
-      search = "Rechercher :",
-      lengthMenu = "Afficher _MENU_ entr\u00e9es",
-      info = "Affichage de _START_ \u00e0 _END_ sur _TOTAL_ entr\u00e9es",
-      infoEmpty = "Aucune donn\u00e9e disponible",
-      infoFiltered = "(filtr\u00e9 \u00e0 partir de _MAX_ entr\u00e9es au total)",
-      zeroRecords = "Aucun enregistrement correspondant trouv\u00e9",
-      paginate = list(
-        first = "Premier",
-        last = "Dernier",
-        `next` = "Suivant",
-        previous = "Pr\u00e9c\u00e9dent"
-      ),
-      processing = "Traitement en cours...",
-      loadingRecords = "Chargement des enregistrements...",
-      emptyTable = "Aucune donn\u00e9e disponible dans le tableau"
-    ),
-    "spanish" = list(
-      search = "Buscar datos:",
-      lengthMenu = "Mostrar _MENU_ entradas",
-      info = "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-      infoEmpty = "No hay datos disponibles",
-      infoFiltered = "(filtrado de _MAX_ entradas totales)",
-      zeroRecords = "No se encontraron registros coincidentes",
-      paginate = list(
-        first = "Primero",
-        last = "\u00daltimo",
-        `next` = "Siguiente",
-        previous = "Anterior"
-      ),
-      processing = "Procesando...",
-      loadingRecords = "Cargando registros...",
-      emptyTable = "No hay datos disponibles en la tabla"
-    ),
-    # Default English
-    list(
-      search = "Search data:",
-      lengthMenu = "Show _MENU_ entries",
-      info = "Showing _START_ to _END_ of _TOTAL_ entries",
-      infoEmpty = "No data available",
-      infoFiltered = "(filtered from _MAX_ total entries)",
-      zeroRecords = "No matching records found",
-      paginate = list(
-        first = "First",
-        last = "Last",
-        `next` = "Next",
-        previous = "Previous"
-      ),
-      processing = "Processing...",
-      loadingRecords = "Loading records...",
-      emptyTable = "No data available in table"
-    )
-  )
-
-  list(
-    # Pagination and display
-    pageLength = 15,
-    lengthMenu = c(10, 15, 25, 50, 100),
-    # Search and filtering
-    searchHighlight = TRUE,
-    search = list(regex = TRUE, caseInsensitive = TRUE),
-
-    # Column features
-    columnDefs = list(
-      list(className = 'dt-center', targets = '_all'),
-      list(searchable = TRUE, targets = '_all')
-    ),
-
-    # Language support
-    language = lang_options
-  )
-}
-
-#' Create table download popover button
-#' @param tab Character string module prefix for button IDs (default: "fit")
-#' @param ns Shiny namespace function
-#' @return bslib popover element with download button and format options
-#' @keywords internal
-ui_download_popover_table <- function(tab = "fit", ns) {
-  bslib::popover(
-    actionButton(
-      ns(paste0(tab, "DownloadBtnTbl")),
-      label = tagList(
-        bsicons::bs_icon("download"),
-        span(`data-translate` = "ui_2download", "Download")
-      ),
-      class = "btn-light border btn-sm align-self-start"
-    ),
-    card(
-      class = card_shadow,
-      style = "width: 250px; margin-top: 10px;",
-      card_body(
-        div(
-          style = "display: grid; gap: 8px;",
-          downloadButton(
-            ns(paste0(tab, "DlXlsx")),
-            label = span(`data-translate` = "ui_2dlxlsx", "XLSX file"),
-            class = "btn-light border btn-sm w-100"
-          ),
-          downloadButton(
-            ns(paste0(tab, "DlCsv")),
-            label = span(`data-translate` = "ui_2dlcsv", "CSV File"),
-            class = "btn-light border btn-sm w-100"
-          )
-        )
-      )
-    ),
-    placement = "bottom"
-  )
-}
-
-#' Create report download popover button
-#' @param tab Character string module prefix for button IDs (default: "report")
-#' @param ns Shiny namespace function
-#' @return bslib popover element with download button and format options
-#' @keywords internal
-ui_download_report <- function(tab = "report", ns) {
-  bslib::popover(
-    actionButton(
-      ns(paste0(tab, "DownloadBtnReport")),
-      label = tagList(
-        bsicons::bs_icon("download"),
-        span(`data-translate` = "ui_2download", "Download")
-      ),
-      class = "btn-light border btn-sm align-self-start"
-    ),
-    card(
-      class = card_shadow,
-      style = "width: 250px; margin-top: 10px;",
-      card_body(
-        div(
-          style = "display: grid; gap: 8px;",
-          downloadButton(
-            ns(paste0(tab, "DlPdf")),
-            label = span(`data-translate` = "ui_2dlpdf", "PDF file"),
-            class = "btn-light border btn-sm w-100"
-          ),
-          downloadButton(
-            ns(paste0(tab, "DlHtml")),
-            label = span(`data-translate` = "ui_2dlhtml", "HTML File"),
-            class = "btn-light border btn-sm w-100"
-          )
-        )
-      )
-    ),
-    placement = "bottom"
-  )
-}
-
-#' Create plot download popover button with settings
-#' @param tab Character string module prefix for button IDs (default: "fit")
-#' @param ns Shiny namespace function
-#' @return bslib popover element with download button, format options, and PNG settings
-#' @keywords internal
-ui_download_popover <- function(tab = "fit", ns) {
-  bslib::popover(
-    actionButton(
-      ns(paste0(tab, "DownloadBtn")),
-      label = tagList(
-        bsicons::bs_icon("download"),
-        span(`data-translate` = "ui_2download", "Download")
-      ),
-      class = "btn-light border btn-sm align-self-start"
-    ),
-    card(
-      class = card_shadow,
-      style = "width: 250px; margin-top: 10px;",
-      card_body(
-        div(
-          style = "display: grid; gap: 8px;",
-          downloadButton(
-            ns(paste0(tab, "DlPlot")),
-            label = span(`data-translate` = "ui_2dlplot", "PNG file"),
-            class = "btn-light border btn-sm w-100"
-          ),
-          downloadButton(
-            ns(paste0(tab, "DlRds")),
-            label = span(`data-translate` = "ui_2dlrds", "RDS File"),
-            class = "btn-light border btn-sm w-100"
-          )
-        ),
-        div(
-          h6(
-            span(`data-translate` = "ui_2png", "PNG Format Settings"),
-            style = "margin-bottom: 10px;"
-          ),
-          div(
-            style = "display: flex; gap: 5px; justify-content: space-between;",
-            div(
-              style = "flex: 1; min-width: 0;",
-              numericInput(
-                ns("width"),
-                label = span(`data-translate` = "ui_2width", "Width"),
-                value = 6,
-                min = 1,
-                max = 50,
-                step = 1
-              )
-            ),
-            div(
-              style = "flex: 1; min-width: 0;",
-              numericInput(
-                ns("height"),
-                label = span(`data-translate` = "ui_2height", "Height"),
-                value = 4,
-                min = 1,
-                max = 50,
-                step = 1
-              )
-            ),
-            div(
-              style = "flex: 1; min-width: 0;",
-              numericInput(
-                ns("dpi"),
-                label = span(`data-translate` = "ui_2dpi", "DPI"),
-                value = 300,
-                min = 50,
-                max = 2000,
-                step = 50
-              )
-            )
-          )
-        )
-      )
-    ),
-    placement = "bottom"
-  )
-}
-
 #' Build GOF-style header tooltips named vector
 #' @param trans Translations reactive value
 #' @param lang Character string language code ("english", "french", "spanish")
 #' @return Named character vector mapping column names to tooltip descriptions
 #' @keywords internal
 gof_header_tooltips <- function(trans, lang = "english") {
-  # Descriptions sourced from inst/extdata/about-{lang}.md
+  # Descriptions sourced from the gof section of inst/extdata/about-{lang}.md
   tooltips <- switch(lang,
     "french" = c(
       dist = "Distribution",
@@ -340,54 +103,161 @@ gof_header_tooltips <- function(trans, lang = "english") {
   tooltips
 }
 
-#' Create DT headerCallback JS for column tooltips
-#' @param tooltips Named character vector mapping column names to tooltip text
-#' @return DT::JS object with headerCallback function
+#' Language strings for reactable tables
+#' @param lang Character string language: "english", "french" or "spanish".
+#' @return A [reactable::reactableLang()] object.
 #' @keywords internal
-dt_header_tooltip_callback <- function(tooltips) {
-  json <- as.character(jsonlite::toJSON(as.list(tooltips), auto_unbox = TRUE))
-  DT::JS(sprintf(
-    "function(thead, data, start, end, display) {
-      var tooltips = %s;
-      $(thead).find('th').each(function() {
-        var text = $(this).text().trim();
-        if (tooltips[text]) {
-          $(this).attr('title', tooltips[text]);
-          $(this).css('cursor', 'help');
-        }
-      });
-    }",
-    json
-  ))
+table_lang <- function(lang = "english") {
+  switch(
+    lang,
+    "french" = reactable::reactableLang(
+      searchPlaceholder = "Rechercher",
+      noData = "Aucune donn\u00e9e",
+      pageInfo = "{rowStart} \u00e0 {rowEnd} sur {rows} lignes",
+      pagePrevious = "\u2039",
+      pageNext = "\u203a",
+      pagePreviousLabel = "Page pr\u00e9c\u00e9dente",
+      pageNextLabel = "Page suivante"
+    ),
+    "spanish" = reactable::reactableLang(
+      searchPlaceholder = "Buscar",
+      noData = "No hay datos",
+      pageInfo = "{rowStart} a {rowEnd} de {rows} filas",
+      pagePrevious = "\u2039",
+      pageNext = "\u203a",
+      pagePreviousLabel = "P\u00e1gina anterior",
+      pageNextLabel = "P\u00e1gina siguiente"
+    ),
+    reactable::reactableLang(
+      searchPlaceholder = "Search",
+      pageInfo = "{rowStart} to {rowEnd} of {rows} rows",
+      pagePrevious = "\u2039",
+      pageNext = "\u203a",
+      pagePreviousLabel = "Previous page",
+      pageNextLabel = "Next page"
+    )
+  )
 }
 
-#' Add weight column color bar to a DT datatable
-#' @param dt A DT datatable object
-#' @param data The data frame used to create the datatable
-#' @param trans Translations reactive value
-#' @return The DT datatable with color bar formatting on the weight column
+#' Create a table in the app's style
+#'
+#' A reactable with the app's theme. Column names in `tooltips` explain
+#' themselves on hover, and the weight column, when there is one, shows its
+#' value as a bar. Each column is as narrow as its contents allow, so a wide
+#' table such as the goodness of fit fits a step's content, and the first
+#' column stays in view when a table scrolls sideways.
+#' @param data A data frame.
+#' @param lang Character string language, as for [table_lang()].
+#' @param tooltips Optional named character vector of column descriptions.
+#' @param weight Optional character string name of the weight column.
+#' @param ... Further arguments passed to [reactable::reactable()].
+#' @return A reactable widget.
 #' @keywords internal
-dt_weight_color_bar <- function(dt, data, trans) {
-  wt_col <- grep(
-    paste0("^wt$|^weight$|^", tr("ui_2weight", trans), "$"),
-    names(data),
-    value = TRUE
-  )[1]
-  if (!is.na(wt_col) && length(data[[wt_col]]) > 0 && any(!is.na(data[[wt_col]]))) {
-    wt_range <- range(data[[wt_col]], na.rm = TRUE)
-    dt <- DT::formatStyle(
-      dt,
-      wt_col,
-      background = DT::styleColorBar(
-        c(0, max(wt_range[2], 0.01)),
-        color = "#d4edda"
+app_table <- function(data, lang = "english", tooltips = NULL, weight = NULL, ...) {
+  first <- names(data)[1]
+  columns <- lapply(stats::setNames(nm = names(data)), function(name) {
+    is_weight <- identical(name, weight)
+    tip <- if (!is.null(tooltips)) tooltips[name] else NA
+    header <- if (!is.na(tip)) {
+      function(value) span(class = "ssd-has-tip", title = unname(tip), value)
+    }
+    cell <- if (is_weight) {
+      function(value) {
+        div(
+          class = "ssd-weight",
+          div(class = "ssd-weight-bar", style = sprintf("width: %.0f%%", 100 * max(value, 0.02))),
+          span(format(value))
+        )
+      }
+    }
+    # Wide enough for the longest of the name and the values (about 7.5 px a
+    # character, and the cell padding), so a narrow column does not wrap;
+    # long text, such as species names, wraps beyond 160 px.
+    chars <- max(nchar(name), nchar(as.character(data[[name]])), na.rm = TRUE)
+    min_width <- if (is_weight) 116 else min(ceiling(chars * 7.5) + 16, 160)
+    args <- Filter(Negate(is.null), list(
+      header = header,
+      cell = cell,
+      minWidth = min_width,
+      # The bar starts at the left, so its header does too.
+      align = if (is_weight) "left",
+      sticky = if (identical(name, first)) "left"
+    ))
+    do.call(reactable::colDef, args)
+  })
+  reactable::reactable(
+    data,
+    columns = columns,
+    highlight = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    theme = app_table_theme(),
+    language = table_lang(lang),
+    ...
+  )
+}
+
+#' Create a step's page header
+#'
+#' The step's title, with its next action at the right. The title wraps beside
+#' the action, which drops below it on narrow screens.
+#' @param title Title tag.
+#' @param action Optional action, such as a Continue button.
+#' @return A div.
+#' @keywords internal
+page_header <- function(title, action = NULL) {
+  div(
+    class = "d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4",
+    div(class = "ssd-page-header-text", h1(class = "ssd-page-title", title)),
+    if (!is.null(action)) div(class = "flex-shrink-0", action)
+  )
+}
+
+#' Create a panel
+#'
+#' A card with a title, optional muted description and an action at the
+#' right of the title.
+#' @param title Title tag.
+#' @param ... Panel content.
+#' @param description Optional description under the title.
+#' @param action Optional action tag.
+#' @param class Optional character string of extra card classes.
+#' @return A bslib card.
+#' @keywords internal
+panel <- function(title, ..., description = NULL, action = NULL, class = NULL) {
+  card(
+    # The panels of a step are spaced by the flex gap around them.
+    class = paste(c("mb-0", class), collapse = " "),
+    full_screen = FALSE,
+    card_body(
+      gap = "1rem",
+      div(
+        class = "d-flex align-items-start justify-content-between gap-3",
+        div(
+          h2(class = "ssd-card-title mb-0", title),
+          if (!is.null(description)) div(class = "small text-body-secondary mt-1", description)
+        ),
+        if (!is.null(action)) div(class = "flex-shrink-0", action)
       ),
-      backgroundSize = "98% 80%",
-      backgroundRepeat = "no-repeat",
-      backgroundPosition = "center"
+      ...
     )
-  }
-  dt
+  )
+}
+
+#' Lay out a step
+#'
+#' The step's settings in an aside beside its content on large screens, and
+#' below it on small ones, so a phone shows the content first.
+#' @param aside Aside content.
+#' @param main Main content.
+#' @return A Bootstrap row.
+#' @keywords internal
+step_layout <- function(aside, main) {
+  div(
+    class = "row g-4",
+    div(class = "col-lg-4 order-last order-lg-first", div(class = "ssd-aside", aside)),
+    div(class = "col-lg-8", main)
+  )
 }
 
 #' Create a button in one of the app's variants
@@ -399,13 +269,19 @@ dt_weight_color_bar <- function(dt, data, trans) {
 #' which keeps Shiny's `btn-default` styles off the button.
 #' @param id Character string input ID.
 #' @param label Button label.
-#' @param icon Optional icon tag shown before the label.
+#' @param icon Optional icon: a [lucide()] name or tag, shown before the label.
 #' @param variant Character string: `"primary"`, `"soft"`, `"outline"` or
 #'   `"ghost"`.
 #' @param size Optional character string Bootstrap size: `"sm"` or `"lg"`.
 #' @param class Optional character string of extra classes.
-#' @param ... Further arguments passed to [shiny::actionButton()].
-#' @return An action button tag.
+#' @param download Logical scalar: whether the button downloads the file of
+#'   the [shiny::downloadHandler()] output `id`.
+#' @param busy Logical scalar: whether a download button shows a spinner, and
+#'   is disabled, from its click until [download_done()] is called for it. For
+#'   a file that takes some seconds to prepare.
+#' @param ... Further arguments passed to [shiny::actionButton()] or
+#'   [shiny::downloadLink()].
+#' @return A button tag.
 #' @keywords internal
 button <- function(
   id,
@@ -414,6 +290,8 @@ button <- function(
   variant = c("primary", "soft", "outline", "ghost"),
   size = NULL,
   class = NULL,
+  download = FALSE,
+  busy = FALSE,
   ...
 ) {
   variant <- match.arg(variant)
@@ -428,16 +306,27 @@ button <- function(
     if (!is.null(size)) paste0("btn-", size),
     class
   )
-  actionButton(
-    id,
-    span(class = "d-inline-flex align-items-center gap-2", icon, label),
-    class = paste(classes, collapse = " "),
-    ...
-  )
+  if (is.character(icon) && !inherits(icon, "html")) icon <- lucide(icon)
+  if (busy) {
+    # Both icons, so the spinner can replace the icon in the browser; in the
+    # button's text colour, as its icon is.
+    icon <- tagList(span(class = "ssd-idle-icon", icon), span(class = "ssd-busy-icon", lucide("loader-2", "ssd-spin")))
+  }
+  label <- span(class = "d-inline-flex align-items-center gap-2", icon, label)
+  if (download) {
+    return(downloadLink(
+      id,
+      label,
+      class = paste(c("btn btn-default", classes), collapse = " "),
+      `data-busy-download` = if (busy) "",
+      ...
+    ))
+  }
+  actionButton(id, label, class = paste(classes, collapse = " "), ...)
 }
 
 #' Create a notice
-#' @param icon Icon tag.
+#' @param icon Icon: a [lucide()] name or tag.
 #' @param title Notice title.
 #' @param ... Optional body content.
 #' @param tone Character string: `"info"`, `"warning"`, `"danger"` or
@@ -460,10 +349,11 @@ notice <- function(
     sprintf("bg-%s-subtle border-%s-subtle", tone, tone)
   )
   icon_class <- if (tone == "muted") "text-body-secondary" else paste0("text-", tone)
+  if (is.character(icon) && !inherits(icon, "html")) icon <- lucide(icon)
   body <- Filter(Negate(is.null), list(...))
   div(
     role = if (tone == "danger") "alert" else "status",
-    class = paste("d-flex align-items-start gap-3 rounded-3 border p-3 my-2 small", box),
+    class = paste("d-flex align-items-start gap-3 rounded-3 border p-3 small", box),
     span(class = paste("ssd-notice-icon", icon_class), icon),
     div(
       class = "flex-grow-1 d-flex flex-column gap-1",
@@ -475,34 +365,99 @@ notice <- function(
 }
 
 #' Create a busy icon
-#' @return A small spinner, hidden from screen readers (the text beside it
-#'   says what is running).
+#' @return A spinning loader icon, hidden from screen readers (the text beside
+#'   it says what is running).
 #' @keywords internal
 busy_icon <- function() {
-  span(class = "spinner-border spinner-border-sm text-primary", `aria-hidden` = "true")
+  lucide("loader-2", "ssd-spin text-primary")
+}
+
+#' Mark a download as done
+#'
+#' Ends the spinner of a download [button()] with `busy = TRUE`; called when
+#' the [shiny::downloadHandler()]'s content function exits.
+#' @param session The module's session.
+#' @param id Character string output ID, without the namespace.
+#' @return Called for its side effect.
+#' @keywords internal
+download_done <- function(session, id) {
+  session$sendCustomMessage("downloadDone", session$ns(id))
 }
 
 #' Create an empty state
 #'
 #' Shown in place of a step that needs an earlier one: what is missing, and a
 #' button to go there.
-#' @param icon Icon tag.
+#' @param icon Icon: a [lucide()] name or tag.
 #' @param title Short title.
 #' @param description Optional longer description.
 #' @param action Optional button.
 #' @return A card with the empty state.
 #' @keywords internal
 empty_state <- function(icon, title, description = NULL, action = NULL) {
-  div(
-    class = "p-3",
-    card(
-      class = card_shadow,
-      card_body(
-        class = "d-flex flex-column align-items-center text-center gap-2 py-5",
-        div(class = "ssd-empty-icon bg-primary-subtle text-primary-emphasis", icon),
-        div(class = "fw-semibold mt-1", title),
-        if (!is.null(description)) div(class = "text-body-secondary ssd-measure", description),
-        if (!is.null(action)) div(class = "mt-2", action)
+  if (is.character(icon) && !inherits(icon, "html")) icon <- lucide(icon)
+  card(
+    class = "mb-0",
+    card_body(
+      class = "d-flex flex-column align-items-center text-center gap-2 py-5",
+      div(class = "ssd-empty-icon bg-primary-subtle text-primary-emphasis", icon),
+      div(class = "fw-semibold mt-1", title),
+      if (!is.null(description)) div(class = "text-body-secondary ssd-measure", description),
+      if (!is.null(action)) div(class = "mt-2", action)
+    )
+  )
+}
+
+# The steps of an analysis, for the welcome card: the translation keys of
+# each step's name and of its one-line description.
+app_steps <- list(
+  list(name = "ui_nav1", name_text = "1. Data", key = "ui_step_data", text = "Use the boron dataset, upload a CSV file or fill out a table."),
+  list(name = "ui_nav2", name_text = "2. Fit", key = "ui_step_fit", text = "Fit distributions to the concentrations and compare how well they fit."),
+  list(name = "ui_nav3", name_text = "3. Predict", key = "ui_step_predict", text = "Estimate a hazard concentration or the fraction affected, with confidence limits."),
+  list(name = "ui_navexport", name_text = "4. Export", key = "ui_step_export", text = "Download the plots, tables and BCANZ report, and the R code that reproduces them.")
+)
+
+#' Create the welcome card
+#'
+#' The app's purpose and its steps, shown on the Data step until data are
+#' loaded.
+#' @param guide_id Character string namespaced input ID of the link to the
+#'   User Guide.
+#' @return A card.
+#' @keywords internal
+welcome_card <- function(guide_id) {
+  step <- function(item, number) {
+    div(
+      class = "col-sm-6 col-xl-3 d-flex align-items-start gap-2",
+      span(class = "ssd-step-marker ssd-step-todo flex-shrink-0 mt-1", `aria-hidden` = "true", number),
+      div(
+        div(class = "fw-semibold mb-1", step_name(item$name, item$name_text)),
+        div(class = "small text-body-secondary", span(`data-translate` = item$key, item$text))
+      )
+    )
+  }
+  card(
+    class = "mb-0",
+    card_body(
+      gap = "1rem",
+      div(
+        class = "d-flex align-items-center gap-3",
+        div(class = "ssd-tile-icon bg-primary-subtle text-primary-emphasis", ssd_art("ssd-art-sm")),
+        div(
+          h2(class = "ssd-card-title mb-0", "ssdtools"),
+          div(class = "small text-body-secondary", span(`data-translate` = "ui_navtitle", "Fit and Plot Species Sensitivity Distributions"))
+        )
+      ),
+      div(class = "row g-3", Map(step, app_steps, seq_along(app_steps))),
+      div(
+        actionLink(
+          guide_id,
+          span(
+            class = "d-inline-flex align-items-center gap-2",
+            lucide("book-open"),
+            span(`data-translate` = "ui_navguide", "User guide")
+          )
+        )
       )
     )
   )
@@ -510,26 +465,22 @@ empty_state <- function(icon, title, description = NULL, action = NULL) {
 
 #' Create a button that opens a step
 #'
-#' The Continue button of a step (primary, at the top right of its content),
-#' or the button of an empty state that opens the step it needs (outline).
-#' Its server side is [observe_step_button()].
+#' The Continue button of a step (primary, in its page header), or the button
+#' of an empty state that opens the step it needs (outline). Its server side
+#' is [observe_step_button()].
 #' @param id Character string namespaced input ID.
 #' @param translate_key Character string translation key of the label.
 #' @param default_text Character string English label.
 #' @param variant Character string button variant, as for [button()].
-#' @return A button tag; a primary one is right aligned in its own row.
+#' @return A button tag.
 #' @keywords internal
 step_button <- function(id, translate_key, default_text, variant = "primary") {
-  btn <- button(
+  button(
     id,
     span(`data-translate` = translate_key, default_text),
-    icon = bsicons::bs_icon("arrow-right"),
+    icon = "arrow-right",
     variant = variant
   )
-  if (variant != "primary") {
-    return(btn)
-  }
-  div(class = "d-flex justify-content-end mb-3", btn)
 }
 
 #' Open a step when its button is clicked

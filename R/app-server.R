@@ -22,7 +22,10 @@ app_server <- function(input, output, session) {
   observe(current_lang("french")) |> bindEvent(input$french)
   observe(current_lang("spanish")) |> bindEvent(input$spanish)
 
-  # Set up shinyhelper with language-specific help files
+  # Set up shinyhelper with language-specific help files. Each language
+  # replaces the previous language's observer, so a help click opens one
+  # modal.
+  help_observer <- NULL
   observe({
     lang_dir <- switch(
       current_lang(),
@@ -30,7 +33,8 @@ app_server <- function(input, output, session) {
       "french" = "fr",
       "spanish" = "es"
     )
-    shinyhelper::observe_helpers(
+    if (!is.null(help_observer)) help_observer$destroy()
+    help_observer <<- shinyhelper::observe_helpers(
       help_dir = system.file(
         paste("helpfiles", lang_dir, sep = "_"),
         package = "shinyssdtools"
@@ -116,16 +120,21 @@ app_server <- function(input, output, session) {
     big_mark,
     decimal_mark
   )
-  report_mod <- mod_report_server(
-    "report_mod",
+  export_mod <- mod_export_server(
+    "export_mod",
     trans,
     current_lang,
     data_mod,
     fit_mod,
     predict_mod,
-    shared_toxicant_name,
-    main_nav = reactive(input$main_nav)
+    main_nav = reactive(input$main_nav),
+    code = function() rcode_mod$code()
   )
+  # The generated script saves plots with the Export step's PNG settings.
+  for (setting in c("width", "height", "dpi")) {
+    fit_mod[[setting]] <- export_mod[[setting]]
+    predict_mod[[setting]] <- export_mod[[setting]]
+  }
   rcode_mod <- mod_rcode_server(
     "rcode_mod",
     trans,
@@ -134,61 +143,45 @@ app_server <- function(input, output, session) {
     predict_mod
   )
 
-  # The states of the step markers (step_marker_switch()): "done" once a step
-  # has a result, "busy" while it computes in the background, else "todo".
-  step_state <- function(done, busy = function() FALSE) {
+  # The steps the user has opened: a step computed in the background is not
+  # done until it has been seen.
+  visited <- reactiveVal(character())
+  observe(visited(union(visited(), input$main_nav))) |>
+    bindEvent(input$main_nav)
+
+  # The states of the step markers (step_title()): "done" once a step has
+  # been opened and has a result, "busy" while it computes in the
+  # background, else "todo".
+  step_state <- function(step, done, busy = function() FALSE) {
     reactive({
       if (isTRUE(busy())) {
         return("busy")
       }
-      if (isTRUE(tryCatch(done(), error = function(e) FALSE))) "done" else "todo"
+      has_result <- isTRUE(tryCatch(done(), error = function(e) FALSE))
+      if (has_result && step %in% visited()) "done" else "todo"
     })
   }
-  output$mark_data <- step_state(data_mod$has_data)
-  output$mark_fit <- step_state(fit_mod$has_fit)
-  output$mark_predict <- step_state(predict_mod$has_predict, predict_mod$cl_running)
-  output$mark_report <- step_state(report_mod$has_preview, report_mod$running)
-  for (step in c("data", "fit", "predict", "report")) {
+  output$mark_data <- step_state("data", data_mod$has_data)
+  output$mark_fit <- step_state("fit", fit_mod$has_fit)
+  output$mark_predict <- step_state("predict", predict_mod$has_predict, predict_mod$cl_running)
+  output$mark_export <- step_state("export", export_mod$has_preview, export_mod$running)
+  for (step in c("data", "fit", "predict", "export")) {
     outputOptions(output, paste0("mark_", step), suspendWhenHidden = FALSE)
   }
 
-  output$ui_5format <- renderUI({
-    radioButtons("report_format", "Report format")
-  })
-
-  output$ui_about <- renderUI({
-    lang <- current_lang()
-    ver <- paste("ssdtools version:", utils::packageVersion("ssdtools"))
-    sver <- paste(
-      "shinyssdtools version:",
-      utils::packageVersion("shinyssdtools")
-    )
-
-    file_suffix <- switch(
-      lang,
-      "english" = "en",
-      "french" = "fr",
-      "spanish" = "es",
-      "en"  # Default to English
-    )
-
-    file_path <- system.file(
-      package = "shinyssdtools",
-      paste0("extdata/about-", file_suffix, ".html")
-    )
-
+  # The rendered About HTML, the source of the Methods and About pages.
+  about_html <- reactive({
+    file_suffix <- switch(current_lang(), "french" = "fr", "spanish" = "es", "en")
+    file_path <- system.file(package = "shinyssdtools", paste0("extdata/about-", file_suffix, ".html"))
     # Fall back to English if translation doesn't exist
-    if (!file.exists(file_path) || file_path == "") {
+    if (!nzchar(file_path)) {
       file_path <- system.file(package = "shinyssdtools", "extdata/about-en.html")
     }
+    paste(readLines(file_path, encoding = "UTF-8", warn = FALSE), collapse = "\n")
+  })
 
-    tagList(
-      p(ver),
-      p(sver),
-      includeHTML(file_path)
-    )
-  }) |>
-    bindEvent(current_lang())
+  output$ui_methods <- renderUI(methods_page(about_html()))
+  output$ui_about <- renderUI(about_page(about_html()))
 
   output$ui_userguide <- renderUI({
     lang <- current_lang()

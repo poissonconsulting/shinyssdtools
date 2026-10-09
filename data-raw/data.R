@@ -62,6 +62,12 @@ translations <- dplyr::bind_rows(
     spanish = "Analizar"
   ),
   dplyr::tibble(
+    id = "ui_navmethods",
+    english = "Methods",
+    french = "M\u00e9thodes",
+    spanish = "M\u00e9todos"
+  ),
+  dplyr::tibble(
     id = "ui_navabout",
     english = "About",
     french = "\u00c0 propos",
@@ -69,9 +75,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_navguide",
-    english = "User Guide",
+    english = "User guide",
     french = "Guide de l'utilisateur",
-    spanish = "Gu\u00eda del Usuario"
+    spanish = "Gu\u00eda del usuario"
   ),
   dplyr::tibble(
     id = "ui_navlang",
@@ -99,9 +105,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_tabreport",
-    english = "Get BCANZ report",
-    french = "Obtenir le rapport BCANZ",
-    spanish = "Obtener informe BCANZ"
+    english = "BCANZ report",
+    french = "Rapport BCANZ",
+    spanish = "Informe BCANZ"
   ),
   dplyr::tibble(
     id = "ui_tabcode",
@@ -153,9 +159,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_1table",
-    english = "3. Fill out table below:",
-    french = "3. Remplir le tableau ci-dessous:",
-    spanish = "3. Completar la tabla a continuaci\u00f3n:"
+    english = "3. Fill out table below",
+    french = "3. Remplir le tableau ci-dessous",
+    spanish = "3. Completar la tabla a continuaci\u00f3n"
   ),
 
   dplyr::tibble(
@@ -196,15 +202,15 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_2plot",
-    english = "Plot fitted distributions",
-    french = "Repr\u00e9sentation des courbes de distribution ajust\u00e9es",
-    spanish = "Gr\u00e1fico de distribuciones ajustadas"
+    english = "Fitted distributions",
+    french = "Courbes de distribution ajust\u00e9es",
+    spanish = "Distribuciones ajustadas"
   ),
   dplyr::tibble(
     id = "ui_2table",
-    english = "Goodness of Fit table",
+    english = "Goodness of fit table",
     french = "Tableau de l'\u00e9valuation de la qualit\u00e9 de l\u2019ajustement des courbes de distribution",
-    spanish = "Tabla de Bondad de Ajuste"
+    spanish = "Tabla de bondad de ajuste"
   ),
   dplyr::tibble(
     id = "ui_2weight",
@@ -226,21 +232,21 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_2height",
-    english = "Height",
-    french = "Hauteur",
-    spanish = "Altura"
+    english = "Height (in)",
+    french = "Hauteur (po)",
+    spanish = "Altura (pulg.)"
   ),
   dplyr::tibble(
     id = "ui_2width",
-    english = "Width",
-    french = "Largeur",
-    spanish = "Ancho"
+    english = "Width (in)",
+    french = "Largeur (po)",
+    spanish = "Ancho (pulg.)"
   ),
   dplyr::tibble(
     id = "ui_2dpi",
-    english = "Dpi",
-    french = "Dpi",
-    spanish = "Dpi"
+    english = "DPI",
+    french = "DPI",
+    spanish = "DPI"
   ),
   dplyr::tibble(
     id = "ui_2dlpdf",
@@ -346,9 +352,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3model",
-    english = "Plot model average and estimate hazard concentration",
-    french = "Repr\u00e9sentation de l'inf\u00e9rence multimod\u00e8le et estimation de la concentration pr\u00e9sentant un risque",
-    spanish = "Gr\u00e1fico de promedio de modelo y estimaci\u00f3n de concentraci\u00f3n peligrosa"
+    english = "Model average",
+    french = "Inf\u00e9rence multimod\u00e8le",
+    spanish = "Promedio de modelos"
   ),
   dplyr::tibble(
     id = "ui_3help",
@@ -364,9 +370,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3hc2",
-    english = "% of species is",
-    french = "% des esp\u00e8ces est de",
-    spanish = "% de las especies es"
+    english = "of species is",
+    french = "des esp\u00e8ces est de",
+    spanish = "de las especies es"
   ),
   dplyr::tibble(
     id = "ui_3perc",
@@ -382,9 +388,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3perc3",
-    english = "% of species",
-    french = "% des esp\u00e8ces",
-    spanish = "% de las especies"
+    english = "of species",
+    french = "des esp\u00e8ces",
+    spanish = "de las especies"
   ),
   dplyr::tibble(
     id = "ui_3cl",
@@ -472,9 +478,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3dpi",
-    english = "Dpi (resolution)",
-    french = "Dpi (r\u00e9solution)",
-    spanish = "Dpi (resoluci\u00f3n)"
+    english = "DPI (resolution)",
+    french = "DPI (r\u00e9solution)",
+    spanish = "DPI (resoluci\u00f3n)"
   ),
   dplyr::tibble(
     id = "ui_3clbutton",
@@ -520,9 +526,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_getreport",
-    english = "Get Report",
+    english = "Get report",
     french = "Obtenir le rapport",
-    spanish = "Obtener Informe"
+    spanish = "Obtener informe"
   ),
   dplyr::tibble(
     id = "ui_prevreport",
@@ -847,9 +853,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_update_fit",
-    english = "Update Fit",
+    english = "Update fit",
     french = "Mettre \u00e0 jour l'ajustement",
-    spanish = "Actualizar Ajuste"
+    spanish = "Actualizar ajuste"
   ),
   dplyr::tibble(
     id = "ui_update_data",
@@ -877,9 +883,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_cl_stale2",
-    english = "The fit or threshold has changed. Get CL again to update them.",
-    french = "L'ajustement ou le seuil a chang\u00e9. Recalculez les LC pour les mettre \u00e0 jour.",
-    spanish = "El ajuste o el umbral ha cambiado. Obtenga los LC de nuevo para actualizarlos."
+    english = "The fit, threshold or number of bootstrap samples has changed.",
+    french = "L'ajustement, le seuil ou le nombre de simulations bootstrap a chang\u00e9.",
+    spanish = "El ajuste, el umbral o el n\u00famero de muestras bootstrap ha cambiado."
   ),
   dplyr::tibble(
     id = "ui_cl_failed",
@@ -906,10 +912,10 @@ translations <- dplyr::bind_rows(
     spanish = "Continuar a la predicci\u00f3n"
   ),
   dplyr::tibble(
-    id = "ui_continue_report",
-    english = "Continue to report",
-    french = "Continuer vers le rapport",
-    spanish = "Continuar al informe"
+    id = "ui_continue_export",
+    english = "Continue to export",
+    french = "Continuer vers l'exportation",
+    spanish = "Continuar a la exportaci\u00f3n"
   ),
   dplyr::tibble(
     id = "ui_goto_data",
@@ -936,6 +942,24 @@ translations <- dplyr::bind_rows(
     spanish = "No se pudieron ajustar las distribuciones"
   ),
   dplyr::tibble(
+    id = "ui_fitting",
+    english = "Fitting distributions...",
+    french = "Ajustement des distributions en cours...",
+    spanish = "Ajustando distribuciones..."
+  ),
+  dplyr::tibble(
+    id = "ui_fit_stale",
+    english = "The fit is out of date",
+    french = "L'ajustement n'est plus \u00e0 jour",
+    spanish = "El ajuste est\u00e1 desactualizado"
+  ),
+  dplyr::tibble(
+    id = "ui_update_cl",
+    english = "Update CL",
+    french = "Mettre \u00e0 jour les bornes",
+    spanish = "Actualizar LC"
+  ),
+  dplyr::tibble(
     id = "ui_step_done",
     english = "complete",
     french = "termin\u00e9",
@@ -946,6 +970,60 @@ translations <- dplyr::bind_rows(
     english = "running",
     french = "en cours",
     spanish = "en curso"
+  ),
+  dplyr::tibble(
+    id = "ui_navexport",
+    english = "4. Export",
+    french = "4. Exportation",
+    spanish = "4. Exportar"
+  ),
+  dplyr::tibble(
+    id = "ui_export",
+    english = "Export",
+    french = "Exportation",
+    spanish = "Exportar"
+  ),
+  dplyr::tibble(
+    id = "ui_navhelp",
+    english = "Help",
+    french = "Aide",
+    spanish = "Ayuda"
+  ),
+  dplyr::tibble(
+    id = "ui_download_all",
+    english = "Download all",
+    french = "Tout t\u00e9l\u00e9charger",
+    spanish = "Descargar todo"
+  ),
+  dplyr::tibble(
+    id = "ui_data",
+    english = "Data",
+    french = "Donn\u00e9es",
+    spanish = "Datos"
+  ),
+  dplyr::tibble(
+    id = "ui_step_data",
+    english = "Use the boron dataset, upload a CSV file or fill out a table.",
+    french = "Utilisez le jeu de donn\u00e9es sur le bore, t\u00e9l\u00e9versez un fichier CSV ou remplissez un tableau.",
+    spanish = "Use el conjunto de datos de boro, cargue un archivo CSV o complete una tabla."
+  ),
+  dplyr::tibble(
+    id = "ui_step_fit",
+    english = "Fit distributions to the concentrations and compare how well they fit.",
+    french = "Ajustez des distributions aux concentrations et comparez la qualit\u00e9 de leur ajustement.",
+    spanish = "Ajuste distribuciones a las concentraciones y compare la calidad del ajuste."
+  ),
+  dplyr::tibble(
+    id = "ui_step_predict",
+    english = "Estimate a hazard concentration or the fraction affected, with confidence limits.",
+    french = "Estimez une concentration pr\u00e9sentant un risque ou la fraction affect\u00e9e, avec les bornes de l'intervalle de confiance.",
+    spanish = "Estime una concentraci\u00f3n peligrosa o la fracci\u00f3n afectada, con l\u00edmites de confianza."
+  ),
+  dplyr::tibble(
+    id = "ui_step_export",
+    english = "Download the plots, tables and BCANZ report, and the R code that reproduces them.",
+    french = "T\u00e9l\u00e9chargez les graphiques, les tableaux et le rapport BCANZ, ainsi que le code R qui les reproduit.",
+    spanish = "Descargue los gr\u00e1ficos, las tablas y el informe BCANZ, y el c\u00f3digo R que los reproduce."
   )
 )
 

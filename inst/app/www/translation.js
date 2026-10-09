@@ -18,6 +18,12 @@ $(document).ready(function() {
       const iconHtml = $element.find('.bi').length > 0 ? $element.find('.bi')[0].outerHTML : '';
       
       if (translations[key]) {
+        // Step names sit beside a numbered marker, so they drop their own
+        // number ("1. Data" -> "Data").
+        if ($element.is('[data-strip-number]')) {
+          $element.text(translations[key].replace(/^\s*\d+\.\s*/, ''));
+          return;
+        }
         if (iconHtml) {
           // Preserve icon and add translated text with spacing
           $element.html(iconHtml + '<span style="margin-left: 0.5rem;">' + translations[key] + '</span>');

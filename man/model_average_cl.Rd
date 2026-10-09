@@ -15,7 +15,7 @@ model_average_cl(fit, percent = NULL, nboot)
 }
 \value{
 Model-averaged hazard concentrations, as from
-\code{\link[ssdtools:ssd_hc]{ssdtools::ssd_hc()}}.
+\code{\link[ssdtools:ssd_hc_bcanz]{ssdtools::ssd_hc_bcanz()}}.
 }
 \description{
 The model-averaged curve with confidence limits at every whole percent and

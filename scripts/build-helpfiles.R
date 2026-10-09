@@ -15,7 +15,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Script to extract helpfile sections from user guide markdown files
+# Script to extract helpfile sections from user guide and about markdown files
 # This ensures helpfiles and user guide stay in sync with one source of truth
 
 #' Extract a section from markdown file
@@ -62,6 +62,27 @@ extract_section <- function(file_path, section_heading, output_heading) {
   result <- c(paste0("## ", output_heading), "", section_lines)
 
   return(result)
+}
+
+#' Extract a section of an About file by its ID
+#' @param file_path Path to the about markdown file
+#' @param id The section's ID (e.g., "gof" for "## Goodness of fit table {#gof}")
+#' @return Character vector of the section, under its title
+extract_about_section <- function(file_path, id) {
+  lines <- readLines(file_path, encoding = "UTF-8")
+  start_line <- grep(paste0("^## .*\\{#", id, "\\}\\s*$"), lines)[1]
+  if (is.na(start_line)) {
+    stop(sprintf("Section '%s' not found in %s", id, file_path))
+  }
+  next_heading <- grep("^##\\s+", lines)
+  end_line <- next_heading[next_heading > start_line][1]
+  end_line <- if (is.na(end_line)) length(lines) else end_line - 1
+  section_lines <- lines[(start_line + 1):end_line]
+  while (length(section_lines) > 0 && trimws(section_lines[length(section_lines)]) == "") {
+    section_lines <- section_lines[-length(section_lines)]
+  }
+  title <- trimws(sub("\\{#[^}]+\\}\\s*$", "", lines[start_line]))
+  c(title, "", section_lines)
 }
 
 #' Build helpfiles for a specific language
@@ -172,6 +193,13 @@ build_helpfiles_for_language <- function(lang) {
       }
     )
   }
+
+  # The goodness of fit table's description, from the About file, which the
+  # Methods page also shows.
+  about_path <- file.path("inst/extdata", paste0("about-", lang, ".md"))
+  output_file <- file.path(helpfiles_dir, "gofTable.md")
+  writeLines(extract_about_section(about_path, "gof"), output_file, useBytes = TRUE)
+  message(sprintf("Created: %s", output_file))
 }
 
 # Build helpfiles for all languages

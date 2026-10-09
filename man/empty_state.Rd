@@ -7,7 +7,7 @@
 empty_state(icon, title, description = NULL, action = NULL)
 }
 \arguments{
-\item{icon}{Icon tag.}
+\item{icon}{Icon: a \code{\link[=lucide]{lucide()}} name or tag.}
 
 \item{title}{Short title.}
 

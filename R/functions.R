@@ -223,22 +223,6 @@ guess_conc <- function(name, data = NULL) {
   return(NA_character_)
 }
 
-#' Add mandatory field indicator to label
-#' @param label Character string or tag for the label
-#' @return tagList with label and asterisk span
-#' @keywords internal
-label_mandatory <- function(label) {
-  tagList(label, span("*", class = "mandatory_star"))
-}
-
-#' Create inline-block div wrapper
-#' @param x Shiny UI element(s) to wrap
-#' @return tags$div with inline-block styling
-#' @keywords internal
-inline <- function(x) {
-  tags$div(style = "display:inline-block;", x)
-}
-
 #' Check if values have zero range
 #' @param x Numeric vector
 #' @param tol Tolerance for comparison (default: sqrt of machine precision)
@@ -290,27 +274,47 @@ calculate_threshold_conc <- function(fit, thresh, digits = 3) {
   signif(estimate_hc(fit, thresh), digits)
 }
 
-#' Format R code with proper styling
+#' Format R code
+#'
+#' Joins the lines of code, which are written in tidyverse style, and quotes
+#' their strings with single quotes.
 #' @param code_lines Character vector of R code lines
-#' @return Single character string with formatted, styled code
+#' @return Single character string of the code
 #' @keywords internal
 format_r_code <- function(code_lines) {
-  # Join lines into a single string
-  code_text <- paste(code_lines, collapse = "\n")
+  formatted_text <- paste(code_lines, collapse = "\n")
 
-  # Use styler to format the code
-  # scope = "tokens" provides lighter-weight formatting focused on spacing/indentation
-  formatted <- styler::style_text(code_text, scope = "tokens")
-
-  # Convert formatted text back to a single string
-  formatted_text <- paste(formatted, collapse = "\n")
-
-  # Replace double quotes with single quotes
-  # This is done after styling to maintain R syntax validity during formatting
-  # Important for structure() output from dput() which uses double quotes
-  formatted_text <- gsub('"', "'", formatted_text)
+  # Quote strings with single quotes, including those of the structure()
+  # output of dput(). Each comment and string literal is matched whole, so
+  # quotes pair up; strings containing an apostrophe or an escape keep their
+  # double quotes.
+  tokens <- gregexpr(
+    "#[^\n]*|\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'",
+    formatted_text,
+    perl = TRUE
+  )
+  regmatches(formatted_text, tokens) <- lapply(
+    regmatches(formatted_text, tokens),
+    function(token) {
+      swap <- startsWith(token, "\"") & !grepl("['\\\\]", token)
+      token[swap] <- paste0("'", substr(token[swap], 2, nchar(token[swap]) - 1), "'")
+      token
+    }
+  )
 
   formatted_text
+}
+
+#' Quote a string as R code
+#' @param x Character string.
+#' @return The string as an R string literal: in single quotes, or in double
+#'   quotes when it contains an apostrophe, with any other special characters
+#'   escaped.
+#' @keywords internal
+r_string <- function(x) {
+  x <- as.character(x %||% "")
+  quote <- if (grepl("'", x, fixed = TRUE)) "\"" else "'"
+  encodeString(x, quote = quote)
 }
 
 #' Render the BCANZ report

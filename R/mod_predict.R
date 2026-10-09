@@ -19,402 +19,434 @@
 mod_predict_ui <- function(id) {
   ns <- NS(id)
 
-  tagList(
+  title <- span(`data-translate` = "ui_tabpredict", "Estimate hazard concentration") |>
+    shinyhelper::helper(type = "markdown", content = "predictTab", size = "l", colour = color_primary, buttonLabel = "OK")
+
+  aside <- card(card_body(
+    radioButtons(
+      ns("threshType"),
+      label = span(
+        `data-translate` = "ui_3threshlabel",
+        "Threshold type"
+      ),
+      choices = c(
+        "Concentration" = "Concentration",
+        "Fraction affected" = "Fraction"
+      ),
+      selected = "Concentration",
+      inline = TRUE
+    ),
     conditionalPanel(
-      condition = paste_js("has_fit", ns),
-      layout_sidebar(
-        padding = "1rem",
-        gap = "1rem",
-        sidebar = sidebar(
-          width = 400,
-          style = "height: calc(100vh - 150px); overflow-y: auto; overflow-x: hidden;",
-          div(
-            h5(span(
-              `data-translate` = "ui_tabpredict",
-              "Get predictions"
-            )),
-          ) |>
-            shinyhelper::helper(
-              type = "markdown",
-              content = "predictTab",
-              size = "l",
-              colour = color_primary,
-              buttonLabel = "OK"
-            ),
-          radioButtons(
-            ns("threshType"),
-            label = span(
-              `data-translate` = "ui_3threshlabel",
-              "Threshold type"
-            ),
-            choices = c(
-              "Concentration" = "Concentration",
-              "Fraction affected" = "Fraction"
-            ),
-            selected = "Concentration",
-            inline = TRUE
+      condition = glue::glue(
+        "input['{ns(\"threshType\")}'] != 'Concentration'"
+      ),
+      layout_column_wrap(
+        width = 1 / 2,
+        numericInput(
+          ns("conc"),
+          label = span(
+            `data-translate` = "ui_3byconc",
+            "by concentration"
           ),
-          conditionalPanel(
-            condition = glue::glue(
-              "input['{ns(\"threshType\")}'] != 'Concentration'"
-            ),
-            layout_column_wrap(
-              width = 1 / 2,
-              numericInput(
-                ns("conc"),
-                label = span(
-                  `data-translate` = "ui_3byconc",
-                  "by concentration"
-                ),
-                value = 1,
-                min = 0,
-                max = 100,
-                step = 0.1
-              )
-            )
-          ),
-          conditionalPanel(
-            condition = glue::glue(
-              "input['{ns(\"threshType\")}'] == 'Concentration'"
-            ),
-            layout_column_wrap(
-              width = 1 / 2,
-              selectizeInput(
-                ns("thresh"),
-                label = span(
-                  `data-translate` = "ui_3affecting",
-                  "affecting % species"
-                ),
-                choices = c(1, 5, 10, 20),
-                options = list(
-                  create = TRUE,
-                  createFilter = "^[1-9][0-9]?$|^99$"
-                ),
-                selected = 5
-              ),
-              div(
-                tags$label(
-                  span(
-                    `data-translate` = "ui_3protecting",
-                    "protecting % species"
-                  )
-                ),
-                div(
-                  class = "form-control bg-body-tertiary mt-2",
-                  `aria-live` = "polite",
-                  textOutput(ns("threshPc"), inline = TRUE)
-                )
-              )
-            )
-          ),
-          bslib::accordion(
-            open = c("cl_pred"),
-            # ui cl -------------------------------------------------------------------
-            accordion_panel(
-              title = span(
-                `data-translate` = "ui_3cl",
-                "Get confidence limits"
-              ),
-              value = "cl_pred",
-              checkboxInput(
-                ns("includeCi"),
-                label = span(
-                  `data-translate` = "ui_3includeci",
-                  "Include on model average plot"
-                ),
-                value = TRUE
-              ),
-              selectizeInput(
-                ns("bootSamp"),
-                options = list(
-                  create = TRUE,
-                  createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
-                ),
-                label = span(
-                  `data-translate` = "ui_3samples",
-                  "Bootstrap samples"
-                ),
-                choices = c(
-                  "500" = "500",
-                  "1,000" = "1000",
-                  "5,000" = "5000",
-                  "10,000" = "10000"
-                ),
-                selected = "1000",
-                width = "190px"
-              ),
-              conditionalPanel(
-                condition = sprintf("!%s", paste_js("cl_running", ns)),
-                button(
-                  ns("getCl"),
-                  span(`data-translate` = "ui_3clbutton", "Get CL"),
-                  icon = bsicons::bs_icon("calculator"),
-                  variant = "soft",
-                  class = "w-100"
-                ),
-                shiny::helpText(htmlOutput(ns("describeTime")))
-              ),
-              conditionalPanel(
-                condition = paste_js("cl_running", ns),
-                notice(
-                  icon = busy_icon(),
-                  title = span(`data-translate` = "ui_cl_running", "Computing confidence limits"),
-                  htmlOutput(ns("describeCl")),
-                  tone = "info",
-                  action = button(
-                    ns("cancelCl"),
-                    span(`data-translate` = "ui_cancel", "Cancel"),
-                    icon = bsicons::bs_icon("x-lg"),
-                    variant = "outline",
-                    size = "sm"
-                  )
-                )
-              ),
-              conditionalPanel(
-                condition = sprintf(
-                  "%s && !%s",
-                  paste_js("cl_stale", ns),
-                  paste_js("cl_running", ns)
-                ),
-                notice(
-                  icon = bsicons::bs_icon("exclamation-triangle"),
-                  title = span(
-                    `data-translate` = "ui_cl_stale",
-                    "The confidence limits are out of date"
-                  ),
-                  span(
-                    `data-translate` = "ui_cl_stale2",
-                    "The fit or threshold has changed. Get CL again to update them."
-                  ),
-                  tone = "warning"
-                )
-              )
-            ),
-            # ui plot formatting -------------------------------------------------------
-            bslib::accordion_panel(
-              title = span(
-                `data-translate` = "ui_3plotopts",
-                "Plot formatting options"
-              ),
-              value = "plot_format_pred",
-              selected = FALSE,
-              radioButtons(
-                ns("ribbonStyle"),
-                label = span(
-                  `data-translate` = "ui_3ribbonstyle",
-                  "Model averaged SSD and CL style"
-                ),
-                choices = c(
-                  "Black filled ribbon" = "TRUE",
-                  "Red/green lines" = "FALSE"
-                ),
-                selected = "TRUE",
-                inline = TRUE
-              ),
-              static_label_input(
-                ns("selectLabel"),
-                "ui_3label",
-                "Label by:",
-                ns("uiSelectLabel")
-              ),
-              static_label_input(
-                ns("selectColour"),
-                "ui_3colour",
-                "Colour by:",
-                ns("uiSelectColour")
-              ),
-              static_label_input(
-                ns("selectShape"),
-                "ui_3symbol",
-                "Symbol by:",
-                ns("uiSelectShape")
-              ),
-              selectInput(
-                ns("selectPalette"),
-                label = span(`data-translate` = "ui_3pal", "Palette"),
-                choices = pals,
-                selected = pals[2]
-              ),
-              textInput(
-                ns("xaxis"),
-                value = "Concentration",
-                label = span(`data-translate` = "ui_3xlab", "X-axis label")
-              ),
-              textInput(
-                ns("yaxis"),
-                value = "Species affected (%)",
-                label = span(`data-translate` = "ui_3ylab", "Y-axis label")
-              ),
-              textInput(
-                ns("title"),
-                value = "",
-                label = span(`data-translate` = "ui_3title", "Title")
-              ),
-              static_label_input(
-                ns("legendColour"),
-                "ui_3legend",
-                "Legend colour",
-                ns("uiLegendColour")
-              ),
-              static_label_input(
-                ns("legendShape"),
-                "ui_3shape",
-                "Legend shape",
-                ns("uiLegendShape")
-              ),
-              layout_column_wrap(
-                width = 1 / 2,
-                numericInput(
-                  ns("size3"),
-                  label = span(`data-translate` = "ui_size", "Text size"),
-                  value = 12,
-                  min = 1,
-                  max = 100
-                ),
-                numericInput(
-                  ns("sizeLabel3"),
-                  label = span(`data-translate` = "ui_sizeLabel", "Label size"),
-                  value = 3,
-                  min = 1,
-                  max = 10
-                )
-              ),
-              checkboxInput(
-                ns("checkHc"),
-                label = span(
-                  `data-translate` = "ui_checkHc",
-                  "Show hazard concentration"
-                ),
-                value = TRUE
-              ),
-              layout_column_wrap(
-                width = 1 / 3,
-                numericInput(
-                  ns("adjustLabel"),
-                  value = 1.05,
-                  label = span(
-                    `data-translate` = "ui_adjustLabel",
-                    "Adjust label"
-                  ),
-                  min = 0,
-                  max = 10,
-                  step = 0.1
-                ),
-                numericInput(
-                  ns("xMin"),
-                  label = span(`data-translate` = "ui_xmin", "X min"),
-                  min = 1,
-                  value = NULL
-                ),
-                numericInput(
-                  ns("xMax"),
-                  label = span(`data-translate` = "ui_xmax", "X max"),
-                  min = 1,
-                  value = NULL
-                )
-              ),
-              checkboxInput(
-                ns("xlog"),
-                label = span(`data-translate` = "ui_xlog", "Log scale"),
-                value = TRUE
-              ),
-              static_label_input(
-                ns("xbreaks"),
-                "ui_xbreaks",
-                "X breaks",
-                ns("uiXbreaks")
-              )
-            )
-          ),
-        ),
-        # ui outputs --------------------------------------------------------------
-        div(
-          class = "p-3",
-          conditionalPanel(
-            condition = paste_js('has_predict', ns),
-            step_button(ns("continue"), "ui_continue_report", "Continue to report"),
-            card(
-              class = card_shadow,
-              full_screen = TRUE,
-              card_header(
-                class = "d-flex justify-content-between align-items-center",
-                span(`data-translate` = "ui_3model", "Model Average Plot")
-              ),
-              card_body(
-                ui_download_popover(tab = "pred", ns = ns),
-                plotOutput(ns("plotPred")),
-                conditionalPanel(
-                  condition = glue::glue(
-                    "input['{ns(\"threshType\")}'] == 'Concentration'"
-                  ),
-                  div(
-                    span("HC"),
-                    textOutput(ns("hcPercent"), inline = TRUE),
-                    span("/ PC"),
-                    textOutput(ns("pcPercent"), inline = TRUE),
-                    span(": "),
-                    tags$b(textOutput(ns("hcConc"), inline = TRUE))
-                  ),
-                  div(
-                    span(
-                      `data-translate` = "ui_3hc",
-                      "The model averaged estimate of the concentration that affects "
-                    ),
-                    tags$b(textOutput(ns("estPerc"), inline = TRUE)),
-                    span(`data-translate` = "ui_3hc2", " % of species is "),
-                    tags$b(textOutput(ns("estConc"), inline = TRUE))
-                  )
-                ),
-                conditionalPanel(
-                  condition = glue::glue(
-                    "input['{ns(\"threshType\")}'] != 'Concentration'"
-                  ),
-                  div(
-                    span(
-                      `data-translate` = "ui_3perc",
-                      "The model averaged estimate of the fraction affected by a concentration of "
-                    ),
-                    tags$b(textOutput(ns("estConc2"), inline = TRUE)),
-                    span(`data-translate` = "ui_3perc2", " is "),
-                    tags$b(textOutput(ns("estPerc2"), inline = TRUE)),
-                    span(`data-translate` = "ui_3perc3", " % of species")
-                  )
-                )
-              )
-            )
-          ),
-          conditionalPanel(
-            condition = paste_js('has_predict', ns),
-            conditionalPanel(
-              condition = paste_js("has_cl", ns),
-              card(
-                class = card_shadow,
-                full_screen = TRUE,
-                card_header(
-                  class = "d-flex justify-content-between align-items-center",
-                  div(
-                    span(`data-translate` = "ui_3cl2", "Confidence Limits")
-                  )
-                ),
-                card_body(
-                  padding = 25,
-                  ui_download_popover_table(tab = "pred", ns = ns),
-                  div(
-                    class = "table-responsive",
-                    DT::dataTableOutput(ns("tableCl"))
-                  )
-                )
-              )
-            )
-          )
+          value = 1,
+          min = 0,
+          max = 100,
+          step = 0.1
         )
       )
     ),
     conditionalPanel(
-      condition = paste0("!output['", ns("has_fit"), "']"),
-empty_state(
-        icon = bsicons::bs_icon("graph-up"),
+      condition = glue::glue(
+        "input['{ns(\"threshType\")}'] == 'Concentration'"
+      ),
+      layout_column_wrap(
+        width = 1 / 2,
+        selectizeInput(
+          ns("thresh"),
+          label = span(
+            `data-translate` = "ui_3affecting",
+            "affecting % species"
+          ),
+          choices = c(1, 5, 10, 20),
+          options = list(
+            create = TRUE,
+            createFilter = "^[1-9][0-9]?$|^99$"
+          ),
+          selected = 5
+        ),
+        div(
+          class = "form-group shiny-input-container",
+          tags$label(
+            class = "control-label",
+            span(
+              `data-translate` = "ui_3protecting",
+              "protecting % species"
+            )
+          ),
+          # Starts with the value for the default threshold, so the box
+          # does not change when the server's value arrives.
+          div(
+            class = "form-control bg-body-tertiary ssd-readonly-value",
+            `aria-live` = "polite",
+            span(id = ns("threshPc"), class = "shiny-text-output", "95")
+          )
+        )
+      )
+    ),
+    bslib::accordion(
+      open = c("cl_pred"),
+      # ui cl -------------------------------------------------------------------
+      accordion_panel(
         title = span(
+          `data-translate` = "ui_3cl",
+          "Get confidence limits"
+        ),
+        value = "cl_pred",
+        checkboxInput(
+          ns("includeCi"),
+          label = span(
+            `data-translate` = "ui_3includeci",
+            "Include on model average plot"
+          ),
+          value = TRUE
+        ),
+        selectizeInput(
+          ns("bootSamp"),
+          options = list(
+            create = TRUE,
+            createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
+          ),
+          label = span(
+            `data-translate` = "ui_3samples",
+            "Bootstrap samples"
+          ),
+          choices = c(
+            "500" = "500",
+            "1,000" = "1000",
+            "5,000" = "5000",
+            "10,000" = "10000"
+          ),
+          selected = "1000",
+          width = "190px"
+        ),
+        conditionalPanel(
+          condition = sprintf("!%s", paste_js("cl_running", ns)),
+          # Get CL, or Update CL while the limits are out of date: both labels
+          # are in the page and switched in the browser, so the button does
+          # not re-render.
+          button(
+            ns("getCl"),
+            tagList(
+              span(
+                `data-display-if` = sprintf("!%s", paste_js("cl_stale", ns)),
+                `data-ns-prefix` = "",
+                span(
+                  class = "d-inline-flex align-items-center gap-2",
+                  lucide("calculator"),
+                  span(`data-translate` = "ui_3clbutton", "Get CL")
+                )
+              ),
+              span(
+                `data-display-if` = paste_js("cl_stale", ns),
+                `data-ns-prefix` = "",
+                span(
+                  class = "d-inline-flex align-items-center gap-2",
+                  lucide("refresh-cw"),
+                  span(`data-translate` = "ui_update_cl", "Update CL")
+                )
+              )
+            ),
+            variant = "soft",
+            class = "w-100"
+          ),
+          shiny::helpText(htmlOutput(ns("describeTime")))
+        ),
+        # Where Get CL was, while the limits are computed.
+        conditionalPanel(
+          condition = paste_js("cl_running", ns),
+          div(
+            role = "status",
+            class = "d-flex flex-wrap align-items-center gap-2 small",
+            busy_icon(),
+            span(class = "flex-grow-1", `data-translate` = "ui_cl_running", "Computing confidence limits"),
+            button(
+              ns("cancelClAside"),
+              span(`data-translate` = "ui_cancel", "Cancel"),
+              icon = "x",
+              variant = "outline",
+              size = "sm"
+            )
+          )
+        )
+      ),
+      # ui plot formatting -------------------------------------------------------
+      bslib::accordion_panel(
+        title = span(
+          `data-translate` = "ui_3plotopts",
+          "Plot formatting options"
+        ),
+        value = "plot_format_pred",
+        selected = FALSE,
+        radioButtons(
+          ns("ribbonStyle"),
+          label = span(
+            `data-translate` = "ui_3ribbonstyle",
+            "Model averaged SSD and CL style"
+          ),
+          choices = c(
+            "Black filled ribbon" = "TRUE",
+            "Red/green lines" = "FALSE"
+          ),
+          selected = "TRUE",
+          inline = TRUE
+        ),
+        static_label_input(
+          ns("selectLabel"),
+          "ui_3label",
+          "Label by:",
+          ns("uiSelectLabel")
+        ),
+        static_label_input(
+          ns("selectColour"),
+          "ui_3colour",
+          "Colour by:",
+          ns("uiSelectColour")
+        ),
+        static_label_input(
+          ns("selectShape"),
+          "ui_3symbol",
+          "Symbol by:",
+          ns("uiSelectShape")
+        ),
+        selectInput(
+          ns("selectPalette"),
+          label = span(`data-translate` = "ui_3pal", "Palette"),
+          choices = pals,
+          selected = pals[2]
+        ),
+        textInput(
+          ns("xaxis"),
+          value = "Concentration",
+          label = span(`data-translate` = "ui_3xlab", "X-axis label")
+        ),
+        textInput(
+          ns("yaxis"),
+          value = "Species affected (%)",
+          label = span(`data-translate` = "ui_3ylab", "Y-axis label")
+        ),
+        textInput(
+          ns("title"),
+          value = "",
+          label = span(`data-translate` = "ui_3title", "Title")
+        ),
+        static_label_input(
+          ns("legendColour"),
+          "ui_3legend",
+          "Legend colour",
+          ns("uiLegendColour")
+        ),
+        static_label_input(
+          ns("legendShape"),
+          "ui_3shape",
+          "Legend shape",
+          ns("uiLegendShape")
+        ),
+        layout_column_wrap(
+          width = 1 / 2,
+          numericInput(
+            ns("size3"),
+            label = span(`data-translate` = "ui_size", "Text size"),
+            value = 12,
+            min = 1,
+            max = 100
+          ),
+          numericInput(
+            ns("sizeLabel3"),
+            label = span(`data-translate` = "ui_sizeLabel", "Label size"),
+            value = 3,
+            min = 1,
+            max = 10
+          )
+        ),
+        checkboxInput(
+          ns("checkHc"),
+          label = span(
+            `data-translate` = "ui_checkHc",
+            "Show hazard concentration"
+          ),
+          value = TRUE
+        ),
+        layout_column_wrap(
+          width = 1 / 3,
+          numericInput(
+            ns("adjustLabel"),
+            value = 1.05,
+            label = span(
+              `data-translate` = "ui_adjustLabel",
+              "Adjust label"
+            ),
+            min = 0,
+            max = 10,
+            step = 0.1
+          ),
+          numericInput(
+            ns("xMin"),
+            label = span(`data-translate` = "ui_xmin", "X min"),
+            min = 1,
+            value = NULL
+          ),
+          numericInput(
+            ns("xMax"),
+            label = span(`data-translate` = "ui_xmax", "X max"),
+            min = 1,
+            value = NULL
+          )
+        ),
+        checkboxInput(
+          ns("xlog"),
+          label = span(`data-translate` = "ui_xlog", "Log scale"),
+          value = TRUE
+        ),
+        static_label_input(
+          ns("xbreaks"),
+          "ui_xbreaks",
+          "X breaks",
+          ns("uiXbreaks")
+        )
+      )
+    )
+  ))
+
+  main <- tagList(
+    page_header(
+      title,
+      conditionalPanel(
+        condition = paste_js("has_predict", ns),
+        step_button(ns("continue"), "ui_continue_export", "Continue to export")
+      )
+    ),
+    conditionalPanel(
+      condition = paste_js("has_predict", ns),
+      div(
+        class = "d-flex flex-column gap-4",
+        panel(
+          span(`data-translate` = "ui_3model", "Model average"),
+          # The estimate, with its confidence limits once computed, leads
+          # the panel, and the sentence under it says what it is.
+          div(
+            class = "ssd-estimate",
+            conditionalPanel(
+              condition = glue::glue(
+                "input['{ns(\"threshType\")}'] == 'Concentration'"
+              ),
+              div(class = "ssd-estimate-label", textOutput(ns("hcLabel"), inline = TRUE)),
+              div(class = "ssd-estimate-value", textOutput(ns("hcConc"), inline = TRUE)),
+              div(
+                class = "ssd-estimate-text",
+                span(
+                  `data-translate` = "ui_3hc",
+                  "The model averaged estimate of the concentration that affects"
+                ),
+                tags$b(textOutput(ns("estPerc"), inline = TRUE)),
+                span(`data-translate` = "ui_3hc2", "of species is"),
+                tags$b(textOutput(ns("estConc"), inline = TRUE))
+              )
+            ),
+            conditionalPanel(
+              condition = glue::glue(
+                "input['{ns(\"threshType\")}'] != 'Concentration'"
+              ),
+              div(class = "ssd-estimate-label", span(`data-translate` = "ui_3thresh", "Fraction affected")),
+              div(class = "ssd-estimate-value", textOutput(ns("fracValue"), inline = TRUE)),
+              div(
+                class = "ssd-estimate-text",
+                span(
+                  `data-translate` = "ui_3perc",
+                  "The model averaged estimate of the fraction affected by a concentration of"
+                ),
+                tags$b(textOutput(ns("estConc2"), inline = TRUE)),
+                span(`data-translate` = "ui_3perc2", "is"),
+                tags$b(textOutput(ns("estPerc2"), inline = TRUE)),
+                span(`data-translate` = "ui_3perc3", "of species")
+              )
+            )
+          ),
+          div(class = "ssd-figure", plotOutput(ns("plotPred")))
+        ),
+        # The confidence limits, or while they are computed or out of date,
+        # a notice in their place.
+        conditionalPanel(
+          condition = sprintf(
+            "%s || %s || %s",
+            paste_js("has_cl", ns),
+            paste_js("cl_running", ns),
+            paste_js("cl_stale", ns)
+          ),
+          panel(
+            span(`data-translate` = "ui_3cl2", "Confidence limits"),
+            conditionalPanel(
+              condition = paste_js("cl_running", ns),
+              notice(
+                icon = busy_icon(),
+                title = span(`data-translate` = "ui_cl_running", "Computing confidence limits"),
+                htmlOutput(ns("describeCl")),
+                tone = "info",
+                action = button(
+                  ns("cancelCl"),
+                  span(`data-translate` = "ui_cancel", "Cancel"),
+                  icon = "x",
+                  variant = "outline",
+                  size = "sm"
+                )
+              )
+            ),
+            conditionalPanel(
+              condition = sprintf(
+                "%s && !%s",
+                paste_js("cl_stale", ns),
+                paste_js("cl_running", ns)
+              ),
+              notice(
+                icon = "alert-triangle",
+                title = span(
+                  `data-translate` = "ui_cl_stale",
+                  "The confidence limits are out of date"
+                ),
+                span(
+                  `data-translate` = "ui_cl_stale2",
+                  "The fit, threshold or number of bootstrap samples has changed."
+                ),
+                tone = "warning",
+                action = button(
+                  ns("getClNotice"),
+                  span(`data-translate` = "ui_update_cl", "Update CL"),
+                  icon = "refresh-cw",
+                  variant = "outline",
+                  size = "sm"
+                )
+              )
+            ),
+            conditionalPanel(
+              condition = paste_js("has_cl", ns),
+              reactable::reactableOutput(ns("tableCl"))
+            )
+          )
+        )
+      )
+    )
+  )
+
+  tagList(
+    conditionalPanel(
+      condition = paste_js("has_fit", ns),
+      step_layout(aside, main)
+    ),
+    conditionalPanel(
+      condition = sprintf("!%s", paste_js("has_fit", ns)),
+      page_header(title),
+      empty_state(
+        "chart-line",
+        span(
           `data-translate` = "ui_hintfit",
           "You have not successfully fit any distributions yet. Run the 'Fit' tab first."
         ),
@@ -475,6 +507,8 @@ mod_predict_server <- function(
     }) |>
       bindEvent(translations())
 
+    # The choices in the language's number format, keeping the number
+    # selected, so a change of language does not change the number of samples.
     observe({
       current <- lang()
       choices <- switch(
@@ -483,11 +517,20 @@ mod_predict_server <- function(
         "spanish" = c("500", "1.000", "5.000", "10.000"),
         c("500", "1,000", "5,000", "10,000") # Default for English
       )
+      nboot <- clean_nboot(isolate(input$bootSamp) %||% "1000")
+      if (length(nboot) != 1 || is.na(nboot)) nboot <- 1000L
+      standard <- match(nboot, c(500, 1000, 5000, 10000))
+      if (is.na(standard)) {
+        choices <- c(choices, as.character(nboot))
+        selected <- as.character(nboot)
+      } else {
+        selected <- choices[standard]
+      }
       updateSelectizeInput(
         session,
         "bootSamp",
         choices = choices,
-        selected = choices[2]
+        selected = selected
       )
     }) |>
       bindEvent(lang())
@@ -674,7 +717,7 @@ mod_predict_server <- function(
     })
 
     output$estPerc <- renderText({
-      thresh_rv$percent
+      percent_text(thresh_rv$percent, lang())
     })
 
     output$estConc2 <- renderText({
@@ -685,12 +728,14 @@ mod_predict_server <- function(
       )
     })
 
-    output$estPerc2 <- renderText({
+    fraction_text <- reactive({
       paste0(
-        format(thresh_rv$percent, decimal.mark = decimal_mark()),
+        percent_text(format(thresh_rv$percent, decimal.mark = decimal_mark()), lang()),
         estimate_limits(scale = 100)
       )
     })
+    output$estPerc2 <- renderText(fraction_text())
+    output$fracValue <- renderText(fraction_text())
 
     output$describeTime <- renderText({
       describe_time()
@@ -715,12 +760,9 @@ mod_predict_server <- function(
     )
 
     # Dynamic text outputs for HC/PC values
-    output$hcPercent <- renderText({
-      thresh_rv$percent
-    })
-
-    output$pcPercent <- renderText({
-      100 - as.numeric(thresh_rv$percent %||% 0)
+    output$hcLabel <- renderText({
+      percent <- as.numeric(thresh_rv$percent %||% 0)
+      paste0("HC", percent, " / PC", 100 - percent)
     })
 
     output$hcConc <- renderText({
@@ -734,20 +776,16 @@ mod_predict_server <- function(
       )
     })
 
-    output$tableCl <- DT::renderDataTable({
+    output$tableCl <- reactable::renderReactable({
       cl <- table_cl()
       trans <- translations()
-      header_tooltips <- gof_header_tooltips(trans, lang())
-
-      result <- DT::datatable(
-        cl,
-        options = list(
-          dom = "t",
-          headerCallback = dt_header_tooltip_callback(header_tooltips)
-        )
+      app_table(
+        as.data.frame(cl),
+        lang = lang(),
+        tooltips = gof_header_tooltips(trans, lang()),
+        weight = intersect(c("wt", "weight"), names(cl))[1],
+        pagination = FALSE
       )
-
-      dt_weight_color_bar(result, cl, trans)
     })
 
     # Display protecting % as read-only calculated value
@@ -821,7 +859,7 @@ mod_predict_server <- function(
     cl_request <- reactiveVal(NULL)
     cl_result <- reactiveVal(NULL)
 
-    observe({
+    get_cl <- function() {
       req(iv$is_valid(), fit_mod$fit_dist(), thresh_rv$percent)
       request <- list(
         fit = fit_mod$fit_dist(),
@@ -830,14 +868,32 @@ mod_predict_server <- function(
         conc = thresh_rv$conc,
         nboot = clean_nboot(input$bootSamp)
       )
-      cl_request(request)
+      # The data too, so limits of other data are not shown; the job does
+      # not need them.
+      cl_request(c(request, list(data = data_mod$data())))
       request$pred <- curve_lookup(request$fit, request$nboot, request$percent)
       cl_runner$invoke(cl_job, request)
-    }) |>
+    }
+
+    # One observer for each button: bound to several, bindEvent() runs as the
+    # buttons start up, as their unclicked values together are not NULL.
+    observe(get_cl()) |>
       bindEvent(input$getCl)
+    observe(get_cl()) |>
+      bindEvent(input$getClNotice)
 
     observe(cl_runner$cancel()) |>
       bindEvent(input$cancelCl)
+    observe(cl_runner$cancel()) |>
+      bindEvent(input$cancelClAside)
+
+    # Limits being computed for other data are no longer wanted.
+    observe({
+      data <- data_mod$data()
+      if (isolate(cl_runner$running()) && !identical(isolate(cl_request())$data, data)) {
+        cl_runner$cancel()
+      }
+    })
 
     observe({
       done <- cl_runner$done()
@@ -857,15 +913,20 @@ mod_predict_server <- function(
       curve_store(request$fit, request$nboot, done$value$pred)
       cl_result(c(
         done$value,
-        list(fit = request$fit, nboot = request$nboot, conc = request$conc)
+        list(fit = request$fit, nboot = request$nboot, conc = request$conc, data = request$data)
       ))
     }) |>
       bindEvent(cl_runner$done())
 
     # The confidence limits of the current fit.
+    # The confidence limits of the current fit and number of bootstrap
+    # samples: limits from another number of samples are out of date.
     current_cl <- reactive({
       cl <- cl_result()
-      if (!is.null(cl) && identical(cl$fit, fit_mod$fit_dist())) cl
+      if (!is.null(cl) && identical(cl$fit, fit_mod$fit_dist()) &&
+        identical(cl$nboot, clean_nboot(input$bootSamp))) {
+        cl
+      }
     })
 
     # The plot's band, while the threshold is one of its percents (it always
@@ -891,7 +952,12 @@ mod_predict_server <- function(
 
     output$cl_running <- reactive(cl_runner$running())
     outputOptions(output, "cl_running", suspendWhenHidden = FALSE)
-    output$cl_stale <- reactive(!is.null(cl_result()) && is.null(cl_table_current()))
+    # Limits of other data are not out of date but absent, as in a new
+    # session.
+    output$cl_stale <- reactive({
+      cl <- cl_result()
+      !is.null(cl) && identical(cl$data, data_mod$data()) && is.null(cl_table_current())
+    })
     outputOptions(output, "cl_stale", suspendWhenHidden = FALSE)
 
     # Without current confidence limits, the predictions are the estimates
@@ -1098,11 +1164,10 @@ mod_predict_server <- function(
       )
     })
 
-    has_predict <- reactive({
-      iv$is_valid() &&
-        !is.null(predict_hc())
-    }) |>
-      bindEvent(predict_hc(), iv$is_valid())
+    # The predictions stay while an input is being edited (such as the
+    # threshold cleared to type another): they are of the last valid
+    # threshold, and the validation message shows on the input.
+    has_predict <- reactive(!is.null(predict_hc()))
 
     output$has_predict <- has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
@@ -1112,52 +1177,8 @@ mod_predict_server <- function(
     output$has_cl <- has_cl
     outputOptions(output, "has_cl", suspendWhenHidden = FALSE)
 
-    observe_step_button(input, "continue", "report")
+    observe_step_button(input, "continue", "export")
     observe_step_button(input, "goFit", "fit")
-
-    # downloaders -------------------------------------------------------------
-    output$predDlPlot <- downloadHandler(
-      filename = function() {
-        "ssdtools_model_average_plot.png"
-      },
-      content = function(file) {
-        ggplot2::ggsave(
-          file,
-          plot = plot_model_average(),
-          device = "png",
-          width = input$width,
-          height = input$height,
-          dpi = input$dpi
-        )
-      }
-    )
-
-    output$predDlRds <- downloadHandler(
-      filename = function() {
-        "ssdtools_model_average_plot.rds"
-      },
-      content = function(file) {
-        saveRDS(plot_model_average(), file = file)
-      }
-    )
-
-    output$predDlCsv <- downloadHandler(
-      filename = function() {
-        "ssdtools_cl_table.csv"
-      },
-      content = function(file) {
-        readr::write_csv(dplyr::as_tibble(table_cl()), file)
-      }
-    )
-
-    output$predDlXlsx <- downloadHandler(
-      filename = function() {
-        "ssdtools_cl_table.xlsx"
-      },
-      content = function(file) {
-        writexl::write_xlsx(dplyr::as_tibble(table_cl()), file)
-      }
-    )
 
     return(
       list(
@@ -1238,16 +1259,7 @@ mod_predict_server <- function(
         curve_lookup = curve_lookup,
         curve_store = curve_store,
         has_cl = has_cl,
-        has_predict = has_predict,
-        width = reactive({
-          input$width
-        }),
-        height = reactive({
-          input$height
-        }),
-        dpi = reactive({
-          input$dpi
-        })
+        has_predict = has_predict
       )
     )
   })

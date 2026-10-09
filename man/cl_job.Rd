@@ -34,7 +34,7 @@ Bootstraps the model-averaged hazard concentrations at every whole percent
 and the threshold (for the plot's band, the model-averaged row of the
 confidence limits table and the report), and the estimates of each
 distribution for the table: by percent, at the threshold and at
-\link{cl_percents}; by concentration, the fraction affected at \code{conc}, with its
+\code{cl_percents}; by concentration, the fraction affected at \code{conc}, with its
 model average. The percents of one call share their bootstrap fits, so
 extra percents cost little. A model-averaged curve already bootstrapped
 with the same fit and number of samples (\code{pred}) is used rather than

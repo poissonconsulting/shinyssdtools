@@ -8,6 +8,8 @@ de toute modification pertinente apportée à ssdtools. Lorsque vous
 rapportez les estimations de HC5 générées à l’aide de cette application,
 il est recommandé d’indiquer la version de ssdtools ainsi que le nom des
 distributions ajustées aux données.</p>
+<div id="methods" class="section level2">
+<h2>Articles de ssdtools</h2>
 <p>Pour plus d’informations sur les méthodes utilisées, consultez les
 articles de ssdtools :</p>
 <ul>
@@ -28,6 +30,21 @@ des graphiques</a> - modification des graphiques de DSE</li>
 <li><a href="https://bcgov.github.io/ssdtools/articles/faqs.html">FAQ</a> -
 questions fréquemment posées</li>
 </ul>
+</div>
+<div id="references" class="section level2">
+<h2>Références</h2>
+<ul>
+<li><a href="https://joss.theoj.org/papers/10.21105/joss.07492">ssdtools
+v2: An R package to fit Species Sensitivity Distributions</a> - Thorley
+et al. (2025), Journal of Open Source Software</li>
+<li><a href="http://a100.gov.bc.ca/appsdata/acat/documents/r57400/2_1568399094009_8398900200.pdf">Improving
+statistical methods to derive species sensitivity distributions</a> -
+Schwarz et Tillmanns (2019), Water Science Series, Province de la
+Colombie-Britannique</li>
+</ul>
+</div>
+<div id="gof" class="section level2">
+<h2>Tableau de la qualité de l’ajustement</h2>
 <p>Les colonnes du tableau de l’évaluation de la qualité de l’ajustement
 sont : la distribution (dist), le nombre de paramètres (npars), le
 nombre d’observations (nobs), la log-vraisemblance (log_lik), le critère
@@ -40,19 +57,34 @@ L’estimation de la fonction de distribution finale est basée sur
 l’inférence multimodèle (à partir de l’AICc). La concentration
 présentant un risque est la concentration estimée d’une substance
 affectant un centile (seuil) sélectionné de l’ensemble des espèces.</p>
-<p>Pour signaler un bogue, un comportement inattendu ou pour proposer
-une nouvelle fonctionnalité, veuillez soumettre un issue sur <a href="https://github.com/poissonconsulting/shinyssdtools/issues">GitHub
-à l’adresse suivante</a>.</p>
-<p>Pour citer l’application R ‘ssdtools’ : Thorley, J., Fisher, R., Fox,
-D., and Schwarz, C. 2025. <a href="https://joss.theoj.org/papers/10.21105/joss.07492">ssdtools v2: An
+</div>
+<div id="cite" class="section level2">
+<h2>Citation</h2>
+<p>Pour citer l’application R ‘ssdtools’ :</p>
+<blockquote>
+<p>Thorley, J., Fisher, R., Fox, D., and Schwarz, C. 2025. <a href="https://joss.theoj.org/papers/10.21105/joss.07492">ssdtools v2: An
 R package to fit Species Sensitivity Distributions. JOSS 10(105):
 7492.</a> <code>doi:10.21105/joss.07492</code>.</p>
-<p>Pour citer l’application web : Seb Dalgarno (2018) ssdtools: A shiny
-web app to analyse species sensitivity distributions. Prepared by
-Poisson Consulting for the Ministry of the Environment, British
-Columbia. <code>https://bcgov-env.shinyapps.io/ssdtools/</code></p>
+</blockquote>
+<p>Pour citer l’application web :</p>
+<blockquote>
+<p>Seb Dalgarno (2026) ssdtools: A shiny web app to analyse species
+sensitivity distributions. Prepared by Poisson Consulting for the
+Ministry of the Environment, British Columbia.
+<code>https://bcgov-env.shinyapps.io/ssdtools/</code></p>
+</blockquote>
 <p>Pour plus d’information sur l’utilisation de l’inférence multimodèle
-afin d’obtenir des estimations de HC5, veuillez consulter : <a href="http://a100.gov.bc.ca/appsdata/acat/documents/r57400/2_1568399094009_8398900200.pdf">Schwarz,
+afin d’obtenir des estimations de HC5, veuillez consulter :</p>
+<blockquote>
+<p><a href="http://a100.gov.bc.ca/appsdata/acat/documents/r57400/2_1568399094009_8398900200.pdf">Schwarz,
 C.J. and A.R. Tillmanns. 2019. Improving statistical methods to derive
 species sensitivity distributions. Water Science Series, WSS2019-07,
 Province of British Columbia, Victoria.</a></p>
+</blockquote>
+</div>
+<div id="issues" class="section level2">
+<h2>Signaler un problème</h2>
+<p>Pour signaler un bogue, un comportement inattendu ou pour proposer
+une nouvelle fonctionnalité, veuillez soumettre un issue sur <a href="https://github.com/poissonconsulting/shinyssdtools/issues">GitHub
+à l’adresse suivante</a>.</p>
+</div>

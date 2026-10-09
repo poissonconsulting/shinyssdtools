@@ -7,8 +7,8 @@
 busy_icon()
 }
 \value{
-A small spinner, hidden from screen readers (the text beside it
-says what is running).
+A spinning loader icon, hidden from screen readers (the text beside
+it says what is running).
 }
 \description{
 Create a busy icon
