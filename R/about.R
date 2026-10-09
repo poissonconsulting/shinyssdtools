@@ -40,8 +40,8 @@ about_sections <- function(html) {
   list(intro = intro, sections = stats::setNames(sections, vapply(sections, `[[`, "", "id")))
 }
 
-# A citation block with a Copy button for its text.
-about_citation <- function(text) {
+# A citation block with a Copy button for its text, labelled `copy`.
+about_citation <- function(text, copy = "Copy") {
   onclick <- paste0(
     "navigator.clipboard.writeText(this.closest('.ssd-cite').querySelector('.ssd-cite-text').innerText)",
     ".then(() => { this.classList.add('ssd-copied'); setTimeout(() => this.classList.remove('ssd-copied'), 1500); })"
@@ -53,8 +53,8 @@ about_citation <- function(text) {
       type = "button",
       class = "btn btn-light border btn-sm flex-shrink-0",
       onclick = onclick,
-      title = "Copy",
-      `aria-label` = "Copy",
+      title = copy,
+      `aria-label` = copy,
       span(class = "ssd-copy-icon", lucide("copy")),
       span(class = "ssd-copied-icon", lucide("check"))
     )
@@ -64,9 +64,10 @@ about_citation <- function(text) {
 #' Create the panel of an About section
 #' @param sections Sections from [about_sections()].
 #' @param id Character string section ID.
+#' @param copy Character string label of the citations' Copy buttons.
 #' @return A panel, or `NULL` when the section is missing.
 #' @keywords internal
-about_panel <- function(sections, id) {
+about_panel <- function(sections, id, copy = "Copy") {
   section <- sections[[id]]
   if (is.null(section)) {
     return(NULL)
@@ -78,7 +79,7 @@ about_panel <- function(sections, id) {
     div(
       class = "d-flex flex-column gap-2",
       lapply(seq_along(parts), function(i) {
-        if (i %% 2 == 0) about_citation(parts[[i]]) else if (nzchar(trimws(parts[[i]]))) HTML(parts[[i]])
+        if (i %% 2 == 0) about_citation(parts[[i]], copy) else if (nzchar(trimws(parts[[i]]))) HTML(parts[[i]])
       })
     )
   } else {
@@ -109,9 +110,11 @@ methods_page <- function(html) {
 
 #' Create the About page
 #' @param html Character string rendered About HTML for the current language.
+#' @param copy Character string label of the citations' Copy buttons, in the
+#'   current language.
 #' @return The page's content.
 #' @keywords internal
-about_page <- function(html) {
+about_page <- function(html, copy = "Copy") {
   about <- about_sections(html)
   sections <- about$sections
   version <- function(package) as.character(utils::packageVersion(package))
@@ -143,7 +146,7 @@ about_page <- function(html) {
         )
       )
     ),
-    about_panel(sections, "cite"),
+    about_panel(sections, "cite", copy),
     if (!is.null(issues)) {
       card(
         class = "mb-0",

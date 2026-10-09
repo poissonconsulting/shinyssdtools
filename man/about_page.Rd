@@ -4,10 +4,13 @@
 \alias{about_page}
 \title{Create the About page}
 \usage{
-about_page(html)
+about_page(html, copy = "Copy")
 }
 \arguments{
 \item{html}{Character string rendered About HTML for the current language.}
+
+\item{copy}{Character string label of the citations' Copy buttons, in the
+current language.}
 }
 \value{
 The page's content.

@@ -181,7 +181,7 @@ app_server <- function(input, output, session) {
   })
 
   output$ui_methods <- renderUI(methods_page(about_html()))
-  output$ui_about <- renderUI(about_page(about_html()))
+  output$ui_about <- renderUI(about_page(about_html(), copy = tr("ui_copy_cite", trans())))
 
   output$ui_userguide <- renderUI({
     lang <- current_lang()

@@ -209,7 +209,7 @@ translations <- dplyr::bind_rows(
   dplyr::tibble(
     id = "ui_2table",
     english = "Goodness of fit table",
-    french = "Tableau de l'\u00e9valuation de la qualit\u00e9 de l\u2019ajustement des courbes de distribution",
+    french = "Tableau de la qualit\u00e9 de l'ajustement",
     spanish = "Tabla de bondad de ajuste"
   ),
   dplyr::tibble(
@@ -615,15 +615,15 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_hintfit",
-    english = "You have not successfully fit any distributions yet. Run the 'Fit' tab first.",
-    french = "Aucune distribution n\u2019a encore \u00e9t\u00e9 ajust\u00e9e avec succ\u00e8s. Ex\u00e9cuter d'abord l\u2019onglet 'Ajustement'.",
-    spanish = "A\u00fan no ha ajustado ninguna distribuci\u00f3n con \u00e9xito. Ejecute primero la pesta\u00f1a 'Ajuste'."
+    english = "You have not successfully fit any distributions yet.",
+    french = "Aucune distribution n\u2019a encore \u00e9t\u00e9 ajust\u00e9e avec succ\u00e8s.",
+    spanish = "A\u00fan no ha ajustado ninguna distribuci\u00f3n con \u00e9xito."
   ),
   dplyr::tibble(
     id = "ui_hintpredict",
-    english = "You have not successfully generated predictions yet. Run the 'Predict' tab first.",
-    french = "Aucune pr\u00e9diction n'a encore \u00e9t\u00e9 g\u00e9n\u00e9r\u00e9e avec succ\u00e8s. Ex\u00e9cutez d'abord l'onglet \u00ab Estimation \u00bb.",
-    spanish = "A\u00fan no ha generado predicciones con \u00e9xito. Ejecute primero la pesta\u00f1a 'Predicci\u00f3n'."
+    english = "You have not successfully generated predictions yet.",
+    french = "Aucune pr\u00e9diction n'a encore \u00e9t\u00e9 g\u00e9n\u00e9r\u00e9e avec succ\u00e8s.",
+    spanish = "A\u00fan no ha generado predicciones con \u00e9xito."
   ),
   dplyr::tibble(
     id = "ui_hintfail",
@@ -660,6 +660,24 @@ translations <- dplyr::bind_rows(
     english = "Bootstrap samples must not be missing.",
     french = "Le nombre d'\u00e9chantillons bootstrap ne doit pas \u00eatre vide.",
     spanish = "Las muestras bootstrap no deben faltar."
+  ),
+  dplyr::tibble(
+    id = "ui_copy_cite",
+    english = "Copy",
+    french = "Copier",
+    spanish = "Copiar"
+  ),
+  dplyr::tibble(
+    id = "ui_csv_failed",
+    english = "Could not read the CSV file",
+    french = "Le fichier CSV n'a pas pu \u00eatre lu",
+    spanish = "No se pudo leer el archivo CSV"
+  ),
+  dplyr::tibble(
+    id = "ui_bcanz_zip",
+    english = "The report and every BCANZ output",
+    french = "Le rapport et tous les r\u00e9sultats BCANZ",
+    spanish = "El informe y todos los resultados BCANZ"
   ),
   dplyr::tibble(
     id = "ui_copy",
@@ -872,13 +890,13 @@ translations <- dplyr::bind_rows(
   dplyr::tibble(
     id = "ui_cl_running",
     english = "Computing confidence limits",
-    french = "Calcul des limites de confiance",
+    french = "Calcul des bornes de l'intervalle de confiance",
     spanish = "Calculando los l\u00edmites de confianza"
   ),
   dplyr::tibble(
     id = "ui_cl_stale",
     english = "The confidence limits are out of date",
-    french = "Les limites de confiance ne sont plus \u00e0 jour",
+    french = "Les bornes de l'intervalle de confiance ne sont plus \u00e0 jour",
     spanish = "Los l\u00edmites de confianza est\u00e1n desactualizados"
   ),
   dplyr::tibble(
@@ -890,7 +908,7 @@ translations <- dplyr::bind_rows(
   dplyr::tibble(
     id = "ui_cl_failed",
     english = "The confidence limits could not be computed",
-    french = "Les limites de confiance n'ont pas pu \u00eatre calcul\u00e9es",
+    french = "Les bornes de l'intervalle de confiance n'ont pas pu \u00eatre calcul\u00e9es",
     spanish = "No se pudieron calcular los l\u00edmites de confianza"
   ),
   dplyr::tibble(
@@ -944,7 +962,7 @@ translations <- dplyr::bind_rows(
   dplyr::tibble(
     id = "ui_fitting",
     english = "Fitting distributions...",
-    french = "Ajustement des distributions en cours...",
+    french = "Ajustement des distributions en cours ...",
     spanish = "Ajustando distribuciones..."
   ),
   dplyr::tibble(
@@ -1004,25 +1022,25 @@ translations <- dplyr::bind_rows(
   dplyr::tibble(
     id = "ui_step_data",
     english = "Use the boron dataset, upload a CSV file or fill out a table.",
-    french = "Utilisez le jeu de donn\u00e9es sur le bore, t\u00e9l\u00e9versez un fichier CSV ou remplissez un tableau.",
+    french = "Utiliser l'ensemble de donn\u00e9es pour le bore, t\u00e9l\u00e9verser un fichier CSV ou remplir le tableau.",
     spanish = "Use el conjunto de datos de boro, cargue un archivo CSV o complete una tabla."
   ),
   dplyr::tibble(
     id = "ui_step_fit",
     english = "Fit distributions to the concentrations and compare how well they fit.",
-    french = "Ajustez des distributions aux concentrations et comparez la qualit\u00e9 de leur ajustement.",
+    french = "Ajuster les distributions aux donn\u00e9es et comparer la qualit\u00e9 de l'ajustement.",
     spanish = "Ajuste distribuciones a las concentraciones y compare la calidad del ajuste."
   ),
   dplyr::tibble(
     id = "ui_step_predict",
     english = "Estimate a hazard concentration or the fraction affected, with confidence limits.",
-    french = "Estimez une concentration pr\u00e9sentant un risque ou la fraction affect\u00e9e, avec les bornes de l'intervalle de confiance.",
+    french = "Estimer la concentration pr\u00e9sentant un risque ou la fraction affect\u00e9e, avec les bornes de l'intervalle de confiance.",
     spanish = "Estime una concentraci\u00f3n peligrosa o la fracci\u00f3n afectada, con l\u00edmites de confianza."
   ),
   dplyr::tibble(
     id = "ui_step_export",
     english = "Download the plots, tables and BCANZ report, and the R code that reproduces them.",
-    french = "T\u00e9l\u00e9chargez les graphiques, les tableaux et le rapport BCANZ, ainsi que le code R qui les reproduit.",
+    french = "T\u00e9l\u00e9charger les graphiques, les tableaux et le rapport BCANZ, ainsi que le code R pour reproduire les r\u00e9sultats.",
     spanish = "Descargue los gr\u00e1ficos, las tablas y el informe BCANZ, y el c\u00f3digo R que los reproduce."
   )
 )

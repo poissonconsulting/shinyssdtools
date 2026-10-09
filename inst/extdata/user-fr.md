@@ -70,11 +70,13 @@ Les distributions ne sont pas traitées comme constituant une distribution uniqu
 Il faut cliquer sur le bouton `Obtenir bornes`.
 4. Utilisez les options de la barre latérale pour mettre en forme le graphique, puis **téléchargez le graphique** au format PNG ou RDS ainsi que **le tableau des limites de confiance** aux formats CSV ou XLSX.
 
-### Étape 4: Obtenir le rapport BCANZ
+### Étape 4: Exportation
+
+#### Obtenir le rapport BCANZ
 Générer un rapport au format HTML ou PDF comprenant le tracé de la distribution ajustée, le tableau de qualité de l'ajustement, le tracé de l'ajustement moyen du modèle et le tableau des concentrations dangereuses/protectrices estimées. 
 Toutes les options sélectionnées dans l'application seront incorporées dans le rapport.
 
-### Étape 5: Obtenir le code R
+#### Obtenir le code R
 
 Copiez le code R pour reproduire les résultats par programmation. Le code est généré dynamiquement en fonction des entrées de l'utilisateur et des fonctions exécutées dans l'application (par exemple, le code permettant de générer les limites de confiance apparaît après avoir cliqué sur le bouton « Obtenir les bornes »).  
  

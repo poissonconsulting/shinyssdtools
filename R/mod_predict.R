@@ -477,7 +477,7 @@ mod_predict_ui <- function(id) {
         "chart-line",
         span(
           `data-translate` = "ui_hintfit",
-          "You have not successfully fit any distributions yet. Run the 'Fit' tab first."
+          "You have not successfully fit any distributions yet."
         ),
         action = step_button(ns("goFit"), "ui_goto_fit", "Go to Fit", variant = "outline")
       )

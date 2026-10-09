@@ -114,7 +114,8 @@ mod_export_ui <- function(id, rcode = NULL) {
         button(ns("reportDlHtml"), "HTML", icon = "download", variant = "outline", size = "sm", download = TRUE),
         button(
           ns("bcanzZip"), "ZIP", icon = "file-archive", variant = "outline", size = "sm", download = TRUE,
-          title = "The report and every BCANZ output"
+          title = "The report and every BCANZ output",
+          `data-translate-title` = "ui_bcanz_zip"
         )
       )
     )
@@ -183,7 +184,7 @@ mod_export_ui <- function(id, rcode = NULL) {
         "calculator",
         span(
           `data-translate` = "ui_hintpredict",
-          "You have not successfully generated predictions yet. Run the 'Predict' tab first."
+          "You have not successfully generated predictions yet."
         ),
         action = step_button(ns("goPredict"), "ui_goto_predict", "Go to Predict", variant = "outline")
       )
@@ -355,7 +356,7 @@ mod_export_server <- function(
         tags$iframe(
           srcdoc = report_preview_html(),
           class = "ssd-report-frame",
-          title = "BCANZ report",
+          title = tr("ui_tabreport", translations()),
           sandbox = "allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
         ),
         title = tr("ui_prevreport", translations()),
