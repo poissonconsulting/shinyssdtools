@@ -166,6 +166,13 @@
   overflow: hidden;
 }
 
+/* Shiny's busy indicators give a recalculating output room for its spinner,
+   but hide the spinner on HTML outputs; without this an empty message output
+   grows and moves what is below it while it recalculates. */
+[data-shiny-busy-spinners] .recalculating.shiny-html-output:not(.shiny-table-output) {
+  min-height: 0;
+}
+
 /* The estimate under the model-average plot. */
 .ssd-estimate {
   font-variant-numeric: tabular-nums;
