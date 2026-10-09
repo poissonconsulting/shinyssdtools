@@ -85,6 +85,7 @@ mod_data_ui <- function(id) {
         )
       ),
       accordion(
+        id = ns("sections"),
         open = FALSE,
         accordion_panel(
           title = span(`data-translate` = "ui_1preview", "Preview chosen dataset"),
@@ -235,6 +236,10 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
       active_source("demo")
     }) |>
       bindEvent(input$demoData)
+
+    # New data open the preview, whichever way they were provided.
+    observe(accordion_panel_open("sections", "preview")) |>
+      bindEvent(input$demoData, input$uploadData, input$handson_done, ignoreInit = TRUE)
 
     observe({
       active_source("handson")

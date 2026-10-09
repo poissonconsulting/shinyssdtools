@@ -127,7 +127,6 @@ app_server <- function(input, output, session) {
     data_mod,
     fit_mod,
     predict_mod,
-    shared_toxicant_name,
     main_nav = reactive(input$main_nav),
     code = function() rcode_mod$code()
   )

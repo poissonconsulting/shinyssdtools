@@ -99,9 +99,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_tabreport",
-    english = "Get BCANZ report",
-    french = "Obtenir le rapport BCANZ",
-    spanish = "Obtener informe BCANZ"
+    english = "BCANZ report",
+    french = "Rapport BCANZ",
+    spanish = "Informe BCANZ"
   ),
   dplyr::tibble(
     id = "ui_tabcode",

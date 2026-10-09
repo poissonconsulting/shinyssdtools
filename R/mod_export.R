@@ -99,7 +99,7 @@ mod_export_ui <- function(id, rcode = NULL) {
   )
 
   report_row <- div(
-    class = "d-flex flex-column gap-3 border rounded-3 p-3",
+    class = "border rounded-3 p-3",
     div(
       class = "d-flex flex-wrap align-items-center gap-3",
       div(class = "ssd-tile-icon bg-primary-subtle text-primary-emphasis", lucide("file-text")),
@@ -107,38 +107,12 @@ mod_export_ui <- function(id, rcode = NULL) {
         class = "flex-grow-1",
         div(
           class = "fw-medium ssd-card-title",
-          span(`data-translate` = "ui_tabreport", "Get BCANZ report") |>
+          span(`data-translate` = "ui_tabreport", "BCANZ report") |>
             shinyhelper::helper(type = "markdown", content = "reportTab", size = "l", colour = color_primary, buttonLabel = "OK")
         ),
-        conditionalPanel(
-          condition = sprintf("!%s && %s", paste_js("report_running", ns), paste_js("needs_bootstrap", ns)),
-          div(class = "small text-body-secondary", htmlOutput(ns("describeTime"), inline = TRUE))
-        )
+        div(class = "small text-body-secondary", htmlOutput(ns("describeReport"), inline = TRUE))
       ),
       div(class = "flex-shrink-0", report_actions)
-    ),
-    layout_column_wrap(
-      width = 1 / 2,
-      gap = "0.75rem",
-      textInput(
-        ns("toxicant"),
-        label = span(`data-translate` = "ui_4toxname", "Toxicant name"),
-        value = "",
-        width = "100%"
-      ) |>
-        tagAppendAttributes(class = "mb-0"),
-      selectizeInput(
-        ns("bootSamp"),
-        options = list(
-          create = TRUE,
-          createFilter = "^(?:[1-9][0-9]{0,3}|10000)$"
-        ),
-        label = span(`data-translate` = "ui_3samples", "Bootstrap samples"),
-        choices = c("500", "1,000", "5,000", "10,000"),
-        selected = "10,000",
-        width = "100%"
-      ) |>
-        tagAppendAttributes(class = "mb-0")
     )
   )
 
@@ -203,7 +177,6 @@ mod_export_server <- function(
   data_mod,
   fit_mod,
   predict_mod,
-  shared_toxicant_name = NULL,
   main_nav = reactive("export"),
   code = function() ""
 ) {
@@ -213,56 +186,6 @@ mod_export_server <- function(
     output$has_predict <- predict_mod$has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)
 
-    observe({
-      current <- lang()
-      nboot_value <- predict_mod$nboot()
-
-      # Default choices based on language
-      if (current == "french") {
-        choices <- c("500", "1 000", "5 000", "10 000")
-        standard_values <- c("500", "1000", "5000", "10000")
-      } else {
-        choices <- c("500", "1,000", "5,000", "10,000")
-        standard_values <- c("500", "1000", "5000", "10000")
-      }
-
-      # Check if nboot_value is a custom value (not in standard list)
-      nboot_clean <- clean_nboot(nboot_value)
-      if (!is.null(nboot_value) && !nboot_clean %in% standard_values) {
-        choices <- c(choices, nboot_value)
-      }
-
-      updateSelectizeInput(
-        session,
-        "bootSamp",
-        choices = choices,
-        selected = nboot_value
-      )
-    }) |>
-      bindEvent(lang(), predict_mod$nboot())
-
-    # Update toxicant input when shared value changes from another module
-    if (!is.null(shared_toxicant_name)) {
-      observe({
-        toxicant_name <- shared_toxicant_name()
-        if (!is.null(toxicant_name) && toxicant_name != "" &&
-            toxicant_name != input$toxicant) {
-          updateTextInput(
-            session,
-            "toxicant",
-            value = toxicant_name
-          )
-        }
-      }) |>
-        bindEvent(shared_toxicant_name())
-
-      # Update shared value when this module's input changes
-      observe({
-        shared_toxicant_name(input$toxicant)
-      }) |>
-        bindEvent(input$toxicant)
-    }
-
     # The report's parameters other than its confidence limits, which the
     # report job adds.
     params_list <- reactive({
@@ -270,7 +193,7 @@ mod_export_server <- function(
       req(fit_mod$has_fit())
 
       list(
-        toxicant = input$toxicant,
+        toxicant = data_mod$toxicant_name(),
         data = data_mod$clean_data(),
         dists = fit_mod$dists(),
         fit_plot = fit_mod$fit_plot(),
@@ -288,7 +211,9 @@ mod_export_server <- function(
     report_request <- reactiveVal(NULL)
     report_result <- reactiveVal(NULL)
 
-    report_nboot <- reactive(clean_nboot(req(input$bootSamp)))
+    # The report uses the Predict step's bootstrap samples, so it reuses the
+    # confidence limits computed there.
+    report_nboot <- reactive(clean_nboot(req(predict_mod$nboot())))
 
     report_inputs <- reactive({
       list(
@@ -377,12 +302,18 @@ mod_export_server <- function(
     output$needs_bootstrap <- reactive(is.null(report_curve()))
     outputOptions(output, "needs_bootstrap", suspendWhenHidden = FALSE)
 
-    output$describeTime <- renderText({
-      HTML(
-        tr("ui_3cldesc3", translations()),
-        estimate_time(report_nboot(), lang()),
-        tr("ui_3cldesc4", translations())
-      )
+    output$describeReport <- renderText({
+      trans <- translations()
+      samples <- paste0(tr("ui_3samples", trans), ": ", predict_mod$nboot())
+      if (!is.null(report_curve())) {
+        return(samples)
+      }
+      HTML(paste0(
+        samples, ". ",
+        tr("ui_3cldesc3", trans), " ",
+        estimate_time(report_nboot(), lang()), " ",
+        tr("ui_3cldesc4", trans)
+      ))
     })
 
     # Links open in a new tab rather than within the preview's iframe.

@@ -40,25 +40,50 @@ brand <- function() {
 # background, a marker. The markers are switched in the browser by the output
 # mark_<step> (app_server()), so they need no round trip to render.
 step_title <- function(translate_key, default_text, step) {
-  marker <- function(state, icon, class, translate_key, default_text) {
+  span(
+    class = "d-inline-flex align-items-center gap-2",
+    step_name(translate_key, default_text),
+    span(class = "order-first d-inline-flex", step_marker_switch(step))
+  )
+}
+
+# A step's name without its number, which its marker shows ("1. Data" ->
+# "Data"); translation.js strips the number from translations too.
+step_name <- function(translate_key, default_text) {
+  span(`data-translate` = translate_key, `data-strip-number` = "", sub("^\\s*\\d+\\.\\s*", "", default_text))
+}
+
+# A step's marker in each state, switched in the browser by the output
+# mark_<step> ("todo", "done" or "busy"): its number until it is done, then a
+# tick, or a spinner while it runs in the background.
+step_marker_switch <- function(step) {
+  number <- match(step, c("data", "fit", "predict", "export"))
+  marker <- function(state, condition, content) {
     # conditionalPanel() as a span, so the marker sits inline with the name.
     # Shiny shows a conditional element with display: contents, so the marker's
     # own box is an inner span.
     span(
-      `data-display-if` = sprintf("output.mark_%s === '%s'", step, state),
+      `data-display-if` = condition,
       `data-ns-prefix` = "",
-      span(
-        class = paste("ssd-step-marker", class),
-        icon,
-        span(class = "visually-hidden", `data-translate` = translate_key, default_text)
-      )
+      span(class = paste0("ssd-step-marker ssd-step-", state), content)
     )
   }
-  span(
-    class = "d-inline-flex align-items-center gap-2",
-    span(`data-translate` = translate_key, default_text),
-    marker("done", lucide("check"), "ssd-step-done", "ui_step_done", "complete"),
-    marker("busy", lucide("loader-2", "ssd-spin"), "ssd-step-busy", "ui_step_busy", "running")
+  tagList(
+    marker(
+      "todo",
+      sprintf("['done', 'busy'].indexOf(output.mark_%s) < 0", step),
+      span(`aria-hidden` = "true", number)
+    ),
+    marker(
+      "done",
+      sprintf("output.mark_%s === 'done'", step),
+      tagList(lucide("check"), span(class = "visually-hidden", `data-translate` = "ui_step_done", "complete"))
+    ),
+    marker(
+      "busy",
+      sprintf("output.mark_%s === 'busy'", step),
+      tagList(lucide("loader-2", "ssd-spin"), span(class = "visually-hidden", `data-translate` = "ui_step_busy", "running"))
+    )
   )
 }
 
@@ -98,11 +123,11 @@ app_ui <- function() {
       # the top of the page on every input change.
       useBusyIndicators(pulse = FALSE),
       tags$head(
-        # Versioned by the file's modification time, so a browser fetches the
-        # stylesheet again when it changes rather than using a cached copy.
-        tags$link(rel = "stylesheet", href = paste0("style.css?v=", styles_version())),
+        # Versioned by the files' modification times, so a browser fetches
+        # them again when they change rather than using a cached copy.
+        tags$link(rel = "stylesheet", href = paste0("style.css?v=", asset_version("style.css"))),
         tags$link(rel = "icon", type = "image/svg+xml", href = "favicon.svg"),
-        tags$script(src = "translation.js")
+        tags$script(src = paste0("translation.js?v=", asset_version("translation.js")))
       )
     ),
     nav_spacer(),
@@ -191,7 +216,7 @@ theme_picker <- function() {
   )
 }
 
-styles_version <- function() {
-  path <- system.file("app", "www", "style.css", package = "shinyssdtools")
+asset_version <- function(file) {
+  path <- system.file("app", "www", file, package = "shinyssdtools")
   as.integer(file.mtime(path))
 }

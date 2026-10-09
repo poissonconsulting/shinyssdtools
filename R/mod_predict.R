@@ -75,14 +75,16 @@ mod_predict_ui <- function(id) {
           selected = 5
         ),
         div(
+          class = "form-group shiny-input-container",
           tags$label(
+            class = "control-label",
             span(
               `data-translate` = "ui_3protecting",
               "protecting % species"
             )
           ),
           div(
-            class = "form-control bg-body-tertiary mt-2",
+            class = "form-control bg-body-tertiary",
             `aria-live` = "polite",
             textOutput(ns("threshPc"), inline = TRUE)
           )

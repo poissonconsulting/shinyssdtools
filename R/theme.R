@@ -68,10 +68,11 @@ app_theme <- function(palette = "hakai", navbar = "light") {
   } else {
     list(bg = col$navbar_bg, fg = "rgba(255, 255, 255, 0.72)", hover = "#ffffff", active = "#ffffff", brand = "#ffffff")
   }
-  # A done step's marker: a white disc on the dark navbar, a green one on the
-  # light navbar. Compiled with the theme, so it follows a theme change.
+  # A done step's marker: a white disc on the dark navbar, a solid green one
+  # with a white tick on the light navbar. Compiled with the theme, so it
+  # follows a theme change.
   rules <- c(
-    sprintf(".ssd-step-done { background: %s; color: %s; }", if (light) col$success_muted else "#ffffff", if (light) col$success else col$secondary_fg),
+    sprintf(".ssd-step-done { background: %s; color: %s; }", if (light) col$success else "#ffffff", if (light) "#ffffff" else col$secondary_fg),
     sprintf(".ssd-step-busy { background: %s; color: %s; }", col$accent, col$accent_fg),
     if (light) sprintf(".navbar { border-bottom: 1px solid %s; }", col$border),
     # Navigation items as in shadcn/ui: rounded ghost items, the open one

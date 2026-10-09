@@ -396,11 +396,14 @@ app_steps <- list(
 #' @return A card.
 #' @keywords internal
 welcome_card <- function(guide_id) {
-  step <- function(item) {
+  step <- function(item, number) {
     div(
-      class = "col-sm-6 col-xl-3",
-      div(class = "fw-semibold mb-1", span(`data-translate` = item$name, item$name_text)),
-      div(class = "small text-body-secondary", span(`data-translate` = item$key, item$text))
+      class = "col-sm-6 col-xl-3 d-flex align-items-start gap-2",
+      span(class = "ssd-step-marker ssd-step-todo flex-shrink-0 mt-1", `aria-hidden` = "true", number),
+      div(
+        div(class = "fw-semibold mb-1", step_name(item$name, item$name_text)),
+        div(class = "small text-body-secondary", span(`data-translate` = item$key, item$text))
+      )
     )
   }
   card(
@@ -415,7 +418,7 @@ welcome_card <- function(guide_id) {
           div(class = "small text-body-secondary", span(`data-translate` = "ui_navtitle", "Fit and Plot Species Sensitivity Distributions"))
         )
       ),
-      div(class = "row g-3", lapply(app_steps, step)),
+      div(class = "row g-3", Map(step, app_steps, seq_along(app_steps))),
       div(
         actionLink(
           guide_id,
