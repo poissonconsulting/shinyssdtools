@@ -240,9 +240,12 @@ mod_fit_server <- function(
       bindEvent(main_nav())
 
     # Also when Update Fit is clicked, in the aside or in the out of date
-    # notice
+    # notice: one observer for each, as bound to both, bindEvent() runs as the
+    # buttons start up.
     observe(refit()) |>
-      bindEvent(input$updateFit, input$updateFitNotice)
+      bindEvent(input$updateFit)
+    observe(refit()) |>
+      bindEvent(input$updateFitNotice)
 
     # Auto-update for critical changes
     observe({

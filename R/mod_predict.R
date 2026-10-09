@@ -859,7 +859,7 @@ mod_predict_server <- function(
     cl_request <- reactiveVal(NULL)
     cl_result <- reactiveVal(NULL)
 
-    observe({
+    get_cl <- function() {
       req(iv$is_valid(), fit_mod$fit_dist(), thresh_rv$percent)
       request <- list(
         fit = fit_mod$fit_dist(),
@@ -873,11 +873,19 @@ mod_predict_server <- function(
       cl_request(c(request, list(data = data_mod$data())))
       request$pred <- curve_lookup(request$fit, request$nboot, request$percent)
       cl_runner$invoke(cl_job, request)
-    }) |>
-      bindEvent(input$getCl, input$getClNotice)
+    }
+
+    # One observer for each button: bound to several, bindEvent() runs as the
+    # buttons start up, as their unclicked values together are not NULL.
+    observe(get_cl()) |>
+      bindEvent(input$getCl)
+    observe(get_cl()) |>
+      bindEvent(input$getClNotice)
 
     observe(cl_runner$cancel()) |>
-      bindEvent(input$cancelCl, input$cancelClAside)
+      bindEvent(input$cancelCl)
+    observe(cl_runner$cancel()) |>
+      bindEvent(input$cancelClAside)
 
     # Limits being computed for other data are no longer wanted.
     observe({
