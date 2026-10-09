@@ -1123,11 +1123,10 @@ mod_predict_server <- function(
       )
     })
 
-    has_predict <- reactive({
-      iv$is_valid() &&
-        !is.null(predict_hc())
-    }) |>
-      bindEvent(predict_hc(), iv$is_valid())
+    # The predictions stay while an input is being edited (such as the
+    # threshold cleared to type another): they are of the last valid
+    # threshold, and the validation message shows on the input.
+    has_predict <- reactive(!is.null(predict_hc()))
 
     output$has_predict <- has_predict
     outputOptions(output, "has_predict", suspendWhenHidden = FALSE)

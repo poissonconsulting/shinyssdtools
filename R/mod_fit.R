@@ -182,6 +182,12 @@ mod_fit_server <- function(
     fit_settings <- reactive(list(dists = sort(input$selectDist), rescale = isTRUE(input$rescale)))
     fitted_settings <- reactiveVal(NULL)
     refit <- function() {
+      # The validation rules need a concentration column to check.
+      valid <- !is.null(isolate(input$selectConc)) &&
+        isTRUE(tryCatch(isolate(iv$is_valid()), error = function(e) FALSE))
+      if (!valid) {
+        return()
+      }
       fitted_settings(isolate(fit_settings()))
       fit_trigger(isolate(fit_trigger()) + 1)
     }
@@ -417,12 +423,10 @@ mod_fit_server <- function(
     observe_step_button(input, "goData", "data")
 
     # return values ------------------------------------------------------------
-    has_fit <- reactive({
-      iv$is_valid() &&
-        !is.null(fit_dist()) &&
-        !inherits(fit_dist(), "try-error")
-    }) |>
-      bindEvent(fit_dist(), iv$is_valid())
+    # The fit stays while an input is being edited (such as every distribution
+    # removed before choosing others); the validation message shows on the
+    # input, and Update Fit does not refit until the inputs are valid.
+    has_fit <- reactive(!is.null(fit_dist()))
 
     output$has_fit <- has_fit
     outputOptions(output, "has_fit", suspendWhenHidden = FALSE)
