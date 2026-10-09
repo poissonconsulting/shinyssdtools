@@ -57,8 +57,8 @@ step_title <- function(translate_key, default_text, step) {
   span(
     class = "d-inline-flex align-items-center gap-2",
     span(`data-translate` = translate_key, default_text),
-    marker("done", lucide("check"), "bg-white text-secondary-emphasis", "ui_step_done", "complete"),
-    marker("busy", lucide("loader-2", "ssd-spin"), "bg-primary-subtle text-primary-emphasis", "ui_step_busy", "running")
+    marker("done", lucide("check"), "ssd-step-done", "ui_step_done", "complete"),
+    marker("busy", lucide("loader-2", "ssd-spin"), "ssd-step-busy", "ui_step_busy", "running")
   )
 }
 
@@ -85,7 +85,7 @@ app_ui <- function() {
   page_navbar(
     title = brand(),
     id = "main_nav",
-    theme = app_theme(),
+    theme = app_theme("hakai", navbar = "light"),
     fluid = FALSE,
     fillable = FALSE,
     window_title = "ssdtools",
@@ -170,15 +170,23 @@ theme_picker <- function() {
     )
   }
   div(
-    class = "ssd-theme-picker d-flex align-items-center gap-2",
-    span("Theme"),
-    radioButtons(
-      "theme",
-      label = NULL,
-      choiceNames = lapply(names(app_palettes), choice),
-      choiceValues = names(app_palettes),
-      selected = "indigo",
-      inline = TRUE
+    class = "ssd-theme-picker d-flex flex-column align-items-center gap-1",
+    div(
+      class = "d-flex align-items-center gap-2",
+      span("Theme"),
+      radioButtons(
+        "theme",
+        label = NULL,
+        choiceNames = lapply(names(app_palettes), choice),
+        choiceValues = names(app_palettes),
+        selected = "hakai",
+        inline = TRUE
+      )
+    ),
+    div(
+      class = "d-flex align-items-center gap-2",
+      span("Navbar"),
+      radioButtons("navbar", label = NULL, choices = c(Light = "light", Dark = "dark"), selected = "light", inline = TRUE)
     )
   )
 }

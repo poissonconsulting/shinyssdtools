@@ -27,6 +27,8 @@
 neutrals <- list(
   slate = list(bg = "#f8fafc", fg = "#0f172a", muted = "#f1f5f9", muted_fg = "#64748b", border = "#e2e8f0", input = "#8291a6", secondary_fg = "#334155"),
   zinc = list(bg = "#fafafa", fg = "#18181b", muted = "#f4f4f5", muted_fg = "#71717a", border = "#e4e4e7", input = "#85858f", secondary_fg = "#3f3f46"),
+  # kelpbioshiny's greys, from the Hakai Institute's pkgdown site.
+  hakai = list(bg = "#f6f7f9", fg = "#1d2733", muted = "#eef1f4", muted_fg = "#5a6672", border = "#e1e5ea", input = "#8a949e", secondary_fg = "#2c3e50"),
   stone = list(bg = "#fafaf9", fg = "#1c1917", muted = "#f5f5f4", muted_fg = "#78716c", border = "#e7e5e4", input = "#8a827a", secondary_fg = "#44403c")
 )
 
@@ -35,6 +37,7 @@ accent <- function(primary, subtle, border, emphasis, ring_rgb) {
 }
 
 app_palettes <- list(
+  hakai = c(neutrals$hakai, accent("#2c3e50", "#eef2f6", "#cbd5e1", "#1e2b38", "71, 97, 122"), list(label = "Hakai slate", navbar_bg = "#2c3e50")),
   indigo = c(neutrals$slate, accent("#4f46e5", "#eef2ff", "#c7d2fe", "#3730a3", "99, 102, 241"), list(label = "Indigo", navbar_bg = "#0f172a")),
   ocean = c(neutrals$slate, accent("#0f766e", "#f0fdfa", "#99f6e4", "#115e59", "20, 184, 166"), list(label = "Ocean", navbar_bg = "#0b1f2a")),
   graphite = c(neutrals$zinc, accent("#0969da", "#ddf4ff", "#b6e3ff", "#0550ae", "84, 174, 255"), list(label = "Graphite", navbar_bg = "#18181b")),
@@ -53,11 +56,26 @@ app_status_colours <- list(
 # The shinyhelper help icons take the theme's primary colour.
 color_primary <- "var(--bs-primary)"
 
-app_theme <- function(palette = "indigo") {
+# `navbar` is "dark" (the palette's navbar colour with white text) or "light"
+# (white with a hairline border and the page's text colour).
+app_theme <- function(palette = "hakai", navbar = "light") {
   col <- c(app_palettes[[palette]], app_status_colours)
   col$card <- "#ffffff"
   col$ring <- sprintf("rgb(%s)", col$ring_rgb)
-  bs_theme(
+  light <- navbar == "light"
+  nav <- if (light) {
+    list(bg = col$card, fg = col$muted_fg, hover = col$fg, active = col$fg, brand = col$fg)
+  } else {
+    list(bg = col$navbar_bg, fg = "rgba(255, 255, 255, 0.72)", hover = "#ffffff", active = "#ffffff", brand = "#ffffff")
+  }
+  # A done step's marker: a white disc on the dark navbar, a green one on the
+  # light navbar. Compiled with the theme, so it follows a theme change.
+  rules <- c(
+    sprintf(".ssd-step-done { background: %s; color: %s; }", if (light) col$success_muted else "#ffffff", if (light) col$success else col$secondary_fg),
+    sprintf(".ssd-step-busy { background: %s; color: %s; }", col$accent, col$accent_fg),
+    if (light) sprintf(".navbar { border-bottom: 1px solid %s; }", col$border)
+  )
+  theme <- bs_theme(
     version = 5,
     bg = col$bg,
     fg = col$fg,
@@ -119,16 +137,16 @@ app_theme <- function(palette = "indigo") {
     "badge-font-weight" = 500,
     "progress-bg" = col$muted,
     "progress-height" = "0.5rem",
-    "navbar-bg" = col$navbar_bg,
+    "navbar-bg" = nav$bg,
     # The underlined step tabs get extra bottom padding equal to the navbar's,
     # so equal top padding keeps their labels on the navbar's centre line.
     "navbar-padding-y" = "0.75rem",
     "nav-link-padding-y" = "0.75rem",
-    "navbar-light-color" = "rgba(255, 255, 255, 0.72)",
-    "navbar-light-hover-color" = "#ffffff",
-    "navbar-light-active-color" = "#ffffff",
-    "navbar-light-brand-color" = "#ffffff",
-    "navbar-light-brand-hover-color" = "#ffffff",
+    "navbar-light-color" = nav$fg,
+    "navbar-light-hover-color" = nav$hover,
+    "navbar-light-active-color" = nav$active,
+    "navbar-light-brand-color" = nav$brand,
+    "navbar-light-brand-hover-color" = nav$brand,
     "nav-link-font-weight" = 500,
     "nav-link-color" = col$fg,
     "nav-link-hover-color" = col$fg,
@@ -157,6 +175,7 @@ app_theme <- function(palette = "indigo") {
     "table-bg" = "transparent",
     "modal-content-border-radius" = "0.875rem"
   )
+  bs_add_rules(theme, rules)
 }
 
 # reactable styles from the theme's CSS variables.

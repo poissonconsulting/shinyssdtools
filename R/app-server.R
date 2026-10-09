@@ -68,9 +68,9 @@ app_server <- function(input, output, session) {
   }) |>
     bindEvent(client_translations())
 
-  # The palette picked in the footer (theme_picker()).
-  observe(session$setCurrentTheme(app_theme(input$theme))) |>
-    bindEvent(input$theme, ignoreInit = TRUE)
+  # The palette and navbar picked in the footer (theme_picker()).
+  observe(session$setCurrentTheme(app_theme(input$theme, navbar = input$navbar))) |>
+    bindEvent(input$theme, input$navbar, ignoreInit = TRUE)
 
   # --- Number formatting
   big_mark <- reactive({
