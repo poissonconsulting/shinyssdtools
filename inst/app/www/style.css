@@ -173,6 +173,19 @@
   min-height: 0;
 }
 
+/* The Fit step's placeholder, shown only while its first fit runs. */
+.ssd-fit-loading {
+  display: none;
+}
+
+.ssd-fit-error.recalculating ~ * .ssd-fit-loading {
+  display: block;
+}
+
+.ssd-fit-loading-figure {
+  height: 400px;
+}
+
 /* The estimate under the model-average plot. */
 .ssd-estimate {
   font-variant-numeric: tabular-nums;

@@ -936,6 +936,12 @@ translations <- dplyr::bind_rows(
     spanish = "No se pudieron ajustar las distribuciones"
   ),
   dplyr::tibble(
+    id = "ui_fitting",
+    english = "Fitting distributions...",
+    french = "Ajustement des distributions en cours...",
+    spanish = "Ajustando distribuciones..."
+  ),
+  dplyr::tibble(
     id = "ui_fit_stale",
     english = "The fit is out of date",
     french = "L'ajustement n'est plus \u00e0 jour",

@@ -104,7 +104,24 @@ mod_fit_ui <- function(id) {
     ),
     # Outside the panels' column, so they take no space while there is no
     # error and the fit is current.
-    uiOutput(ns("fitError")),
+    uiOutput(ns("fitError"), class = "ssd-fit-error"),
+    # While the first fit runs, a placeholder where its plot will be; shown by
+    # style.css while fitError, which depends on the fit, is recalculating.
+    conditionalPanel(
+      condition = sprintf("!%s", paste_js("has_fit", ns)),
+      div(
+        class = "ssd-fit-loading",
+        panel(
+          span(`data-translate` = "ui_2plot", "Plot fitted distributions"),
+          div(
+            class = "ssd-figure ssd-fit-loading-figure d-flex align-items-center justify-content-center gap-2 text-body-secondary",
+            role = "status",
+            busy_icon(),
+            span(`data-translate` = "ui_fitting", "Fitting distributions...")
+          )
+        )
+      )
+    ),
     conditionalPanel(
       condition = sprintf("%s && %s", paste_js("has_fit", ns), paste_js("fit_stale", ns)),
       div(
