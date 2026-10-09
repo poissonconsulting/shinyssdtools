@@ -152,7 +152,8 @@ mod_fit_ui <- function(id) {
             div(class = "ssd-figure", plotOutput(ns("plotDist")))
           ),
           panel(
-            span(`data-translate` = "ui_2table", "Goodness of Fit"),
+            span(`data-translate` = "ui_2table", "Goodness of Fit") |>
+              shinyhelper::helper(type = "markdown", content = "gofTable", size = "l", colour = color_primary, buttonLabel = "OK"),
             reactable::reactableOutput(ns("tableGof"))
           )
         )
