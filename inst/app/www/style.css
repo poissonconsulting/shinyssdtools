@@ -303,15 +303,31 @@
 }
 
 .ssd-about-methods li {
+  position: relative;
   border: 1px solid var(--bs-border-color);
   border-radius: var(--bs-border-radius-lg);
   padding: 0.75rem 1rem;
   font-size: 0.8125rem;
   color: var(--bs-secondary-color);
+  transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.ssd-about-methods li:hover,
+.ssd-about-methods li:has(a:focus-visible) {
+  border-color: var(--bs-primary);
+  background: var(--bs-tertiary-bg);
 }
 
 .ssd-about-methods li a {
   font-weight: 600;
+}
+
+/* The article's link covers its tile, so the whole tile opens it. */
+.ssd-about-methods li a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
 }
 
 .ssd-cite-text code {

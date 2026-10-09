@@ -62,6 +62,8 @@ about_citation <- function(text) {
 #' @return The page's content.
 #' @keywords internal
 about_page <- function(html) {
+  # Links open in a new tab, so following one keeps the analysis open.
+  html <- gsub("<a href=", "<a target=\"_blank\" rel=\"noopener\" href=", html, fixed = TRUE)
   about <- about_sections(html)
   sections <- about$sections
   version <- function(package) as.character(utils::packageVersion(package))
@@ -76,7 +78,8 @@ about_page <- function(html) {
   body <- function(id) {
     html <- sections[[id]]$body
     if (id == "methods") {
-      # Each article as a tile: its title as the link, its summary below.
+      # Each article as a tile: its title as the link, which style.css
+      # stretches over the tile, and its summary below.
       html <- gsub("</a>\\s*-\\s*", "</a><br>", html)
     }
     if (id == "cite") {
