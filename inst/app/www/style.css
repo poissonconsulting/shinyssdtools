@@ -252,22 +252,3 @@
   width: 1.375rem;
   height: 1.375rem;
 }
-
-/* The palette picker in the footer: small and on one line. */
-.ssd-theme-picker .shiny-input-container {
-  margin-bottom: 0;
-  width: auto;
-}
-
-.ssd-theme-picker .radio-inline,
-.ssd-theme-picker .form-check-inline {
-  margin-right: 0.75rem;
-  font-size: 0.75rem;
-}
-
-.ssd-swatch {
-  display: inline-block;
-  width: 0.625rem;
-  height: 0.625rem;
-  border-radius: 50%;
-}

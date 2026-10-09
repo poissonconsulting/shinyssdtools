@@ -15,36 +15,21 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# The app's theme: one of several palettes (app_palettes), each a neutral
-# family for the page and an accent for primary actions, expressed as
-# Bootstrap Sass variables. Everything else reads colours from var(--bs-*)
-# rather than from a palette; custom CSS (inst/app/www/style.css) styles only
-# the app's own ssd-* classes.
+# The app's theme: kelpbioshiny's Hakai greys with Hakai's slate, pushed a
+# step toward blue, as the accent for primary actions, expressed as Bootstrap
+# Sass variables. Everything else reads colours from var(--bs-*) rather than
+# from this palette; custom CSS (inst/app/www/style.css) styles only the app's
+# own ssd-* classes. Red is kept for errors.
 #
 # Every text and border pair meets WCAG 2.1 AA contrast (input borders 3:1,
 # text 4.5:1, white text on the primary 4.5:1).
 
-neutrals <- list(
-  slate = list(bg = "#f8fafc", fg = "#0f172a", muted = "#f1f5f9", muted_fg = "#64748b", border = "#e2e8f0", input = "#8291a6", secondary_fg = "#334155"),
-  zinc = list(bg = "#fafafa", fg = "#18181b", muted = "#f4f4f5", muted_fg = "#71717a", border = "#e4e4e7", input = "#85858f", secondary_fg = "#3f3f46"),
-  # kelpbioshiny's greys, from the Hakai Institute's pkgdown site.
-  hakai = list(bg = "#f6f7f9", fg = "#1d2733", muted = "#eef1f4", muted_fg = "#5a6672", border = "#e1e5ea", input = "#8a949e", secondary_fg = "#2c3e50"),
-  stone = list(bg = "#fafaf9", fg = "#1c1917", muted = "#f5f5f4", muted_fg = "#78716c", border = "#e7e5e4", input = "#8a827a", secondary_fg = "#44403c")
-)
-
-accent <- function(primary, subtle, border, emphasis, ring_rgb) {
-  list(primary = primary, accent = subtle, accent_border = border, accent_fg = emphasis, ring_rgb = ring_rgb)
-}
-
-app_palettes <- list(
-  # Hakai's slate pushed a step toward blue, for a little more colour.
-  hakai = c(neutrals$hakai, accent("#2b4a6f", "#eef3f9", "#c8d6e6", "#1e3550", "70, 110, 155"), list(label = "Hakai slate", navbar_bg = "#2c3e50")),
-  indigo = c(neutrals$slate, accent("#4f46e5", "#eef2ff", "#c7d2fe", "#3730a3", "99, 102, 241"), list(label = "Indigo", navbar_bg = "#0f172a")),
-  ocean = c(neutrals$slate, accent("#0f766e", "#f0fdfa", "#99f6e4", "#115e59", "20, 184, 166"), list(label = "Ocean", navbar_bg = "#0b1f2a")),
-  graphite = c(neutrals$zinc, accent("#0969da", "#ddf4ff", "#b6e3ff", "#0550ae", "84, 174, 255"), list(label = "Graphite", navbar_bg = "#18181b")),
-  forest = c(neutrals$stone, accent("#15803d", "#f0fdf4", "#bbf7d0", "#166534", "34, 197, 94"), list(label = "Forest", navbar_bg = "#1a2e22")),
-  ember = c(neutrals$stone, accent("#c2410c", "#fff7ed", "#fed7aa", "#9a3412", "249, 115, 22"), list(label = "Ember", navbar_bg = "#1c1917")),
-  violet = c(neutrals$zinc, accent("#7c3aed", "#f5f3ff", "#ddd6fe", "#5b21b6", "139, 92, 246"), list(label = "Violet", navbar_bg = "#1e1b2e"))
+app_palette <- list(
+  bg = "#f6f7f9", fg = "#1d2733", card = "#ffffff",
+  muted = "#eef1f4", muted_fg = "#5a6672", secondary_fg = "#2c3e50",
+  border = "#e1e5ea", input = "#8a949e",
+  primary = "#2b4a6f", accent = "#eef3f9", accent_border = "#c8d6e6", accent_fg = "#1e3550",
+  ring = "rgb(70, 110, 155)", ring_rgb = "70, 110, 155"
 )
 
 app_status_colours <- list(
@@ -57,47 +42,28 @@ app_status_colours <- list(
 # The shinyhelper help icons take the theme's primary colour.
 color_primary <- "var(--bs-primary)"
 
-# `navbar` is "dark" (the palette's navbar colour with white text) or "light"
-# (white with a hairline border and the page's text colour).
-app_theme <- function(palette = "hakai", navbar = "light") {
-  col <- c(app_palettes[[palette]], app_status_colours)
-  col$card <- "#ffffff"
-  col$ring <- sprintf("rgb(%s)", col$ring_rgb)
-  light <- navbar == "light"
-  nav <- if (light) {
-    list(bg = col$card, fg = col$muted_fg, hover = col$fg, active = col$fg, brand = col$fg)
-  } else {
-    list(bg = col$navbar_bg, fg = "rgba(255, 255, 255, 0.72)", hover = "#ffffff", active = "#ffffff", brand = "#ffffff")
-  }
-  # A done step's marker: a white disc on the dark navbar; on the light
-  # navbar a green ring and tick, outlined like the numbers of the steps to
-  # do. Compiled with the theme, so it follows a theme change.
+app_theme <- function() {
+  col <- c(app_palette, app_status_colours)
   rules <- c(
-    if (light) {
-      ".ssd-step-done { background: transparent; color: #059669; border: 1.5px solid #059669; }"
-    } else {
-      sprintf(".ssd-step-done { background: #ffffff; color: %s; }", col$secondary_fg)
-    },
+    # The navbar is white with a hairline border, as in shadcn/ui.
+    sprintf(".navbar { border-bottom: 1px solid %s; }", col$border),
+    # A done step's marker: a green ring and tick, outlined like the numbers
+    # of the steps to do.
+    ".ssd-step-done { background: transparent; color: #059669; border: 1.5px solid #059669; }",
     sprintf(".ssd-step-busy { background: %s; color: %s; }", col$accent, col$accent_fg),
-    if (light) sprintf(".navbar { border-bottom: 1px solid %s; }", col$border),
-    # Navigation items as in shadcn/ui: rounded ghost items, the open one
-    # filled with a muted pill, the others on hover.
+    # Navigation items as in shadcn/ui: rounded ghost items, the open one a
+    # muted pill with a hairline ring, the others muted on hover.
     ".navbar .navbar-nav .nav-link { border-radius: 0.375rem; padding: 0.375rem 0.75rem; margin: 0 0.125rem; }",
-    sprintf(
-      ".navbar .navbar-nav .nav-link:hover, .navbar .navbar-nav .show > .nav-link { background: %s; }",
-      if (light) col$muted else "rgba(255, 255, 255, 0.08)"
-    ),
+    sprintf(".navbar .navbar-nav .nav-link:hover, .navbar .navbar-nav .show > .nav-link { background: %s; }", col$muted),
     sprintf(
       ".navbar .navbar-nav .nav-link.active { background: %s; color: %s; font-weight: 600; box-shadow: inset 0 0 0 1px %s; }",
-      if (light) col$muted else "rgba(255, 255, 255, 0.14)",
-      if (light) col$fg else "#ffffff",
-      if (light) col$border else "rgba(255, 255, 255, 0.18)"
+      col$muted, col$fg, col$border
     ),
     # A divider between the steps and Help, so the steps read as the app's
     # navigation and Help and Language as utilities.
     sprintf(
       ".navbar .navbar-nav .nav-item:has(> .nav-link[data-value='help']) { margin-left: 0.5rem; padding-left: 0.625rem; border-left: 1px solid %s; }",
-      if (light) col$border else "rgba(255, 255, 255, 0.18)"
+      col$border
     )
   )
   theme <- bs_theme(
@@ -162,13 +128,13 @@ app_theme <- function(palette = "hakai", navbar = "light") {
     "badge-font-weight" = 500,
     "progress-bg" = col$muted,
     "progress-height" = "0.5rem",
-    "navbar-bg" = nav$bg,
+    "navbar-bg" = col$card,
     "navbar-padding-y" = "0.625rem",
-    "navbar-light-color" = nav$fg,
-    "navbar-light-hover-color" = nav$hover,
-    "navbar-light-active-color" = nav$active,
-    "navbar-light-brand-color" = nav$brand,
-    "navbar-light-brand-hover-color" = nav$brand,
+    "navbar-light-color" = col$muted_fg,
+    "navbar-light-hover-color" = col$fg,
+    "navbar-light-active-color" = col$fg,
+    "navbar-light-brand-color" = col$fg,
+    "navbar-light-brand-hover-color" = col$fg,
     "nav-link-font-weight" = 500,
     "nav-link-color" = col$fg,
     "nav-link-hover-color" = col$fg,

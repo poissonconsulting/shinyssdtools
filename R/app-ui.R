@@ -110,7 +110,7 @@ app_ui <- function() {
   page_navbar(
     title = brand(),
     id = "main_nav",
-    theme = app_theme("hakai", navbar = "light"),
+    theme = app_theme(),
     fluid = FALSE,
     fillable = FALSE,
     window_title = "ssdtools",
@@ -150,13 +150,12 @@ app_ui <- function() {
     ),
     language_menu(),
     footer = div(
-      class = "border-top small text-body-secondary py-4 mt-4 d-flex flex-column align-items-center gap-2",
+      class = "border-top text-center small text-body-secondary py-4 mt-4",
       sprintf(
         "shinyssdtools v%s \u00b7 ssdtools v%s",
         utils::packageVersion("shinyssdtools"),
         utils::packageVersion("ssdtools")
-      ),
-      theme_picker()
+      )
     )
   )
 }
@@ -181,38 +180,6 @@ help_ui <- function() {
     widths = c(3, 9),
     page("guide", "book-open", "ui_navguide", "User Guide", "ui_userguide"),
     page("about", "info", "ui_navabout", "About", "ui_about")
-  )
-}
-
-# A trial of colour palettes: a small radio group in the footer that switches
-# the theme while the app runs (app_server()).
-theme_picker <- function() {
-  choice <- function(name) {
-    span(
-      class = "d-inline-flex align-items-center gap-1",
-      span(class = "ssd-swatch", style = sprintf("background: %s", app_palettes[[name]]$primary)),
-      app_palettes[[name]]$label
-    )
-  }
-  div(
-    class = "ssd-theme-picker d-flex flex-column align-items-center gap-1",
-    div(
-      class = "d-flex align-items-center gap-2",
-      span("Theme"),
-      radioButtons(
-        "theme",
-        label = NULL,
-        choiceNames = lapply(names(app_palettes), choice),
-        choiceValues = names(app_palettes),
-        selected = "hakai",
-        inline = TRUE
-      )
-    ),
-    div(
-      class = "d-flex align-items-center gap-2",
-      span("Navbar"),
-      radioButtons("navbar", label = NULL, choices = c(Light = "light", Dark = "dark"), selected = "light", inline = TRUE)
-    )
   )
 }
 
