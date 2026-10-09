@@ -22,7 +22,10 @@ app_server <- function(input, output, session) {
   observe(current_lang("french")) |> bindEvent(input$french)
   observe(current_lang("spanish")) |> bindEvent(input$spanish)
 
-  # Set up shinyhelper with language-specific help files
+  # Set up shinyhelper with language-specific help files. Each language
+  # replaces the previous language's observer, so a help click opens one
+  # modal.
+  help_observer <- NULL
   observe({
     lang_dir <- switch(
       current_lang(),
@@ -30,7 +33,8 @@ app_server <- function(input, output, session) {
       "french" = "fr",
       "spanish" = "es"
     )
-    shinyhelper::observe_helpers(
+    if (!is.null(help_observer)) help_observer$destroy()
+    help_observer <<- shinyhelper::observe_helpers(
       help_dir = system.file(
         paste("helpfiles", lang_dir, sep = "_"),
         package = "shinyssdtools"
