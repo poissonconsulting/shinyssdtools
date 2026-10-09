@@ -34,3 +34,7 @@ for (fn in internal_fns) {
     assign(fn, get(fn, envir = .ns), envir = .GlobalEnv)
   }
 }
+
+# Slow jobs run in the session, so testServer() tests see their results at
+# once (see task_runner()).
+options(shinyssdtools.daemons = 0)

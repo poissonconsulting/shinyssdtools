@@ -24,3 +24,6 @@ inst/docs/
 tests/resources/
 
 french-translation-review/
+
+# The number of daemons of a deployment, written by scripts/deploy-app.R.
+inst/app/daemons

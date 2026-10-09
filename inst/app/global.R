@@ -15,25 +15,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Bootstrap confidence limits and reports run on mirai daemons, so they do not
-# block the R process that serves every session (see task_runner()). Set the
-# option shinyssdtools.daemons to 0 to run them in the session instead.
-n_daemons <- getOption("shinyssdtools.daemons", 2L)
-if (n_daemons > 0 && !mirai::daemons_set()) {
-  mirai::daemons(n_daemons)
-  # The jobs are shinyssdtools functions, so each daemon loads the same copy of
-  # the package as the app: from source when the app was loaded with
-  # pkgload::load_all() (as app.R does for deployment), otherwise installed.
-  source_path <- if (pkgload::is_dev_package("shinyssdtools")) {
-    pkgload::pkg_path(system.file(package = "shinyssdtools"))
+# Bootstrap confidence limits and reports run on mirai daemons started when
+# first needed (see task_runner()), so they do not block the R process that
+# serves every session. A deployment sets their number in the file daemons
+# (written by scripts/deploy-app.R); 0 runs them in the session. The option
+# shinyssdtools.daemons, when set, takes precedence.
+if (is.null(getOption("shinyssdtools.daemons"))) {
+  setting <- system.file("app", "daemons", package = "shinyssdtools")
+  if (nzchar(setting)) {
+    options(shinyssdtools.daemons = as.integer(readLines(setting, n = 1)))
   }
-  mirai::everywhere(
-    if (is.null(source_path)) {
-      loadNamespace("shinyssdtools")
-    } else {
-      pkgload::load_all(source_path, quiet = TRUE)
-    },
-    source_path = source_path
-  )
-  shiny::onStop(function() mirai::daemons(0))
 }
+shiny::onStop(function() if (mirai::daemons_set()) mirai::daemons(0))
