@@ -54,7 +54,7 @@ test_that("data upload: test tox2", {
   expect_true(has_fit)
 
   gof_table_rendered <- app$get_js(
-    "!!document.querySelector('#fit_mod-tableGof .dataTable')"
+    "!!document.querySelector('#fit_mod-tableGof .rt-table')"
   )
   expect_true(gof_table_rendered)
 })
@@ -76,7 +76,7 @@ test_that("data upload: test tox3", {
   expect_true(has_fit)
 
   gof_table_rendered <- app$get_js(
-    "!!document.querySelector('#fit_mod-tableGof .dataTable')"
+    "!!document.querySelector('#fit_mod-tableGof .rt-table')"
   )
   expect_true(gof_table_rendered)
 })

@@ -39,7 +39,7 @@ test_that("workflow: data -> fit, plot and table render, state values", {
   expect_true(fit_plot_rendered)
 
   gof_table_rendered <- app$get_js(
-    "!!document.querySelector('#fit_mod-tableGof .dataTable')"
+    "!!document.querySelector('#fit_mod-tableGof .rt-table')"
   )
   expect_true(gof_table_rendered)
 
@@ -108,10 +108,12 @@ test_that("workflow: data -> predict, plot and table render, state values", {
   set_bootstrap_samples(app, "5")
   app$wait_for_idle()
   app$click("predict_mod-getCl")
-  app$wait_for_idle(timeout = 15000)
+  wait_for_cl(app)
 
+  # The table renders once the limits show its panel.
+  app$wait_for_js("!!document.querySelector('#predict_mod-tableCl .rt-table')", timeout = 10000)
   cl_table_rendered <- app$get_js(
-    "!!document.querySelector('#predict_mod-tableCl .dataTable')"
+    "!!document.querySelector('#predict_mod-tableCl .rt-table')"
   )
   expect_true(cl_table_rendered)
 })
@@ -134,11 +136,13 @@ test_that("workflow: data -> rcode, text renders", {
   app$set_inputs(`main_nav` = "predict")
   wait_for_predict(app)
 
-  app$set_inputs(`main_nav` = "rcode")
+  # The R script is a page of the Export step.
+  app$set_inputs(`main_nav` = "export")
+  app$set_inputs(`export_mod-page` = "rcode")
   app$wait_for_idle()
 
-  nav_value <- app$get_value(input = "main_nav")
-  expect_equal(nav_value, "rcode")
+  expect_equal(app$get_value(input = "main_nav"), "export")
+  expect_equal(app$get_value(input = "export_mod-page"), "rcode")
 
   has_code <- app$get_value(output = "rcode_mod-has_code")
   expect_true(has_code)
