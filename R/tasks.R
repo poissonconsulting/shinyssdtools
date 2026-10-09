@@ -15,6 +15,53 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+#' Number of daemons for slow jobs
+#'
+#' The option `shinyssdtools.daemons`, which a deployment sets through
+#' `inst/app/global.R`: the number of mirai daemons that run slow jobs, started
+#' when the first job runs, or 0 to run them in the session.
+#' @return An integer scalar.
+#' @keywords internal
+n_daemons <- function() {
+  as.integer(getOption("shinyssdtools.daemons", 1L))
+}
+
+#' Whether slow jobs run in the background
+#' @return A logical scalar: `TRUE` when they run on daemons.
+#' @keywords internal
+background_jobs <- function() {
+  n_daemons() > 0
+}
+
+#' Start the daemons for slow jobs
+#'
+#' Starts [n_daemons()] mirai daemons, unless they are running, each with the
+#' same copy of the package as the app: from source when the app was loaded
+#' with [pkgload::load_all()] (as `app.R` does for deployment), otherwise
+#' installed. Daemons are per R process, so the sessions of one process share
+#' them.
+#' @return Called for its side effect.
+#' @keywords internal
+start_daemons <- function() {
+  if (mirai::daemons_set()) {
+    return(invisible())
+  }
+  mirai::daemons(n_daemons())
+  source_path <- if (pkgload::is_dev_package("shinyssdtools")) {
+    pkgload::pkg_path(system.file(package = "shinyssdtools"))
+  }
+  # With dispatcher, every daemon loads the package before it runs a job.
+  mirai::everywhere(
+    if (is.null(source_path)) {
+      loadNamespace("shinyssdtools")
+    } else {
+      pkgload::load_all(source_path, quiet = TRUE)
+    },
+    source_path = source_path
+  )
+  invisible()
+}
+
 #' Create a runner for slow jobs
 #'
 #' A runner runs one job at a time. `invoke(fn, args)` starts `do.call(fn,
@@ -23,15 +70,16 @@
 #' `n` counting the jobs settled. `cancel()` stops a running job. The result
 #' of a job that was cancelled or replaced is discarded.
 #'
-#' With mirai daemons set (`inst/app/global.R`), jobs run on a daemon and
-#' settle through a promise, so the session, and every other session in the
-#' same R process, stays responsive. Without daemons (as in `testServer()`
-#' tests) a job runs in the session as soon as it is invoked.
+#' In the background, jobs run on mirai daemons, started by the first job
+#' ([start_daemons()]), and settle through a promise, so the session, and
+#' every other session in the same R process, stays responsive. Otherwise (no
+#' daemons, as in `testServer()` tests) a job runs in the session as soon as
+#' it is invoked, and the page shows that it is busy (`busy.js`).
 #'
 #' @param background Logical scalar: whether to run jobs on mirai daemons.
 #' @return A list of the runner's functions.
 #' @keywords internal
-task_runner <- function(background = mirai::daemons_set()) {
+task_runner <- function(background = background_jobs()) {
   running <- reactiveVal(FALSE)
   done <- reactiveVal(NULL)
   n <- 0
@@ -65,6 +113,7 @@ task_runner <- function(background = mirai::daemons_set()) {
   }
   invoke <- function(fn, args) {
     cancel()
+    start_daemons()
     job <- id
     running(TRUE)
     current <<- mirai::mirai(

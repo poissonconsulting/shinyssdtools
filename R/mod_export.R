@@ -60,29 +60,51 @@ mod_export_ui <- function(id, rcode = NULL) {
   }
 
   # The BCANZ report: its settings, and the actions its state allows: Get
-  # Report while its bootstrap is needed, a spinner and Cancel while it
-  # renders, and once it is current, Preview, its files and a ZIP of every
-  # BCANZ output.
-  report_actions <- tagList(
-    conditionalPanel(
-      condition = sprintf("!%s && %s", paste_js("report_running", ns), paste_js("needs_bootstrap", ns)),
-      button(
-        ns("generateReport"),
-        span(`data-translate` = "ui_getreport", "Get report"),
-        icon = "file-text",
-        variant = "soft",
-        size = "sm"
+  # Report while it is needed, a spinner while it renders, and once it is
+  # current, Preview, its files and a ZIP of every BCANZ output. In the
+  # background, the report renders by itself once its bootstrap is done, and
+  # Cancel stops it; in the session, it renders on Get Report, and the page
+  # shows the spinner (busy.js), as the session cannot respond until it is
+  # done.
+  get_report <- button(
+    ns("generateReport"),
+    span(`data-translate` = "ui_getreport", "Get report"),
+    icon = "file-text",
+    variant = "soft",
+    size = "sm",
+    `data-sync-busy` = if (!background_jobs()) ""
+  )
+  report_busy <- function(cancel = NULL) {
+    div(
+      class = "d-flex align-items-center gap-2 small",
+      busy_icon(),
+      span(`data-translate` = "ui_4gentitle", "Generating report..."),
+      cancel
+    )
+  }
+  report_get <- if (background_jobs()) {
+    tagList(
+      conditionalPanel(
+        condition = sprintf("!%s && %s", paste_js("report_running", ns), paste_js("needs_bootstrap", ns)),
+        get_report
+      ),
+      conditionalPanel(
+        condition = paste_js("report_running", ns),
+        report_busy(button(ns("cancelReport"), span(`data-translate` = "ui_cancel", "Cancel"), icon = "x", variant = "outline", size = "sm"))
       )
-    ),
+    )
+  } else {
     conditionalPanel(
-      condition = paste_js("report_running", ns),
+      condition = sprintf("!%s", paste_js("has_preview", ns)),
       div(
-        class = "d-flex align-items-center gap-2 small",
-        busy_icon(),
-        span(`data-translate` = "ui_4gentitle", "Generating report..."),
-        button(ns("cancelReport"), span(`data-translate` = "ui_cancel", "Cancel"), icon = "x", variant = "outline", size = "sm")
+        `data-sync-scope` = "",
+        div(class = "ssd-sync-hide", get_report),
+        div(class = "ssd-sync-show", report_busy())
       )
-    ),
+    )
+  }
+  report_actions <- tagList(
+    report_get,
     conditionalPanel(
       condition = sprintf("%s && !%s", paste_js("has_preview", ns), paste_js("report_running", ns)),
       div(
@@ -202,11 +224,12 @@ mod_export_server <- function(
       )
     })
 
-    # The report renders on a mirai daemon (task_runner()). Once the
+    # The report renders with task_runner(). In the background, once the
     # model-averaged curve of the fit has been bootstrapped with the report's
     # number of samples (by Get CL or Get Report; predict_mod$curve_lookup()),
-    # the report renders by itself while the Report step is open, and again
-    # when its inputs change. Otherwise Get Report bootstraps the curve first.
+    # the report renders by itself while the Export step is open, and again
+    # when its inputs change; otherwise, and always in the session, Get Report
+    # renders it, bootstrapping the curve first when it is needed.
     report_runner <- task_runner()
     report_request <- reactiveVal(NULL)
     report_result <- reactiveVal(NULL)
@@ -253,7 +276,7 @@ mod_export_server <- function(
     settled_inputs <- debounce(report_inputs, 800)
 
     observe({
-      req(main_nav() == "export")
+      req(background_jobs(), main_nav() == "export")
       inputs <- settled_inputs()
       pred <- predict_mod$curve_lookup(inputs$fit, inputs$nboot)
       request <- isolate(report_request())

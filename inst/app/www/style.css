@@ -168,7 +168,7 @@
   overflow: hidden;
 }
 
-/* A download button's spinner while its file is prepared (download.js). */
+/* A download button's spinner while its file is prepared (busy.js). */
 .ssd-busy-icon,
 .ssd-downloading .ssd-idle-icon {
   display: none;
@@ -180,6 +180,17 @@
 
 .ssd-downloading {
   pointer-events: none;
+}
+
+/* A slow job run in the session: its scope's busy content replaces its
+   button from the click until the server is idle again (busy.js). */
+.ssd-sync-show,
+.ssd-syncing .ssd-sync-hide {
+  display: none;
+}
+
+.ssd-syncing .ssd-sync-show {
+  display: flex;
 }
 
 /* Shiny's busy indicators give a recalculating output room for its spinner,
