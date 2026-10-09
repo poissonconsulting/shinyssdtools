@@ -26,12 +26,10 @@ Depends:
     R (>= 4.1.0),
     ssdtools (>= 2.6.0)
 Imports:
-    bsicons,
     bslib,
     dplyr,
     ggplot2,
     glue,
-    jsonlite,
     kableExtra,
     knitr,
     mirai,

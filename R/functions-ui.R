@@ -260,19 +260,6 @@ step_layout <- function(aside, main) {
   )
 }
 
-#' Create a section of a step's aside
-#' @param title Section title tag, shown as a small uppercase eyebrow.
-#' @param ... Section content.
-#' @return A div.
-#' @keywords internal
-aside_section <- function(title, ...) {
-  div(
-    class = "d-flex flex-column gap-2 mb-4",
-    div(class = "ssd-eyebrow text-body-secondary", title),
-    ...
-  )
-}
-
 #' Create a button in one of the app's variants
 #'
 #' Primary (filled) is the next step of the analysis, at most one per screen.

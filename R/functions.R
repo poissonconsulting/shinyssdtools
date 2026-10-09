@@ -223,22 +223,6 @@ guess_conc <- function(name, data = NULL) {
   return(NA_character_)
 }
 
-#' Add mandatory field indicator to label
-#' @param label Character string or tag for the label
-#' @return tagList with label and asterisk span
-#' @keywords internal
-label_mandatory <- function(label) {
-  tagList(label, span("*", class = "mandatory_star"))
-}
-
-#' Create inline-block div wrapper
-#' @param x Shiny UI element(s) to wrap
-#' @return tags$div with inline-block styling
-#' @keywords internal
-inline <- function(x) {
-  tags$div(style = "display:inline-block;", x)
-}
-
 #' Check if values have zero range
 #' @param x Numeric vector
 #' @param tol Tolerance for comparison (default: sqrt of machine precision)
