@@ -942,6 +942,12 @@ translations <- dplyr::bind_rows(
     spanish = "El ajuste est\u00e1 desactualizado"
   ),
   dplyr::tibble(
+    id = "ui_update_cl",
+    english = "Update CL",
+    french = "Mettre \u00e0 jour les bornes",
+    spanish = "Actualizar LC"
+  ),
+  dplyr::tibble(
     id = "ui_step_done",
     english = "complete",
     french = "termin\u00e9",

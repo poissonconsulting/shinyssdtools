@@ -129,10 +129,31 @@ mod_predict_ui <- function(id) {
         ),
         conditionalPanel(
           condition = sprintf("!%s", paste_js("cl_running", ns)),
+          # Get CL, or Update CL while the limits are out of date: both labels
+          # are in the page and switched in the browser, so the button does
+          # not re-render.
           button(
             ns("getCl"),
-            span(`data-translate` = "ui_3clbutton", "Get CL"),
-            icon = "calculator",
+            tagList(
+              span(
+                `data-display-if` = sprintf("!%s", paste_js("cl_stale", ns)),
+                `data-ns-prefix` = "",
+                span(
+                  class = "d-inline-flex align-items-center gap-2",
+                  lucide("calculator"),
+                  span(`data-translate` = "ui_3clbutton", "Get CL")
+                )
+              ),
+              span(
+                `data-display-if` = paste_js("cl_stale", ns),
+                `data-ns-prefix` = "",
+                span(
+                  class = "d-inline-flex align-items-center gap-2",
+                  lucide("refresh-cw"),
+                  span(`data-translate` = "ui_update_cl", "Update CL")
+                )
+              )
+            ),
             variant = "soft",
             class = "w-100"
           ),
@@ -376,7 +397,14 @@ mod_predict_ui <- function(id) {
                   `data-translate` = "ui_cl_stale2",
                   "The fit or threshold has changed. Get CL again to update them."
                 ),
-                tone = "warning"
+                tone = "warning",
+                action = button(
+                  ns("getClNotice"),
+                  span(`data-translate` = "ui_update_cl", "Update CL"),
+                  icon = "refresh-cw",
+                  variant = "outline",
+                  size = "sm"
+                )
               )
             ),
             conditionalPanel(
@@ -815,7 +843,7 @@ mod_predict_server <- function(
       request$pred <- curve_lookup(request$fit, request$nboot, request$percent)
       cl_runner$invoke(cl_job, request)
     }) |>
-      bindEvent(input$getCl)
+      bindEvent(input$getCl, input$getClNotice)
 
     observe(cl_runner$cancel()) |>
       bindEvent(input$cancelCl)
