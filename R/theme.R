@@ -47,9 +47,9 @@ color_primary <- "var(--bs-primary)"
 app_theme <- function() {
   col <- c(app_palette, app_status_colours)
   rules <- c(
-    # A done step's marker: a green ring and tick, outlined like the numbers
-    # of the steps to do, light enough to read on the navy navbar.
-    ".ssd-step-done { background: transparent; color: #6ee7b7; border: 1.5px solid #6ee7b7; }",
+    # A done step's marker: a white ring and tick on the navy navbar,
+    # outlined like the numbers of the steps to do.
+    ".ssd-step-done { background: transparent; color: #ffffff; border: 1.5px solid #ffffff; }",
     sprintf(".ssd-step-busy { background: %s; color: %s; }", col$accent, col$accent_fg),
     # Navigation items as rounded ghost items, the open one a translucent
     # white pill with a hairline ring, the others lightened on hover.
