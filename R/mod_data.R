@@ -20,8 +20,9 @@ mod_data_ui <- function(id) {
   ns <- NS(id)
 
   aside <- card(card_body(
+    gap = "1rem",
     div(
-      class = "small text-body-secondary mb-3",
+      class = "small text-body-secondary",
       span(`data-translate` = "ui_1choose", "Choose one of the following options:")
     ),
     div(
