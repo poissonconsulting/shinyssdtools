@@ -28,7 +28,7 @@ Pour citer l’application R ‘ssdtools’ :
 
 Pour citer l’application web :
 
-> Seb Dalgarno (2018) ssdtools: A shiny web app to analyse species sensitivity distributions. Prepared by Poisson Consulting for the Ministry of the Environment, British Columbia. `https://bcgov-env.shinyapps.io/ssdtools/`
+> Seb Dalgarno (2026) ssdtools: A shiny web app to analyse species sensitivity distributions. Prepared by Poisson Consulting for the Ministry of the Environment, British Columbia. `https://bcgov-env.shinyapps.io/ssdtools/`
 
 Pour plus d'information sur l'utilisation de l'inférence multimodèle afin d'obtenir des estimations de HC5, veuillez consulter :
 

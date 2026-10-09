@@ -28,7 +28,7 @@ Para citar el paquete ssdtools en publicaciones, use:
 
 Para citar la aplicación web, use:
 
-> Seb Dalgarno (2018) ssdtools: A shiny web app to analyse species sensitivity distributions. Prepared by Poisson Consulting for the Ministry of the Environment, British Columbia. `https://bcgov-env.shinyapps.io/ssdtools/`
+> Seb Dalgarno (2026) ssdtools: A shiny web app to analyse species sensitivity distributions. Prepared by Poisson Consulting for the Ministry of the Environment, British Columbia. `https://bcgov-env.shinyapps.io/ssdtools/`
 
 Para obtener más información sobre el uso del promediado de modelos para generar estimaciones de HC5, consulte:
 
