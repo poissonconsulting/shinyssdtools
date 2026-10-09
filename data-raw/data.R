@@ -62,6 +62,12 @@ translations <- dplyr::bind_rows(
     spanish = "Analizar"
   ),
   dplyr::tibble(
+    id = "ui_navmethods",
+    english = "Methods",
+    french = "M\u00e9thodes",
+    spanish = "M\u00e9todos"
+  ),
+  dplyr::tibble(
     id = "ui_navabout",
     english = "About",
     french = "\u00c0 propos",

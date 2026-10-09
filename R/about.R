@@ -15,9 +15,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# The About page of the Help tab, built from the about-<language>.html files
-# (rendered from inst/extdata/about-<language>.md, whose sections carry the
-# ids methods, gof, cite and issues) so its text stays translated.
+# The Methods and About pages of the Help tab, built from the
+# about-<language>.html files (rendered from inst/extdata/about-<language>.md,
+# whose sections carry the ids methods, gof, cite and issues) so their text
+# stays translated. Methods shows the methods and gof sections, About the
+# rest.
 
 #' Split rendered About HTML into its sections
 #' @param html Character string HTML fragment rendered by rmarkdown, with
@@ -26,6 +28,8 @@
 #'   `sections`, each a list of `id`, `title` and `body` HTML.
 #' @keywords internal
 about_sections <- function(html) {
+  # Links open in a new tab, so following one keeps the analysis open.
+  html <- gsub("<a href=", "<a target=\"_blank\" rel=\"noopener\" href=", html, fixed = TRUE)
   pattern <- '(?s)<div id="([^"]+)" class="section level2">\\s*<h2>(.*?)</h2>(.*?)</div>'
   matches <- regmatches(html, gregexpr(pattern, html, perl = TRUE))[[1]]
   sections <- lapply(matches, function(match) {
@@ -57,13 +61,55 @@ about_citation <- function(text) {
   )
 }
 
+#' Create the panel of an About section
+#' @param sections Sections from [about_sections()].
+#' @param id Character string section ID.
+#' @return A panel, or `NULL` when the section is missing.
+#' @keywords internal
+about_panel <- function(sections, id) {
+  section <- sections[[id]]
+  if (is.null(section)) {
+    return(NULL)
+  }
+  html <- section$body
+  body <- if (id == "cite") {
+    parts <- strsplit(html, "(?s)<blockquote>\\s*<p>|</p>\\s*</blockquote>", perl = TRUE)[[1]]
+    # Prefaces and citations alternate.
+    div(
+      class = "d-flex flex-column gap-2",
+      lapply(seq_along(parts), function(i) {
+        if (i %% 2 == 0) about_citation(parts[[i]]) else if (nzchar(trimws(parts[[i]]))) HTML(parts[[i]])
+      })
+    )
+  } else {
+    if (id == "methods") {
+      # Each article as a tile: its title as the link, which style.css
+      # stretches over the tile, and its summary below.
+      html <- gsub("</a>\\s*-\\s*", "</a><br>", html)
+    }
+    HTML(html)
+  }
+  panel(HTML(section$title), div(class = paste0("ssd-about ssd-about-", id), body))
+}
+
+#' Create the Methods page
+#' @param html Character string rendered About HTML for the current language.
+#' @return The page's content.
+#' @keywords internal
+methods_page <- function(html) {
+  sections <- about_sections(html)$sections
+  div(
+    class = "d-flex flex-column gap-4",
+    about_panel(sections, "methods"),
+    about_panel(sections, "gof")
+  )
+}
+
 #' Create the About page
 #' @param html Character string rendered About HTML for the current language.
 #' @return The page's content.
 #' @keywords internal
 about_page <- function(html) {
-  # Links open in a new tab, so following one keeps the analysis open.
-  html <- gsub("<a href=", "<a target=\"_blank\" rel=\"noopener\" href=", html, fixed = TRUE)
   about <- about_sections(html)
   sections <- about$sections
   version <- function(package) as.character(utils::packageVersion(package))
@@ -74,31 +120,6 @@ about_page <- function(html) {
       class = "btn btn-light border btn-sm",
       span(class = "d-inline-flex align-items-center gap-2", lucide(icon), text)
     )
-  }
-  body <- function(id) {
-    html <- sections[[id]]$body
-    if (id == "methods") {
-      # Each article as a tile: its title as the link, which style.css
-      # stretches over the tile, and its summary below.
-      html <- gsub("</a>\\s*-\\s*", "</a><br>", html)
-    }
-    if (id == "cite") {
-      parts <- strsplit(html, "(?s)<blockquote>\\s*<p>|</p>\\s*</blockquote>", perl = TRUE)[[1]]
-      # Prefaces and citations alternate.
-      return(div(
-        class = "d-flex flex-column gap-2",
-        lapply(seq_along(parts), function(i) {
-          if (i %% 2 == 0) about_citation(parts[[i]]) else if (nzchar(trimws(parts[[i]]))) HTML(parts[[i]])
-        })
-      ))
-    }
-    HTML(html)
-  }
-  section_panel <- function(id) {
-    if (is.null(sections[[id]])) {
-      return(NULL)
-    }
-    panel(HTML(sections[[id]]$title), div(class = paste0("ssd-about ssd-about-", id), body(id)))
   }
   issues <- sections$issues
 
@@ -120,9 +141,7 @@ about_page <- function(html) {
         )
       )
     ),
-    section_panel("methods"),
-    section_panel("cite"),
-    section_panel("gof"),
+    about_panel(sections, "cite"),
     if (!is.null(issues)) {
       card(
         class = "mb-0",

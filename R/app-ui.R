@@ -161,7 +161,8 @@ app_ui <- function() {
   )
 }
 
-# The Help tab: the user guide and about pages, picked in its sidebar.
+# The Help tab: the user guide, methods and about pages, picked in its
+# sidebar.
 help_ui <- function() {
   page <- function(value, icon, translate_key, default_text, content) {
     nav_panel(
@@ -180,6 +181,7 @@ help_ui <- function() {
     well = FALSE,
     widths = c(3, 9),
     page("guide", "book-open", "ui_navguide", "User Guide", card(card_body(uiOutput("ui_userguide")))),
+    page("methods", "flask", "ui_navmethods", "Methods", uiOutput("ui_methods")),
     page("about", "info", "ui_navabout", "About", uiOutput("ui_about"))
   )
 }

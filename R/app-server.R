@@ -157,16 +157,19 @@ app_server <- function(input, output, session) {
     outputOptions(output, paste0("mark_", step), suspendWhenHidden = FALSE)
   }
 
-  output$ui_about <- renderUI({
+  # The rendered About HTML, the source of the Methods and About pages.
+  about_html <- reactive({
     file_suffix <- switch(current_lang(), "french" = "fr", "spanish" = "es", "en")
     file_path <- system.file(package = "shinyssdtools", paste0("extdata/about-", file_suffix, ".html"))
     # Fall back to English if translation doesn't exist
     if (!nzchar(file_path)) {
       file_path <- system.file(package = "shinyssdtools", "extdata/about-en.html")
     }
-    about_page(paste(readLines(file_path, encoding = "UTF-8", warn = FALSE), collapse = "\n"))
-  }) |>
-    bindEvent(current_lang())
+    paste(readLines(file_path, encoding = "UTF-8", warn = FALSE), collapse = "\n")
+  })
+
+  output$ui_methods <- renderUI(methods_page(about_html()))
+  output$ui_about <- renderUI(about_page(about_html()))
 
   output$ui_userguide <- renderUI({
     lang <- current_lang()

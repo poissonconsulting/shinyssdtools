@@ -44,7 +44,7 @@ static_label_input <- function(
 #' @return Named character vector mapping column names to tooltip descriptions
 #' @keywords internal
 gof_header_tooltips <- function(trans, lang = "english") {
-  # Descriptions sourced from inst/extdata/about-{lang}.md
+  # Descriptions sourced from the gof section of inst/extdata/about-{lang}.md
   tooltips <- switch(lang,
     "french" = c(
       dist = "Distribution",
