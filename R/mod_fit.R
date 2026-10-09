@@ -51,9 +51,10 @@ mod_fit_ui <- function(id) {
         class = "d-inline-flex align-items-center gap-2",
         span(`data-display-if` = paste_js("fit_stale", ns), `data-ns-prefix` = "", lucide("refresh-cw")),
         span(`data-display-if` = sprintf("!%s", paste_js("fit_stale", ns)), `data-ns-prefix` = "", lucide("check-circle-2")),
-        span(`data-translate` = "ui_update_fit", "Update Fit")
+        span(`data-translate` = "ui_update_fit", "Update fit")
       ),
-      class = "btn-light ssd-btn-soft w-100"
+      # Outline while the fit is current, tinted while it is out of date.
+      class = "btn-light border w-100"
     ),
     accordion(
       class = "mt-2",
@@ -221,6 +222,11 @@ mod_fit_server <- function(
     fit_stale <- reactive(!is.null(fitted_settings()) && !identical(fit_settings(), fitted_settings()))
     output$fit_stale <- fit_stale
     outputOptions(output, "fit_stale", suspendWhenHidden = FALSE)
+    observe({
+      stale <- fit_stale()
+      shinyjs::toggleClass("updateFit", "ssd-btn-soft", condition = stale)
+      shinyjs::toggleClass("updateFit", "border", condition = !stale)
+    })
 
     # trigger if navigate to fit tab
     observe({
