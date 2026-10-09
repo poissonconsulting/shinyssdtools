@@ -468,7 +468,7 @@ welcome_card <- function(guide_id) {
           span(
             class = "d-inline-flex align-items-center gap-2",
             lucide("book-open"),
-            span(`data-translate` = "ui_navguide", "User Guide")
+            span(`data-translate` = "ui_navguide", "User guide")
           )
         )
       )

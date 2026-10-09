@@ -25,9 +25,9 @@
 # its result exists.
 export_files <- list(
   data = list(icon = "database", key = "ui_data", text = "Data", formats = c(CSV = "dataDlCsv", XLSX = "dataDlXlsx"), when = "has_data"),
-  fit_plot = list(icon = "file-image", key = "ui_2plot", text = "Plot fitted distributions", formats = c(PNG = "fitDlPlot", RDS = "fitDlRds"), when = "has_fit"),
-  gof = list(icon = "file-spreadsheet", key = "ui_2table", text = "Goodness of Fit table", formats = c(CSV = "fitDlCsv", XLSX = "fitDlXlsx"), when = "has_fit"),
-  pred_plot = list(icon = "file-image", key = "ui_3model", text = "Plot model average and estimate hazard concentration", formats = c(PNG = "predDlPlot", RDS = "predDlRds"), when = "has_predict"),
+  fit_plot = list(icon = "file-image", key = "ui_2plot", text = "Fitted distributions", formats = c(PNG = "fitDlPlot", RDS = "fitDlRds"), when = "has_fit"),
+  gof = list(icon = "file-spreadsheet", key = "ui_2table", text = "Goodness of fit table", formats = c(CSV = "fitDlCsv", XLSX = "fitDlXlsx"), when = "has_fit"),
+  pred_plot = list(icon = "file-image", key = "ui_3model", text = "Model average", formats = c(PNG = "predDlPlot", RDS = "predDlRds"), when = "has_predict"),
   cl = list(icon = "file-spreadsheet", key = "ui_3cl2", text = "Confidence limits", formats = c(CSV = "predDlCsv", XLSX = "predDlXlsx"), when = "has_cl")
 )
 
@@ -37,9 +37,9 @@ mod_export_ui <- function(id, rcode = NULL) {
   png_settings <- layout_column_wrap(
     width = 1 / 3,
     gap = "0.75rem",
-    numericInput(ns("width"), span(`data-translate` = "ui_2width", "Width"), value = 6, min = 1, max = 50, step = 1),
-    numericInput(ns("height"), span(`data-translate` = "ui_2height", "Height"), value = 4, min = 1, max = 50, step = 1),
-    numericInput(ns("dpi"), span(`data-translate` = "ui_2dpi", "Dpi"), value = 300, min = 50, max = 2000, step = 50)
+    numericInput(ns("width"), span(`data-translate` = "ui_2width", "Width (in)"), value = 6, min = 1, max = 50, step = 1),
+    numericInput(ns("height"), span(`data-translate` = "ui_2height", "Height (in)"), value = 4, min = 1, max = 50, step = 1),
+    numericInput(ns("dpi"), span(`data-translate` = "ui_2dpi", "DPI"), value = 300, min = 50, max = 2000, step = 50)
   )
 
   file_row <- function(file) {
@@ -68,7 +68,7 @@ mod_export_ui <- function(id, rcode = NULL) {
       condition = sprintf("!%s && %s", paste_js("report_running", ns), paste_js("needs_bootstrap", ns)),
       button(
         ns("generateReport"),
-        span(`data-translate` = "ui_getreport", "Get Report"),
+        span(`data-translate` = "ui_getreport", "Get report"),
         icon = "file-text",
         variant = "soft",
         size = "sm"

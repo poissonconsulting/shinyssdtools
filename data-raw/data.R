@@ -75,9 +75,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_navguide",
-    english = "User Guide",
+    english = "User guide",
     french = "Guide de l'utilisateur",
-    spanish = "Gu\u00eda del Usuario"
+    spanish = "Gu\u00eda del usuario"
   ),
   dplyr::tibble(
     id = "ui_navlang",
@@ -159,9 +159,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_1table",
-    english = "3. Fill out table below:",
-    french = "3. Remplir le tableau ci-dessous:",
-    spanish = "3. Completar la tabla a continuaci\u00f3n:"
+    english = "3. Fill out table below",
+    french = "3. Remplir le tableau ci-dessous",
+    spanish = "3. Completar la tabla a continuaci\u00f3n"
   ),
 
   dplyr::tibble(
@@ -202,15 +202,15 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_2plot",
-    english = "Plot fitted distributions",
-    french = "Repr\u00e9sentation des courbes de distribution ajust\u00e9es",
-    spanish = "Gr\u00e1fico de distribuciones ajustadas"
+    english = "Fitted distributions",
+    french = "Courbes de distribution ajust\u00e9es",
+    spanish = "Distribuciones ajustadas"
   ),
   dplyr::tibble(
     id = "ui_2table",
-    english = "Goodness of Fit table",
+    english = "Goodness of fit table",
     french = "Tableau de l'\u00e9valuation de la qualit\u00e9 de l\u2019ajustement des courbes de distribution",
-    spanish = "Tabla de Bondad de Ajuste"
+    spanish = "Tabla de bondad de ajuste"
   ),
   dplyr::tibble(
     id = "ui_2weight",
@@ -232,21 +232,21 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_2height",
-    english = "Height",
-    french = "Hauteur",
-    spanish = "Altura"
+    english = "Height (in)",
+    french = "Hauteur (po)",
+    spanish = "Altura (pulg.)"
   ),
   dplyr::tibble(
     id = "ui_2width",
-    english = "Width",
-    french = "Largeur",
-    spanish = "Ancho"
+    english = "Width (in)",
+    french = "Largeur (po)",
+    spanish = "Ancho (pulg.)"
   ),
   dplyr::tibble(
     id = "ui_2dpi",
-    english = "Dpi",
-    french = "Dpi",
-    spanish = "Dpi"
+    english = "DPI",
+    french = "DPI",
+    spanish = "DPI"
   ),
   dplyr::tibble(
     id = "ui_2dlpdf",
@@ -352,9 +352,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3model",
-    english = "Plot model average and estimate hazard concentration",
-    french = "Repr\u00e9sentation de l'inf\u00e9rence multimod\u00e8le et estimation de la concentration pr\u00e9sentant un risque",
-    spanish = "Gr\u00e1fico de promedio de modelo y estimaci\u00f3n de concentraci\u00f3n peligrosa"
+    english = "Model average",
+    french = "Inf\u00e9rence multimod\u00e8le",
+    spanish = "Promedio de modelos"
   ),
   dplyr::tibble(
     id = "ui_3help",
@@ -478,9 +478,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3dpi",
-    english = "Dpi (resolution)",
-    french = "Dpi (r\u00e9solution)",
-    spanish = "Dpi (resoluci\u00f3n)"
+    english = "DPI (resolution)",
+    french = "DPI (r\u00e9solution)",
+    spanish = "DPI (resoluci\u00f3n)"
   ),
   dplyr::tibble(
     id = "ui_3clbutton",
@@ -526,9 +526,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_getreport",
-    english = "Get Report",
+    english = "Get report",
     french = "Obtenir le rapport",
-    spanish = "Obtener Informe"
+    spanish = "Obtener informe"
   ),
   dplyr::tibble(
     id = "ui_prevreport",
@@ -853,9 +853,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_update_fit",
-    english = "Update Fit",
+    english = "Update fit",
     french = "Mettre \u00e0 jour l'ajustement",
-    spanish = "Actualizar Ajuste"
+    spanish = "Actualizar ajuste"
   ),
   dplyr::tibble(
     id = "ui_update_data",

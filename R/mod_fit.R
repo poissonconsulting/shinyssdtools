@@ -113,7 +113,7 @@ mod_fit_ui <- function(id) {
       div(
         class = "ssd-fit-loading",
         panel(
-          span(`data-translate` = "ui_2plot", "Plot fitted distributions"),
+          span(`data-translate` = "ui_2plot", "Fitted distributions"),
           div(
             class = "ssd-figure ssd-fit-loading-figure d-flex align-items-center justify-content-center gap-2 text-body-secondary",
             role = "status",
@@ -142,7 +142,7 @@ mod_fit_ui <- function(id) {
           tone = "warning",
           action = button(
             ns("updateFitNotice"),
-            span(`data-translate` = "ui_update_fit", "Update Fit"),
+            span(`data-translate` = "ui_update_fit", "Update fit"),
             icon = "refresh-cw",
             variant = "outline",
             size = "sm"
@@ -157,12 +157,12 @@ mod_fit_ui <- function(id) {
         div(
           class = "d-flex flex-column gap-4",
           panel(
-            span(`data-translate` = "ui_2plot", "Plot fitted distributions"),
+            span(`data-translate` = "ui_2plot", "Fitted distributions"),
             htmlOutput(ns("fitFail")),
             div(class = "ssd-figure", plotOutput(ns("plotDist")))
           ),
           panel(
-            span(`data-translate` = "ui_2table", "Goodness of Fit") |>
+            span(`data-translate` = "ui_2table", "Goodness of fit table") |>
               shinyhelper::helper(type = "markdown", content = "gofTable", size = "l", colour = color_primary, buttonLabel = "OK"),
             reactable::reactableOutput(ns("tableGof"))
           )

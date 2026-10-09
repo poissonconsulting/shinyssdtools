@@ -180,7 +180,7 @@ help_ui <- function() {
     id = "help_page",
     well = FALSE,
     widths = c(3, 9),
-    page("guide", "book-open", "ui_navguide", "User Guide", card(card_body(uiOutput("ui_userguide")))),
+    page("guide", "book-open", "ui_navguide", "User guide", card(card_body(uiOutput("ui_userguide")))),
     page("methods", "flask", "ui_navmethods", "Methods", uiOutput("ui_methods")),
     page("about", "info", "ui_navabout", "About", uiOutput("ui_about"))
   )

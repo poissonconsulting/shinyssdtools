@@ -110,7 +110,7 @@ mod_data_ui <- function(id) {
           )
         ),
         accordion_panel(
-          title = span(`data-translate` = "ui_1table", "3. Fill out table below:"),
+          title = span(`data-translate` = "ui_1table", "3. Fill out table below"),
           value = "data_table",
           icon = lucide("sliders-horizontal"),
           rhandsontable::rHandsontableOutput(ns("handson")),
