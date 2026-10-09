@@ -241,6 +241,19 @@ cl_limits_text <- function(table, scale = 1, big_mark = ",", decimal_mark = ".")
   sprintf(" (%s\u2013%s)", limits[[1]], limits[[2]])
 }
 
+#' Format a percent
+#'
+#' English writes the percent sign straight after the number; French and
+#' Spanish separate them by a non-breaking space.
+#' @param x Number, or character string of a formatted number.
+#' @param lang Character string language: `"english"`, `"french"` or
+#'   `"spanish"`.
+#' @return A character string.
+#' @keywords internal
+percent_text <- function(x, lang) {
+  paste0(x, if (identical(lang, "english")) "%" else "\u00a0%")
+}
+
 #' Report confidence limits
 #'
 #' @param pred Model-averaged hazard concentrations with confidence limits,

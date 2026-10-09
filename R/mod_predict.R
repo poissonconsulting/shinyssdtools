@@ -311,48 +311,48 @@ mod_predict_ui <- function(id) {
       div(
         class = "d-flex flex-column gap-4",
         panel(
-          span(`data-translate` = "ui_3model", "Plot model average and estimate hazard concentration"),
-          div(class = "ssd-figure", plotOutput(ns("plotPred"))),
+          span(`data-translate` = "ui_3model", "Model average"),
+          # The estimate, with its confidence limits once computed, leads
+          # the panel, and the sentence under it says what it is.
           div(
-            class = "ssd-estimate d-flex flex-column gap-1",
-        conditionalPanel(
-          condition = glue::glue(
-            "input['{ns(\"threshType\")}'] == 'Concentration'"
-          ),
-          div(
-            span("HC"),
-            textOutput(ns("hcPercent"), inline = TRUE),
-            span("/ PC"),
-            textOutput(ns("pcPercent"), inline = TRUE),
-            span(": "),
-            tags$b(textOutput(ns("hcConc"), inline = TRUE))
-          ),
-          div(
-            span(
-              `data-translate` = "ui_3hc",
-              "The model averaged estimate of the concentration that affects "
+            class = "ssd-estimate",
+            conditionalPanel(
+              condition = glue::glue(
+                "input['{ns(\"threshType\")}'] == 'Concentration'"
+              ),
+              div(class = "ssd-estimate-label", textOutput(ns("hcLabel"), inline = TRUE)),
+              div(class = "ssd-estimate-value", textOutput(ns("hcConc"), inline = TRUE)),
+              div(
+                class = "ssd-estimate-text",
+                span(
+                  `data-translate` = "ui_3hc",
+                  "The model averaged estimate of the concentration that affects"
+                ),
+                tags$b(textOutput(ns("estPerc"), inline = TRUE)),
+                span(`data-translate` = "ui_3hc2", "of species is"),
+                tags$b(textOutput(ns("estConc"), inline = TRUE))
+              )
             ),
-            tags$b(textOutput(ns("estPerc"), inline = TRUE)),
-            span(`data-translate` = "ui_3hc2", " % of species is "),
-            tags$b(textOutput(ns("estConc"), inline = TRUE))
-          )
-        ),
-        conditionalPanel(
-          condition = glue::glue(
-            "input['{ns(\"threshType\")}'] != 'Concentration'"
+            conditionalPanel(
+              condition = glue::glue(
+                "input['{ns(\"threshType\")}'] != 'Concentration'"
+              ),
+              div(class = "ssd-estimate-label", span(`data-translate` = "ui_3thresh", "Fraction affected")),
+              div(class = "ssd-estimate-value", textOutput(ns("fracValue"), inline = TRUE)),
+              div(
+                class = "ssd-estimate-text",
+                span(
+                  `data-translate` = "ui_3perc",
+                  "The model averaged estimate of the fraction affected by a concentration of"
+                ),
+                tags$b(textOutput(ns("estConc2"), inline = TRUE)),
+                span(`data-translate` = "ui_3perc2", "is"),
+                tags$b(textOutput(ns("estPerc2"), inline = TRUE)),
+                span(`data-translate` = "ui_3perc3", "of species")
+              )
+            )
           ),
-          div(
-            span(
-              `data-translate` = "ui_3perc",
-              "The model averaged estimate of the fraction affected by a concentration of "
-            ),
-            tags$b(textOutput(ns("estConc2"), inline = TRUE)),
-            span(`data-translate` = "ui_3perc2", " is "),
-            tags$b(textOutput(ns("estPerc2"), inline = TRUE)),
-            span(`data-translate` = "ui_3perc3", " % of species")
-          )
-        )
-          )
+          div(class = "ssd-figure", plotOutput(ns("plotPred")))
         ),
         # The confidence limits, or while they are computed or out of date,
         # a notice in their place.
@@ -698,7 +698,7 @@ mod_predict_server <- function(
     })
 
     output$estPerc <- renderText({
-      thresh_rv$percent
+      percent_text(thresh_rv$percent, lang())
     })
 
     output$estConc2 <- renderText({
@@ -709,9 +709,9 @@ mod_predict_server <- function(
       )
     })
 
-    output$estPerc2 <- renderText({
+    fraction_text <- reactive({
       paste0(
-        format(thresh_rv$percent, decimal.mark = decimal_mark()),
+        percent_text(format(thresh_rv$percent, decimal.mark = decimal_mark()), lang()),
         estimate_limits(scale = 100)
       )
     })
@@ -739,12 +739,9 @@ mod_predict_server <- function(
     )
 
     # Dynamic text outputs for HC/PC values
-    output$hcPercent <- renderText({
-      thresh_rv$percent
-    })
-
-    output$pcPercent <- renderText({
-      100 - as.numeric(thresh_rv$percent %||% 0)
+    output$hcLabel <- renderText({
+      percent <- as.numeric(thresh_rv$percent %||% 0)
+      paste0("HC", percent, " / PC", 100 - percent)
     })
 
     output$hcConc <- renderText({

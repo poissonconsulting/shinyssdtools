@@ -205,6 +205,26 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The estimate at the top of the Predict panel: its name, its value with
+   any confidence limits, and the sentence that says what it is. */
+.ssd-estimate-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--bs-secondary-color);
+}
+
+.ssd-estimate-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ssd-estimate-text {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+}
+
 /* The generated R script: wrapped, scrollable and in the code font. */
 .ssd-code {
   max-height: 32rem;

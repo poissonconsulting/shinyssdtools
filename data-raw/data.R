@@ -370,9 +370,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3hc2",
-    english = "% of species is",
-    french = "% des esp\u00e8ces est de",
-    spanish = "% de las especies es"
+    english = "of species is",
+    french = "des esp\u00e8ces est de",
+    spanish = "de las especies es"
   ),
   dplyr::tibble(
     id = "ui_3perc",
@@ -388,9 +388,9 @@ translations <- dplyr::bind_rows(
   ),
   dplyr::tibble(
     id = "ui_3perc3",
-    english = "% of species",
-    french = "% des esp\u00e8ces",
-    spanish = "% de las especies"
+    english = "of species",
+    french = "des esp\u00e8ces",
+    spanish = "de las especies"
   ),
   dplyr::tibble(
     id = "ui_3cl",
