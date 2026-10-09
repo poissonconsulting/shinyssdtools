@@ -99,9 +99,11 @@ mod_fit_ui <- function(id) {
         step_button(ns("continue"), "ui_continue_predict", "Continue to predict")
       )
     ),
+    # Outside the panels' column, so it takes no space while there is no
+    # error.
+    uiOutput(ns("fitError")),
     div(
       class = "d-flex flex-column gap-4",
-      uiOutput(ns("fitError")),
       conditionalPanel(
         condition = paste_js("has_fit", ns),
         div(
@@ -230,11 +232,14 @@ mod_fit_server <- function(
     output$fitError <- renderUI({
       result <- fit_result()
       req(inherits(result, "error"))
-      notice(
-        icon = "x-circle",
-        title = tr("ui_fit_failed", translations()),
-        conditionMessage(result),
-        tone = "danger"
+      div(
+        class = "mb-4",
+        notice(
+          icon = "x-circle",
+          title = tr("ui_fit_failed", translations()),
+          conditionMessage(result),
+          tone = "danger"
+        )
       )
     })
 
