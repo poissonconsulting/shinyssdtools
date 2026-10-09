@@ -110,6 +110,8 @@ test_that("workflow: data -> predict, plot and table render, state values", {
   app$click("predict_mod-getCl")
   wait_for_cl(app)
 
+  # The table renders once the limits show its panel.
+  app$wait_for_js("!!document.querySelector('#predict_mod-tableCl .rt-table')", timeout = 10000)
   cl_table_rendered <- app$get_js(
     "!!document.querySelector('#predict_mod-tableCl .rt-table')"
   )
