@@ -14,6 +14,11 @@ For more information on the methods used, see the ssdtools articles:
 - [Customising Plots](https://bcgov.github.io/ssdtools/articles/customising-plots.html) - modifying SSD plot outputs
 - [FAQs](https://bcgov.github.io/ssdtools/articles/faqs.html) - frequently asked questions
 
+## References {#references}
+
+- [ssdtools v2: An R package to fit Species Sensitivity Distributions](https://joss.theoj.org/papers/10.21105/joss.07492) - Thorley et al. (2025), Journal of Open Source Software
+- [Improving statistical methods to derive species sensitivity distributions](http://a100.gov.bc.ca/appsdata/acat/documents/r57400/2_1568399094009_8398900200.pdf) - Schwarz and Tillmanns (2019), Water Science Series, Province of British Columbia
+
 ## Goodness of fit table {#gof}
 
 The columns in the goodness of fit table are the distribution (dist), the number of parameters (npars), the number of observations (nobs), the log-likelihood (log_lik), Akaike's Information Criterion (aic), Akaike's Information Criterion corrected for sample size (aicc), the AICc difference (delta), the AICc based Akaike weight (wt), Bayesian Information Criterion (bic), the Anderson-Darling statistic (ad), the Kolmogorov-Smirnov statistic (ks), and the Cramer-von Mises statistic (cvm). 

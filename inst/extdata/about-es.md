@@ -20,6 +20,11 @@ Las columnas en la tabla de bondad de ajuste son la distribución (dist), el nú
 La predicción es la estimación promediada del modelo (usando aicc) del ajuste.
 La concentración de peligro porcentual es la concentración del químico que se predice que afectará ese porcentaje de las especies probadas.
 
+## Referencias {#references}
+
+- [ssdtools v2: An R package to fit Species Sensitivity Distributions](https://joss.theoj.org/papers/10.21105/joss.07492) - Thorley et al. (2025), Journal of Open Source Software
+- [Improving statistical methods to derive species sensitivity distributions](http://a100.gov.bc.ca/appsdata/acat/documents/r57400/2_1568399094009_8398900200.pdf) - Schwarz y Tillmanns (2019), Water Science Series, Provincia de Columbia Británica
+
 ## Cita {#cite}
 
 Para citar el paquete ssdtools en publicaciones, use:

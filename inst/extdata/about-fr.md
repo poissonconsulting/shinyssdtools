@@ -14,6 +14,11 @@ Pour plus d'informations sur les méthodes utilisées, consultez les articles de
 - [Personnalisation des graphiques](https://bcgov.github.io/ssdtools/articles/customising-plots.html) - modification des graphiques de DSE
 - [FAQ](https://bcgov.github.io/ssdtools/articles/faqs.html) - questions fréquemment posées
 
+## Références {#references}
+
+- [ssdtools v2: An R package to fit Species Sensitivity Distributions](https://joss.theoj.org/papers/10.21105/joss.07492) - Thorley et al. (2025), Journal of Open Source Software
+- [Improving statistical methods to derive species sensitivity distributions](http://a100.gov.bc.ca/appsdata/acat/documents/r57400/2_1568399094009_8398900200.pdf) - Schwarz et Tillmanns (2019), Water Science Series, Province de la Colombie-Britannique
+
 ## Tableau de la qualité de l'ajustement {#gof}
 
 Les colonnes du tableau de l’évaluation de la qualité de l’ajustement sont : la distribution (dist), le nombre de paramètres (npars), le nombre d’observations (nobs), la log-vraisemblance (log_lik), le critère d’information Akaike (aic), le critère d’information Akaike corrigé pour la taille de l’échantillon (aicc), la différence d’AICc (delta), le poids d’Akaike fondé sur l’AICc (wt), le critère d’information Bayésien (bic), la statistique d’Anderson-Darling (ad), la statistique de Kolmogorov-Smirnov (ks) et la statistique de Cramer-von Mises (cvm). 

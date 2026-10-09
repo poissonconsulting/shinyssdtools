@@ -17,9 +17,9 @@
 
 # The Methods and About pages of the Help tab, built from the
 # about-<language>.html files (rendered from inst/extdata/about-<language>.md,
-# whose sections carry the ids methods, gof, cite and issues) so their text
-# stays translated. Methods shows the methods and gof sections, About the
-# rest.
+# whose sections carry the ids methods, gof, references, cite and issues) so
+# their text stays translated. Methods shows the methods, references and gof
+# sections, About the rest.
 
 #' Split rendered About HTML into its sections
 #' @param html Character string HTML fragment rendered by rmarkdown, with
@@ -82,14 +82,15 @@ about_panel <- function(sections, id) {
       })
     )
   } else {
-    if (id == "methods") {
-      # Each article as a tile: its title as the link, which style.css
-      # stretches over the tile, and its summary below.
+    if (id %in% c("methods", "references")) {
+      # Each article or paper as a tile: its title as the link, which
+      # style.css stretches over the tile, and its summary below.
       html <- gsub("</a>\\s*-\\s*", "</a><br>", html)
     }
     HTML(html)
   }
-  panel(HTML(section$title), div(class = paste0("ssd-about ssd-about-", id), body))
+  tiles <- if (id %in% c("methods", "references")) "ssd-about-tiles"
+  panel(HTML(section$title), div(class = paste(c("ssd-about", paste0("ssd-about-", id), tiles), collapse = " "), body))
 }
 
 #' Create the Methods page
@@ -101,6 +102,7 @@ methods_page <- function(html) {
   div(
     class = "d-flex flex-column gap-4",
     about_panel(sections, "methods"),
+    about_panel(sections, "references"),
     about_panel(sections, "gof")
   )
 }

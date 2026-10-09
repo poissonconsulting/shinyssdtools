@@ -293,7 +293,7 @@
   margin-bottom: 0;
 }
 
-.ssd-about-methods ul {
+.ssd-about-tiles ul {
   list-style: none;
   padding: 0;
   margin: 0.75rem 0 0;
@@ -302,7 +302,7 @@
   gap: 0.5rem;
 }
 
-.ssd-about-methods li {
+.ssd-about-tiles li {
   position: relative;
   border: 1px solid var(--bs-border-color);
   border-radius: var(--bs-border-radius-lg);
@@ -312,18 +312,18 @@
   transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
 }
 
-.ssd-about-methods li:hover,
-.ssd-about-methods li:has(a:focus-visible) {
+.ssd-about-tiles li:hover,
+.ssd-about-tiles li:has(a:focus-visible) {
   border-color: var(--bs-primary);
   background: var(--bs-tertiary-bg);
 }
 
-.ssd-about-methods li a {
+.ssd-about-tiles li a {
   font-weight: 600;
 }
 
-/* The article's link covers its tile, so the whole tile opens it. */
-.ssd-about-methods li a::after {
+/* The link covers its tile, so the whole tile opens it. */
+.ssd-about-tiles li a::after {
   content: "";
   position: absolute;
   inset: 0;
