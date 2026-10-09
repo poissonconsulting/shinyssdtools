@@ -236,8 +236,8 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         save_plot,
         "",
         "ssd_gof(dist, wt = TRUE) %>%",
-        "    dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%
-             dplyr::arrange(dplyr::desc(wt))"
+        "  dplyr::mutate_if(is.numeric, ~ signif(., 3)) %>%",
+        "  dplyr::arrange(dplyr::desc(wt))"
       )
     }
 
@@ -396,8 +396,8 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
           paste0("  min_pboot = 0.8"),
           ")",
           "",
-          "dplyr::bind_rows(cl_average, cl_individual) %>%
-             dplyr::arrange(dplyr::desc(wt))"
+          "dplyr::bind_rows(cl_average, cl_individual) %>%",
+          "  dplyr::arrange(dplyr::desc(wt))"
         )
       } else {
         form <- "ssd_hc_bcanz"
@@ -421,8 +421,8 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
           paste0("  min_pboot = 0.8"),
           ")",
           "",
-          "dplyr::bind_rows(cl_average, cl_individual) %>%
-             dplyr::arrange(dplyr::desc(wt))"
+          "dplyr::bind_rows(cl_average, cl_individual) %>%",
+          "  dplyr::arrange(dplyr::desc(wt))"
         )
       }
     }

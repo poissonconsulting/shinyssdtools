@@ -274,26 +274,20 @@ calculate_threshold_conc <- function(fit, thresh, digits = 3) {
   signif(estimate_hc(fit, thresh), digits)
 }
 
-#' Format R code with proper styling
+#' Format R code
+#'
+#' Joins the lines of code, which are written in tidyverse style, and quotes
+#' their strings with single quotes.
 #' @param code_lines Character vector of R code lines
-#' @return Single character string with formatted, styled code
+#' @return Single character string of the code
 #' @keywords internal
 format_r_code <- function(code_lines) {
-  # Join lines into a single string
-  code_text <- paste(code_lines, collapse = "\n")
+  formatted_text <- paste(code_lines, collapse = "\n")
 
-  # Use styler to format the code
-  # scope = "tokens" provides lighter-weight formatting focused on spacing/indentation
-  formatted <- styler::style_text(code_text, scope = "tokens")
-
-  # Convert formatted text back to a single string
-  formatted_text <- paste(formatted, collapse = "\n")
-
-  # Replace double quotes with single quotes
-  # This is done after styling to maintain R syntax validity during formatting
-  # Important for structure() output from dput() which uses double quotes.
-  # Each comment and string literal is matched whole, so quotes pair up;
-  # strings containing an apostrophe or an escape keep their double quotes.
+  # Quote strings with single quotes, including those of the structure()
+  # output of dput(). Each comment and string literal is matched whole, so
+  # quotes pair up; strings containing an apostrophe or an escape keep their
+  # double quotes.
   tokens <- gregexpr(
     "#[^\n]*|\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'",
     formatted_text,
@@ -307,7 +301,6 @@ format_r_code <- function(code_lines) {
       token
     }
   )
-
 
   formatted_text
 }

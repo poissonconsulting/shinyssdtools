@@ -46,7 +46,6 @@ Imports:
     shinyjs,
     shinyvalidate,
     stats,
-    styler,
     writexl
 Suggests:
     covr,
