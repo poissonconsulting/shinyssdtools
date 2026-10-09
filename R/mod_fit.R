@@ -213,6 +213,9 @@ mod_fit_server <- function(
     # limits and report computed from it, no longer apply once the data
     # change.
     fitted_data <- reactiveVal(NULL)
+    # The inputs of the last fit: refitting the same inputs would return the
+    # cached fit but still invalidate, and so re-render, everything downstream.
+    fitted_inputs <- NULL
     refit <- function() {
       # The validation rules need a concentration column to check.
       valid <- !is.null(isolate(input$selectConc)) &&
@@ -220,6 +223,11 @@ mod_fit_server <- function(
       if (!valid) {
         return()
       }
+      inputs <- list(isolate(fit_settings()), isolate(input$selectConc), isolate(data_mod$data()))
+      if (identical(inputs, fitted_inputs)) {
+        return()
+      }
+      fitted_inputs <<- inputs
       fitted_settings(isolate(fit_settings()))
       fitted_data(isolate(data_mod$data()))
       fit_trigger(isolate(fit_trigger()) + 1)
