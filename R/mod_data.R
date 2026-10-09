@@ -196,9 +196,8 @@ mod_data_server <- function(id, translations, lang, shared_toxicant_name = NULL)
         error = function(e) {
           showNotification(
             ui = div(
-              strong("Could not read CSV file"),
+              strong(tr("ui_csv_failed", translations())),
               br(),
-              "Error: ",
               as.character(e$message)
             ),
             type = "error",

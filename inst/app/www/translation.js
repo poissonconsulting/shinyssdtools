@@ -34,6 +34,13 @@ $(document).ready(function() {
       }
     });
     
+    // Tooltips: elements with data-translate-title take the translation as
+    // their title.
+    $('[data-translate-title]').each(function() {
+      const text = translations[$(this).attr('data-translate-title')];
+      if (text) $(this).attr('title', text);
+    });
+
     // Update language-specific attributes; <html lang> tells screen readers
     // which language to read the page in.
     $('body').attr('data-language', language.toLowerCase());

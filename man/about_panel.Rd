@@ -4,12 +4,14 @@
 \alias{about_panel}
 \title{Create the panel of an About section}
 \usage{
-about_panel(sections, id)
+about_panel(sections, id, copy = "Copy")
 }
 \arguments{
 \item{sections}{Sections from \code{\link[=about_sections]{about_sections()}}.}
 
 \item{id}{Character string section ID.}
+
+\item{copy}{Character string label of the citations' Copy buttons.}
 }
 \value{
 A panel, or \code{NULL} when the section is missing.
