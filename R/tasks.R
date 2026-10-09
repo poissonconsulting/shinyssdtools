@@ -160,15 +160,16 @@ cl_job <- function(fit, threshold_type, percent, conc, nboot, pred = NULL) {
 #' @param percent Optional numeric scalar percent of species affected.
 #' @param nboot Integer scalar number of bootstrap samples.
 #' @return Model-averaged hazard concentrations, as from
-#'   [ssdtools::ssd_hc()].
+#'   [ssdtools::ssd_hc_bcanz()].
 #' @keywords internal
 model_average_cl <- function(fit, percent = NULL, nboot) {
-  loadNamespace("ssdtools")
-  stats::predict(
+  ssdtools::ssd_hc_bcanz(
     fit,
     proportion = unique(c(1:99, percent)) / 100,
+    ci = TRUE,
+    average = TRUE,
     nboot = nboot,
-    ci = TRUE
+    min_pboot = 0.8
   )
 }
 
