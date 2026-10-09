@@ -201,6 +201,12 @@
 }
 
 /* The estimate under the model-average plot. */
+/* A calculated value in an input's box keeps the input's height, also
+   while it is empty. */
+.ssd-readonly-value {
+  min-height: calc(1.5em + 0.75rem + calc(var(--bs-border-width) * 2));
+}
+
 .ssd-estimate {
   font-variant-numeric: tabular-nums;
 }

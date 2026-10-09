@@ -83,10 +83,12 @@ mod_predict_ui <- function(id) {
               "protecting % species"
             )
           ),
+          # Starts with the value for the default threshold, so the box
+          # does not change when the server's value arrives.
           div(
-            class = "form-control bg-body-tertiary",
+            class = "form-control bg-body-tertiary ssd-readonly-value",
             `aria-live` = "polite",
-            textOutput(ns("threshPc"), inline = TRUE)
+            span(id = ns("threshPc"), class = "shiny-text-output", "95")
           )
         )
       )
