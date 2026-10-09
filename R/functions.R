@@ -291,10 +291,37 @@ format_r_code <- function(code_lines) {
 
   # Replace double quotes with single quotes
   # This is done after styling to maintain R syntax validity during formatting
-  # Important for structure() output from dput() which uses double quotes
-  formatted_text <- gsub('"', "'", formatted_text)
+  # Important for structure() output from dput() which uses double quotes.
+  # Each comment and string literal is matched whole, so quotes pair up;
+  # strings containing an apostrophe or an escape keep their double quotes.
+  tokens <- gregexpr(
+    "#[^\n]*|\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'",
+    formatted_text,
+    perl = TRUE
+  )
+  regmatches(formatted_text, tokens) <- lapply(
+    regmatches(formatted_text, tokens),
+    function(token) {
+      swap <- startsWith(token, "\"") & !grepl("['\\\\]", token)
+      token[swap] <- paste0("'", substr(token[swap], 2, nchar(token[swap]) - 1), "'")
+      token
+    }
+  )
+
 
   formatted_text
+}
+
+#' Quote a string as R code
+#' @param x Character string.
+#' @return The string as an R string literal: in single quotes, or in double
+#'   quotes when it contains an apostrophe, with any other special characters
+#'   escaped.
+#' @keywords internal
+r_string <- function(x) {
+  x <- as.character(x %||% "")
+  quote <- if (grepl("'", x, fixed = TRUE)) "\"" else "'"
+  encodeString(x, quote = quote)
 }
 
 #' Render the BCANZ report

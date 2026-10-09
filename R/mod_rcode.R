@@ -199,8 +199,8 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       plot_code <- c(
         paste0("ssd_plot_cdf("),
         paste0("  dist,"),
-        paste0("  ylab = '", ylab, "',"),
-        paste0("  xlab = '", xlab, "',"),
+        paste0("  ylab = ", r_string(ylab), ","),
+        paste0("  xlab = ", r_string(xlab), ","),
         paste0("  delta = Inf,"),
         paste0("  average = NA,"),
         paste0("  theme_classic = TRUE,"),
@@ -211,7 +211,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
       )
 
       if (has_title) {
-        plot_code <- c(plot_code, paste0("  ggtitle('", title, "')"))
+        plot_code <- c(plot_code, paste0("  ggtitle(", r_string(title), ")"))
       }
 
       save_plot <- c(
@@ -257,13 +257,13 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         is.null(predict_mod$legend_colour()) ||
           predict_mod$legend_colour() == "-none-",
         "NULL",
-        paste0("'", predict_mod$legend_colour(), "'")
+        r_string(predict_mod$legend_colour())
       )
       legend.shape <- ifelse(
         is.null(predict_mod$legend_shape()) ||
           predict_mod$legend_shape() == "-none-",
         "NULL",
-        paste0("'", predict_mod$legend_shape(), "'")
+        r_string(predict_mod$legend_shape())
       )
       text_size <- predict_mod$text_size()
       xlab <- predict_mod$xaxis_label()
@@ -322,8 +322,8 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  shape = ", code_shape(), ","),
         paste0("  color = ", code_colour(), ","),
         paste0("  label_size = ", predict_mod$label_size(), ","),
-        paste0("  ylab = '", ylab, "',"),
-        paste0("  xlab = '", xlab, "',"),
+        paste0("  ylab = ", r_string(ylab), ","),
+        paste0("  xlab = ", r_string(xlab), ","),
         paste0("  ci = ", ci_value, ","),
         paste0("  ribbon = ", ribbon_value, ","),
         paste0("  shift_x = ", predict_mod$adjust_label(), ","),
@@ -336,7 +336,7 @@ mod_rcode_server <- function(id, translations, data_mod, fit_mod, predict_mod) {
         paste0("  text_size = ", text_size, ","),
         paste0("  theme_classic = TRUE"),
         ") +",
-        paste0("  ggtitle('", title, "') +"),
+        paste0("  ggtitle(", r_string(title), ") +"),
         paste0(
           "  scale_color_brewer(palette = '",
           predict_mod$palette(),
