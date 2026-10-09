@@ -127,7 +127,8 @@ app_ui <- function() {
         # them again when they change rather than using a cached copy.
         tags$link(rel = "stylesheet", href = paste0("style.css?v=", asset_version("style.css"))),
         tags$link(rel = "icon", type = "image/svg+xml", href = "favicon.svg"),
-        tags$script(src = paste0("translation.js?v=", asset_version("translation.js")))
+        tags$script(src = paste0("translation.js?v=", asset_version("translation.js"))),
+        tags$script(src = paste0("download.js?v=", asset_version("download.js")))
       )
     ),
     nav_spacer(),

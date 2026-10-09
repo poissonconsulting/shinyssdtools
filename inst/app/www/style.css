@@ -166,6 +166,20 @@
   overflow: hidden;
 }
 
+/* A download button's spinner while its file is prepared (download.js). */
+.ssd-busy-icon,
+.ssd-downloading .ssd-idle-icon {
+  display: none;
+}
+
+.ssd-downloading .ssd-busy-icon {
+  display: inline-flex;
+}
+
+.ssd-downloading {
+  pointer-events: none;
+}
+
 /* Shiny's busy indicators give a recalculating output room for its spinner,
    but hide the spinner on HTML outputs; without this an empty message output
    grows and moves what is below it while it recalculates. */

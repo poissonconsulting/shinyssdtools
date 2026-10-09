@@ -143,7 +143,7 @@ mod_export_ui <- function(id, rcode = NULL) {
       condition = paste_js("has_predict", ns),
       page_header(
         span(`data-translate` = "ui_export", "Export"),
-        button(ns("downloadAll"), span(`data-translate` = "ui_download_all", "Download all"), icon = "file-archive", download = TRUE)
+        button(ns("downloadAll"), span(`data-translate` = "ui_download_all", "Download all"), icon = "file-archive", download = TRUE, busy = TRUE)
       ),
       # The pages of the step, picked in its sidebar as on the Help tab.
       navset_pill_list(
@@ -443,6 +443,7 @@ mod_export_server <- function(
     output$downloadAll <- downloadHandler(
       filename = function() "ssdtools.zip",
       content = function(file) {
+        on.exit(download_done(session, "downloadAll"), add = TRUE)
         dir <- tempfile("ssdtools-")
         dir.create(dir)
         on.exit(unlink(dir, recursive = TRUE), add = TRUE)

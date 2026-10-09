@@ -273,6 +273,9 @@ aside_section <- function(title, ...) {
 #' @param class Optional character string of extra classes.
 #' @param download Logical scalar: whether the button downloads the file of
 #'   the [shiny::downloadHandler()] output `id`.
+#' @param busy Logical scalar: whether a download button shows a spinner, and
+#'   is disabled, from its click until [download_done()] is called for it. For
+#'   a file that takes some seconds to prepare.
 #' @param ... Further arguments passed to [shiny::actionButton()] or
 #'   [shiny::downloadLink()].
 #' @return A button tag.
@@ -285,6 +288,7 @@ button <- function(
   size = NULL,
   class = NULL,
   download = FALSE,
+  busy = FALSE,
   ...
 ) {
   variant <- match.arg(variant)
@@ -300,9 +304,20 @@ button <- function(
     class
   )
   if (is.character(icon) && !inherits(icon, "html")) icon <- lucide(icon)
+  if (busy) {
+    # Both icons, so the spinner can replace the icon in the browser; in the
+    # button's text colour, as its icon is.
+    icon <- tagList(span(class = "ssd-idle-icon", icon), span(class = "ssd-busy-icon", lucide("loader-2", "ssd-spin")))
+  }
   label <- span(class = "d-inline-flex align-items-center gap-2", icon, label)
   if (download) {
-    return(downloadLink(id, label, class = paste(c("btn btn-default", classes), collapse = " "), ...))
+    return(downloadLink(
+      id,
+      label,
+      class = paste(c("btn btn-default", classes), collapse = " "),
+      `data-busy-download` = if (busy) "",
+      ...
+    ))
   }
   actionButton(id, label, class = paste(classes, collapse = " "), ...)
 }
@@ -352,6 +367,18 @@ notice <- function(
 #' @keywords internal
 busy_icon <- function() {
   lucide("loader-2", "ssd-spin text-primary")
+}
+
+#' Mark a download as done
+#'
+#' Ends the spinner of a download [button()] with `busy = TRUE`; called when
+#' the [shiny::downloadHandler()]'s content function exits.
+#' @param session The module's session.
+#' @param id Character string output ID, without the namespace.
+#' @return Called for its side effect.
+#' @keywords internal
+download_done <- function(session, id) {
+  session$sendCustomMessage("downloadDone", session$ns(id))
 }
 
 #' Create an empty state
